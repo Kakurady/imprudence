@@ -3697,7 +3697,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>VeraMono.ttf</string>
+      <string>DejaVuSansMono.ttf</string>
     </map>
     <key>FontSansSerif</key>
     <map>
@@ -3708,7 +3708,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>LiberationSans-Regular.ttf</string>
+      <string>DroidSans.ttf</string>
     </map>
     <key>FontSansSerifBold</key>
     <map>
@@ -3719,7 +3719,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>LiberationSans-Bold.ttf</string>
+      <string>DroidSans-Bold.ttf</string>
     </map>
     <key>FontSansSerifFallback</key>
     <map>
@@ -3730,7 +3730,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string />
+      <string>DejaVuSansCondensed.ttf</string >
     </map>
     <key>FontSansSerifFallbackScale</key>
     <map>
