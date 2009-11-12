@@ -720,7 +720,18 @@ void LLPanelLogin::addServer(const std::string& server)
 			i++;
 		}
 	}
-	grids->setCurrentByIndex(0);
+	
+	// when you first login select the default, otherwise last connected
+	if (gDisconnected)
+	{
+		grids->setSimple(gHippoGridManager->getCurrentGrid()->getGridNick());
+	}
+	else
+	{
+		std::string last_grid = gSavedSettings.getString("LastSelectedGrid");
+		if (last_grid.empty()) last_grid = defaultGrid;
+		grids->setSimple(last_grid);
+	}
 
 	//LLComboBox* combo = sInstance->getChild<LLComboBox>("server_combo");
 	//combo->add(server, LLSD(domain_name) );
@@ -861,13 +872,13 @@ void LLPanelLogin::refreshLoginPage()
     if (!sInstance) return;
 
     sInstance->childSetVisible("create_new_account_text",
-        !gHippoGridManager->getConnectedGrid()->getRegisterUrl().empty());
+        !gHippoGridManager->getCurrentGrid()->getRegisterUrl().empty());
     sInstance->childSetVisible("forgot_password_text",
-        !gHippoGridManager->getConnectedGrid()->getPasswordUrl().empty());
+        !gHippoGridManager->getCurrentGrid()->getPasswordUrl().empty());
 
     // kick off a request to grab the url manually
 	gResponsePtr = LLIamHereLogin::build(sInstance);
-	std::string login_page = gHippoGridManager->getConnectedGrid()->getLoginPage();
+	std::string login_page = gHippoGridManager->getCurrentGrid()->getLoginPage();
 	if (!login_page.empty()) {
 		LLHTTPClient::head(login_page, gResponsePtr);
 	} else {
@@ -881,7 +892,7 @@ void LLPanelLogin::loadLoginPage()
 	if (!sInstance) return;
 	
 
-	std::string login_page = gHippoGridManager->getConnectedGrid()->getLoginPage();
+	std::string login_page = gHippoGridManager->getCurrentGrid()->getLoginPage();
 	if (login_page.empty()) {
 		sInstance->setSiteIsAlive(false);
 		return;
@@ -1176,6 +1187,9 @@ void LLPanelLogin::onSelectServer(LLUICtrl* ctrl, void*)
 
 	// grid changed so show new splash screen (possibly)
 	loadLoginPage();
+
+	// save grid choice to settings
+	gSavedSettings.setString("LastSelectedGrid", mCurGrid);
 }
 /*
 void LLPanelLogin::onServerComboLostFocus(LLFocusableElement* fe, void*)
