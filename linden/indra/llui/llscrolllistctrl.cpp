@@ -1855,6 +1855,9 @@ BOOL LLScrollListCtrl::handleToolTip(S32 x, S32 y, std::string& msg, LLRect* sti
 
 BOOL LLScrollListCtrl::selectItemAt(S32 x, S32 y, MASK mask)
 {
+	//Don't select anything if the list is unstable
+	if (needsSorting() && !isSorted()) {return FALSE;}
+
 	if (!mCanSelect) return FALSE;
 
 	BOOL selection_changed = FALSE;
