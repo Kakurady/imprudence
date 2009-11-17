@@ -67,9 +67,10 @@ class ViewerManifest(LLManifest):
 
         # Include our fonts
         if self.prefix(src="fonts"):
-            self.path("LiberationSans-Bold.ttf")
-            self.path("LiberationSans-Regular.ttf")
-            self.path("VeraMono.ttf")
+            self.path("DejaVuSansCondensed.ttf")
+            self.path("DejaVuSansMono.ttf")
+            self.path("DroidSans.ttf")
+            self.path("DroidSans-Bold.ttf")                        
             self.path("*.txt")
             self.end_prefix("fonts")
 
