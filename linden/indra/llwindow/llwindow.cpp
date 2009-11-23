@@ -154,6 +154,10 @@ void LLWindowCallbacks::handleScrollWheel(LLWindow *window, S32 clicks)
 {
 }
 
+void LLWindowCallbacks::handleHScrollWheel(LLWindow *window, S32 clicks)
+{
+}
+
 void LLWindowCallbacks::handleResize(LLWindow *window, const S32 width, const S32 height)
 {
 }
