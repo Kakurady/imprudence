@@ -159,8 +159,8 @@ void LLFloaterGesture::show()
 	LLCtrlListInterface *list = self->childGetListInterface("gesture_list");
 	if (list)
 	{
-		const BOOL ascending = TRUE;
-		list->sortByColumn(std::string("name"), ascending);
+		//const BOOL ascending = TRUE;
+		//list->sortByColumn(std::string("name"), ascending);
 		list->selectFirstItem();
 	}
 	
@@ -188,31 +188,29 @@ void LLFloaterGesture::toggleVisibility()
 void LLFloaterGesture::refreshAll()
 {
 	if (sInstance)
-	{
+	{	
+		//keep position from before rebuilding list
+		S32 pos = 0;
+		LLCtrlScrollInterface *scroll = sInstance->childGetScrollInterface("gesture_list");
+		if (scroll) pos = scroll->getScrollPos();
+
 		sInstance->buildGestureList();
 
 		LLCtrlListInterface *list = sInstance->childGetListInterface("gesture_list");
 		if (!list) return;
-
+ 
 		if (sInstance->mSelectedID.isNull())
 		{
 			list->selectFirstItem();
 		}
-		else
+		else if (!list->setCurrentByID(sInstance->mSelectedID))
 		{
-			if (list->setCurrentByID(sInstance->mSelectedID))
-			{
-				LLCtrlScrollInterface *scroll = sInstance->childGetScrollInterface("gesture_list");
-				if (scroll) scroll->scrollToShowSelected();
-			}
-			else
-			{
-				list->selectFirstItem();
-			}
+			list->selectFirstItem();
 		}
-
 		// Update button labels
 		onCommitList(NULL, sInstance);
+		
+		if (scroll) scroll->setScrollPos(pos);
 	}
 }
 

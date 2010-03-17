@@ -4761,7 +4761,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>VeraMono.ttf</string>
+      <string>DejaVuSansMono.ttf</string>
     </map>
     <key>FontSansSerif</key>
     <map>
@@ -4772,7 +4772,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>LiberationSans-Regular.ttf</string>
+      <string>DroidSans.ttf</string>
     </map>
     <key>FontSansSerifBundledFallback</key>
     <map>
@@ -4794,7 +4794,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>LiberationSans-Bold.ttf</string>
+      <string>DroidSans-Bold.ttf</string>
     </map>
     <key>FontSansSerifFallback</key>
     <map>
@@ -4805,7 +4805,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string />
+      <string>DejaVuSansCondensed.ttf</string >
     </map>
     <key>FontSansSerifFallbackScale</key>
     <map>
@@ -4838,7 +4838,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>15.2</real>
+      <real>16.0</real>
     </map>
     <key>FontSizeLarge</key>
     <map>
@@ -4849,7 +4849,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>11.5</real>
+      <real>12.0</real>
     </map>
     <key>FontSizeMedium</key>
     <map>
@@ -4860,7 +4860,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>9.5</real>
+      <real>10.0</real>
     </map>
     <key>FontSizeMonospace</key>
     <map>
@@ -4871,7 +4871,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>8.0</real>
+      <real>8.1</real>
     </map>
     <key>FontSizeSmall</key>
     <map>
@@ -4882,7 +4882,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>8.5</real>
+      <real>9.0</real>
     </map>
     <key>ForceShowGrid</key>
     <map>
