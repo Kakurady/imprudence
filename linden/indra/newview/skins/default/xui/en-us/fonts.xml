@@ -4,33 +4,38 @@
   <font name="default" comment="default font files (global fallbacks)">
     <file>DejaVuSansCondensed.ttf</file>
     <os name="Windows">
+      <file>meiryo.ttc</file>
       <file>MSGOTHIC.TTC</file>
+      <file>malgun.ttf</file>
       <file>gulim.ttc</file>
+      <file>msyh.ttf</file>
       <file>simhei.ttf</file>
       <file>ArialUni.ttf</file>
     </os>
     <os name="Mac">
-      <file>ヒラギノ角ゴ Pro W3.otf</file>
-      <file>ヒラギノ角ゴ ProN W3.otf</file>
-      <file>AppleGothic.dfont</file>
+      <file>ヒラギノ角ゴ ProN W3.otf</file>
+      <file>ヒラギノ角ゴ Pro W3.otf</file>
       <file>AppleGothic.ttf</file>
+      <file>AppleGothic.dfont</file>
       <file>华文细黑.ttf</file>
+      <file>儷黑 Pro.ttf</file>
+      <file>Apple Symbols.ttf</file>
     </os>
   </font>
 
   <font name="SansSerif" comment="Name of san-serif font (Truetype file name)">
-    <file>LiberationSans-Regular.ttf</file>
+    <file>DroidSans.ttf</file>
   </font>
 
   <font name="SansSerifBold" 
 	comment="Name of bold sans-serif font" 
 	font_style="Bold">
-    <file>LiberationSans-Bold.ttf</file>
+    <file>DroidSans-Bold.ttf</file>
   </font>
 
   <font name="Monospace"
 	comment="Name of monospace font">
-    <file>VeraMono.ttf</file>
+    <file>DejaVuSansMono.ttf</file>
   </font>
 
   <font name="DejaVu"
@@ -90,19 +95,19 @@
 	     />
   <font_size name="Huge"
 	     comment="Size of huge font (points, or 1/72 of an inch)"
-	     size="15.2"
+	     size="16.0"
 	     />
   <font_size name="Large"
 	     comment="Size of large font (points, or 1/72 of an inch)"
-	     size="11.5"
+	     size="12.0"
 	     />
   <font_size name="Medium"
 	     comment="Size of medium font (points, or 1/72 of an inch)"
-	     size="9.5"
+	     size="10.0"
 	     />
   <font_size name="Small"
 	     comment="Size of small font (points, or 1/72 of an inch)"
-	     size="8.5"
+	     size="9.0"
 	     />
 </fonts>
 
