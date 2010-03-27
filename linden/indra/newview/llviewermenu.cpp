@@ -8911,6 +8911,21 @@ U32 info_display_from_string(std::string info_display)
 	{
 		return LLPipeline::RENDER_DEBUG_GLOW;
 	}
+	else if ("shadow_frusta" == info_display)
+	{
+		return LLPipeline::RENDER_DEBUG_SHADOW_FRUSTA;
+	}
+	else if ("raycasting" == info_display)
+	{
+		return LLPipeline::RENDER_DEBUG_RAYCAST;
+	}
+	else if ("sculpt" == info_display)
+	{
+		return LLPipeline::RENDER_DEBUG_SCULPTED;
+	}
+/*
+	sub_menu->append(new LLMenuItemCallGL("Vectorize Perf Test", &run_vectorize_perf_test));
+*/	
 	else
 	{
 		return 0;
