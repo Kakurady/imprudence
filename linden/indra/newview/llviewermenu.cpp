@@ -8209,6 +8209,11 @@ class LLToolsSelectTool : public view_listener_t
 		{
 			LLToolMgr::getInstance()->getCurrentToolset()->selectToolByIndex(5);
 		}
+		// #6 is the Inspect tool
+		else if (tool_name == "dummy")
+		{
+			LLToolMgr::getInstance()->getCurrentToolset()->selectToolByIndex(7);
+		}
 		return true;
 	}
 };

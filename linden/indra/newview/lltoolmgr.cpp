@@ -53,7 +53,7 @@
 #include "lltoolpipette.h"
 #include "llagent.h"
 #include "llviewercontrol.h"
-
+#include "nkmaniptest.h"
 
 // Used when app not active to avoid processing hover.
 LLTool*			gToolNull	= NULL;
@@ -94,15 +94,17 @@ void LLToolMgr::initTools()
 		return;
 	}
 	initialized = TRUE;
+
 	gBasicToolset->addTool( LLToolPie::getInstance() );
 	gBasicToolset->addTool( LLToolCamera::getInstance() );
-	gCameraToolset->addTool( LLToolCamera::getInstance() );
 	gBasicToolset->addTool( LLToolGrab::getInstance() );
 	gBasicToolset->addTool( LLToolCompTranslate::getInstance() );
 	gBasicToolset->addTool( LLToolCompCreate::getInstance() );
 	gBasicToolset->addTool( LLToolBrushLand::getInstance() );
-	gMouselookToolset->addTool( LLToolCompGun::getInstance() );
 	gBasicToolset->addTool( LLToolCompInspect::getInstance() );
+	gBasicToolset->addTool( NKManipTest::getInstance() );
+	gMouselookToolset->addTool( LLToolCompGun::getInstance() );
+	gCameraToolset->addTool( LLToolCamera::getInstance() );
 	gFaceEditToolset->addTool( LLToolCamera::getInstance() );
 
 	// On startup, use "select" tool

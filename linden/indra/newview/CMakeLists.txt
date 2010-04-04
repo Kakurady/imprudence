@@ -457,6 +457,7 @@ set(viewer_SOURCE_FILES
     llworldmapview.cpp
     llxmlrpctransaction.cpp
     noise.cpp
+    nkmaniptest.cpp
     panelradar.cpp
     pipeline.cpp
     primbackup.cpp
@@ -886,6 +887,7 @@ set(viewer_HEADER_FILES
     llxmlrpctransaction.h
     macmain.h
     noise.h
+    nkmaniptest.h
     panelradar.h
     pipeline.h
     primbackup.h
