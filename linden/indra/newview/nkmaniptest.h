@@ -13,6 +13,7 @@
 #include "llviewerobject.h"
 
 class LLToolComposite;
+class LLPickInfo;
 
 class NKManipTest : public LLManip, public LLSingleton<NKManipTest> {
 public:
@@ -29,6 +30,10 @@ public:
 	virtual void render();
 	virtual void draw();
 
+	virtual BOOL handleMouseDown(S32 x, S32 y, MASK mask);
+	
+	//*HACK
+	static void pickCallback(const LLPickInfo& pick_info);
 protected:
 	LLViewerObject* mvo;
 };
