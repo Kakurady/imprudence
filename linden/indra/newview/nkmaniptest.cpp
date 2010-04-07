@@ -152,7 +152,7 @@ void NKManipTest::render(){
 			for (S32 s = 0; s < sizeS; s++)
 			{
 				LLVector3& v = pathp->mPath[s].mPos;
-				glVertex3f(v.mV[VX], v.mV[VY], v.mV[VZ]);
+				glVertex3fv(v.mV);
 			}
 			glEnd();
 
@@ -163,7 +163,7 @@ void NKManipTest::render(){
 			{
 				const LLVector3& v = profilep->mProfile[t];
 				//not sure what the Z value is used for...
-				glVertex2f(v.mV[VX], v.mV[VY]);
+				glVertex2fv(v.mV);
 			}
 			glEnd();
 		}

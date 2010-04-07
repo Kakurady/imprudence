@@ -83,6 +83,7 @@
 #include "llvograss.h"
 #include "llvotree.h"
 #include "lluictrlfactory.h"
+#include "nkmanipprofilecut.h"
 
 // Globals
 LLFloaterTools *gFloaterTools = NULL;
@@ -120,6 +121,22 @@ void commit_radio_pan(LLUICtrl *, void*);
 void commit_grid_mode(LLUICtrl *, void*);
 void commit_slider_zoom(LLUICtrl *, void*);
 
+void btnZoomOnClick(void* data)
+{
+	LLFloaterTools::setEditTool((void*)LLToolCamera::getInstance());
+	commit_radio_zoom( NULL, data);
+}
+
+void btnOrbitOnClick(void* data)
+{
+	LLFloaterTools::setEditTool((void*)LLToolCamera::getInstance());
+	commit_radio_orbit (NULL, data);
+};
+void btnPanOnClick(void* data) 
+{
+	LLFloaterTools::setEditTool((void*)LLToolCamera::getInstance());
+	commit_radio_pan(NULL, data);
+};
 
 //static
 void*	LLFloaterTools::createPanelPermissions(void* data)
@@ -186,7 +203,7 @@ BOOL	LLFloaterTools::postBuild()
 	// make sounds on visibility changes.
 	setSoundFlags(LLView::SILENT);
 
-	getDragHandle()->setEnabled( !gSavedSettings.getBOOL("ToolboxAutoMove") );
+	//getDragHandle()->setEnabled( !gSavedSettings.getBOOL("ToolboxAutoMove") );
 
 	LLRect rect;
 	mBtnFocus = getChild<LLButton>("button focus");//btn;
@@ -238,26 +255,52 @@ BOOL	LLFloaterTools::postBuild()
 	mTextGridMode = getChild<LLTextBox>("text ruler mode");
 	mComboGridMode = getChild<LLComboBox>("combobox grid mode");
 	childSetCommitCallback("combobox grid mode",commit_grid_mode, this);
+
 	mBtnLink = getChild<LLButton>("link_btn");
 	childSetAction("link_btn",onClickLink, this);
 	mBtnUnlink = getChild<LLButton>("unlink_btn");
 	childSetAction("unlink_btn",onClickUnlink, this);
 
+	mBtnZoom = getChild<LLButton>("btnZoom");
+	childSetAction("btnZoom",btnZoomOnClick, this);
+	mBtnOrbit = getChild<LLButton>("btnOrbit");
+	childSetAction("btnOrbit",btnOrbitOnClick, this);
+	mBtnPan = getChild<LLButton>("btnPan");
+	childSetAction("btnPan",btnPanOnClick, this);
+
+	mBtnTranslate = getChild<LLButton>("btnMove");
+	childSetAction("btnMove",LLFloaterTools::setEditTool, (void*)LLToolCompTranslate::getInstance());
+	mBtnRotate = getChild<LLButton>("btnRotate");
+	childSetAction("btnRotate",LLFloaterTools::setEditTool, (void*)LLToolCompRotate::getInstance());
+	mBtnScale = getChild<LLButton>("btnScale");
+	childSetAction("btnScale",LLFloaterTools::setEditTool, (void*)LLToolCompScale::getInstance());
+
+	mBtnProfileCut = getChild<LLButton>("btnProfileCut");
+	childSetAction("btnProfileCut",LLFloaterTools::setEditTool, (void*)NKManipProfileCut::getInstance());
+	mBtnPathCut = getChild<LLButton>("btnPathCut");
+	mBtnTwist = getChild<LLButton>("btnTwist");
+	mBtnTaper = getChild<LLButton>("btnTaper");
+	mBtnShear = getChild<LLButton>("btnShear");
+	mBtnHollow = getChild<LLButton>("btnHollow");
+	mBtnSkew = getChild<LLButton>("btnSkew");
+	mBtnRevolutions = getChild<LLButton>("btnRevolutions");
+	mBtnSelFace = getChild<LLButton>("btnSelFace");
+	childSetAction("btnSelFace",LLFloaterTools::setEditTool, (void*)LLToolFace::getInstance());
 	//
 	// Create Buttons
 	//
 
 	static	const std::string	toolNames[]={
 			"ToolCube",
-			"ToolPrism",
-			"ToolPyramid",
+//			"ToolPrism",
+//			"ToolPyramid",
 			"ToolTetrahedron",
 			"ToolCylinder",
-			"ToolHemiCylinder",
-			"ToolCone",
-			"ToolHemiCone",
+//			"ToolHemiCylinder",
+//			"ToolCone",
+//			"ToolHemiCone",
 			"ToolSphere",
-			"ToolHemiSphere",
+//			"ToolHemiSphere",
 			"ToolTorus",
 			"ToolTube",
 			"ToolRing",
@@ -265,15 +308,15 @@ BOOL	LLFloaterTools::postBuild()
 			"ToolGrass"};
 	void*	toolData[]={
 			&LLToolPlacerPanel::sCube,
-			&LLToolPlacerPanel::sPrism,
-			&LLToolPlacerPanel::sPyramid,
+//			&LLToolPlacerPanel::sPrism,
+//			&LLToolPlacerPanel::sPyramid,
 			&LLToolPlacerPanel::sTetrahedron,
 			&LLToolPlacerPanel::sCylinder,
-			&LLToolPlacerPanel::sCylinderHemi,
-			&LLToolPlacerPanel::sCone,
-			&LLToolPlacerPanel::sConeHemi,
+//			&LLToolPlacerPanel::sCylinderHemi,
+//			&LLToolPlacerPanel::sCone,
+//			&LLToolPlacerPanel::sConeHemi,
 			&LLToolPlacerPanel::sSphere,
-			&LLToolPlacerPanel::sSphereHemi,
+//			&LLToolPlacerPanel::sSphereHemi,
 			&LLToolPlacerPanel::sTorus,
 			&LLToolPlacerPanel::sSquareTorus,
 			&LLToolPlacerPanel::sTriangleTorus,
@@ -541,10 +584,10 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 
 	mBtnFocus	->setToggleState( focus_visible );
 
-	mRadioZoom	->setVisible( focus_visible );
-	mRadioOrbit	->setVisible( focus_visible );
-	mRadioPan	->setVisible( focus_visible );
-	childSetVisible("slider zoom", focus_visible);
+//	mRadioZoom	->setVisible( focus_visible );
+//	mRadioOrbit	->setVisible( focus_visible );
+//	mRadioPan	->setVisible( focus_visible );
+//	childSetVisible("slider zoom", focus_visible);
 	childSetEnabled("slider zoom", gCameraBtnZoom);
 
 	mRadioZoom	->set(	!gCameraBtnOrbit &&
@@ -573,7 +616,7 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 	// HACK - highlight buttons for next click
 	if (mRadioMove)
 	{
-		mRadioMove	->setVisible( move_visible );
+		//mRadioMove	->setVisible( move_visible );
 		mRadioMove	->set(	!gGrabBtnSpin && 
 							!gGrabBtnVertical &&
 							!(mask == MASK_VERTICAL) && 
@@ -582,14 +625,14 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 
 	if (mRadioLift)
 	{
-		mRadioLift	->setVisible( move_visible );
+		//mRadioLift	->setVisible( move_visible );
 		mRadioLift	->set(	gGrabBtnVertical || 
 							(mask == MASK_VERTICAL) );
 	}
 
 	if (mRadioSpin)
 	{
-		mRadioSpin	->setVisible( move_visible );
+		//mRadioSpin	->setVisible( move_visible );
 		mRadioSpin	->set(	gGrabBtnSpin || 
 							(mask == MASK_SPIN) );
 	}
@@ -604,13 +647,16 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 
 	mBtnEdit	->setToggleState( edit_visible );
 
-	mRadioPosition	->setVisible( edit_visible );
-	mRadioRotate	->setVisible( edit_visible );
-	mRadioStretch	->setVisible( edit_visible );
+//	mRadioPosition	->setVisible( edit_visible );
+//	mRadioRotate	->setVisible( edit_visible );
+//	mRadioStretch	->setVisible( edit_visible );
 	if (mRadioSelectFace)
 	{
-		mRadioSelectFace->setVisible( edit_visible );
+		//mRadioSelectFace->setVisible( edit_visible );
 		mRadioSelectFace->set( tool == LLToolFace::getInstance() );
+	}
+	if (mBtnSelFace){
+		mBtnSelFace	->setToggleState(  tool == LLToolFace::getInstance() );
 	}
 
 	if (mCheckSelectIndividual)
@@ -622,6 +668,10 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 	mRadioPosition	->set( tool == LLToolCompTranslate::getInstance() );
 	mRadioRotate	->set( tool == LLToolCompRotate::getInstance() );
 	mRadioStretch	->set( tool == LLToolCompScale::getInstance() );
+
+	mBtnTranslate -> setToggleState(tool == LLToolCompTranslate::getInstance());
+	mBtnRotate -> setToggleState(tool == LLToolCompRotate::getInstance());
+	mBtnScale -> setToggleState(tool == LLToolCompScale::getInstance());
 
 	if (mComboGridMode) 
 	{
@@ -653,15 +703,15 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 	if (mTextGridMode) mTextGridMode->setVisible( edit_visible );
 
 	// Snap to grid disabled for grab tool - very confusing
-	if (mCheckSnapToGrid) mCheckSnapToGrid->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
-	if (mBtnGridOptions) mBtnGridOptions->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
+	//if (mCheckSnapToGrid) mCheckSnapToGrid->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
+	//if (mBtnGridOptions) mBtnGridOptions->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
 
 	//mCheckSelectLinked	->setVisible( edit_visible );
-	if (mCheckStretchUniform) mCheckStretchUniform->setVisible( edit_visible );
-	if (mCheckStretchTexture) mCheckStretchTexture->setVisible( edit_visible );
+	//if (mCheckStretchUniform) mCheckStretchUniform->setVisible( edit_visible );
+	//if (mCheckStretchTexture) mCheckStretchTexture->setVisible( edit_visible );
 
-	if (mBtnLink) mBtnLink->setVisible( edit_visible );
-	if (mBtnUnlink) mBtnUnlink->setVisible( edit_visible );
+	//if (mBtnLink) mBtnLink->setVisible( edit_visible );
+	//if (mBtnUnlink) mBtnUnlink->setVisible( edit_visible );
 
 	//TODO: Move these into llselectmgr
 	// Check to see if we can link things
@@ -743,7 +793,7 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 		for (std::vector<LLButton*>::size_type i = 0; i < mButtons.size(); i++)
 		{
 			mButtons[i]->setToggleState(FALSE);
-			mButtons[i]->setVisible( create_visible );
+			//mButtons[i]->setVisible( create_visible );
 		}
 	}
 	else
@@ -757,14 +807,14 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 
 			BOOL state = (pcode == *cur);
 			mButtons[i]->setToggleState( state );
-			mButtons[i]->setVisible( create_visible );
+			//mButtons[i]->setVisible( create_visible );
 		}
 	}
 
-	if (mCheckSticky) mCheckSticky		->setVisible( create_visible );
-	if (mCheckCopySelection) mCheckCopySelection	->setVisible( create_visible );
-	if (mCheckCopyCenters) mCheckCopyCenters	->setVisible( create_visible );
-	if (mCheckCopyRotates) mCheckCopyRotates	->setVisible( create_visible );
+	//if (mCheckSticky) mCheckSticky		->setVisible( create_visible );
+	//if (mCheckCopySelection) mCheckCopySelection	->setVisible( create_visible );
+	//if (mCheckCopyCenters) mCheckCopyCenters	->setVisible( create_visible );
+	//if (mCheckCopyRotates) mCheckCopyRotates	->setVisible( create_visible );
 
 	if (mCheckCopyCenters) mCheckCopyCenters->setEnabled( mCheckCopySelection->get() );
 	if (mCheckCopyRotates) mCheckCopyRotates->setEnabled( mCheckCopySelection->get() );
@@ -1037,6 +1087,9 @@ void commit_grid_mode(LLUICtrl *ctrl, void *data)
 // static 
 void LLFloaterTools::setObjectType( void* data )
 {
+	//*HACK for toolbox support - Kaku
+	LLFloaterTools::setEditTool(LLToolCompCreate::getInstance());
+
 	LLPCode pcode = *(LLPCode*) data;
 	LLToolPlacer::setObjectType( pcode );
 	gSavedSettings.setBOOL("CreateToolCopySelection", FALSE);

@@ -127,6 +127,33 @@ public:
 	LLCheckBoxCtrl	*mRadioZoom;
 	LLCheckBoxCtrl	*mRadioPan;
 
+	LLButton *mBtnZoom;
+	LLButton *mBtnOrbit;
+	LLButton *mBtnPan;
+
+	LLButton *mBtnTranslate;
+	LLButton *mBtnRotate;
+	LLButton *mBtnScale;
+
+	LLButton	*mBtnLink;
+	LLButton	*mBtnUnlink;
+
+	LLButton	*mBtnProfileCut;
+	LLButton	*mBtnPathCut;
+	LLButton	*mBtnHollow;
+	LLButton	*mBtnTwist;
+	LLButton	*mBtnTaper;
+	LLButton	*mBtnShear;
+	LLButton	*mBtnHoleSize;
+	LLButton	*mBtnSkew;
+	LLButton	*mBtnRevolutions;
+
+	LLButton	*mBtnSelFace;
+
+	//LLButton	*mBtnAlignCenter;
+	//LLButton	*mBtnAlignSide;
+	//LLButton	*mBtnDistribute;
+
 	// Move buttons
 	LLCheckBoxCtrl	*mRadioMove;
 	LLCheckBoxCtrl	*mRadioLift;
@@ -154,9 +181,6 @@ public:
 	LLButton	*mBtnDelete;
 	LLButton	*mBtnDuplicate;
 	LLButton	*mBtnDuplicateInPlace;
-
-	LLButton	*mBtnLink;
-	LLButton	*mBtnUnlink;
 
 	// Create buttons
 	LLComboBox		*mComboTreesGrass;

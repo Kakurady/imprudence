@@ -100,7 +100,15 @@ public:
 		LL_ROT_X,
 		LL_ROT_Y,
 		LL_ROT_Z,
-		LL_ROT_ROLL
+		LL_ROT_ROLL,
+
+		//profile cut
+		NK_PROFILE_START,
+		NK_PROFILE_START_BOTTOM, //Path start
+		NK_PROFILE_START_TOP, //Path end
+		NK_PROFILE_END,
+		NK_PROFILE_END_BOTTOM,
+		NK_PROFILE_END_TOP
 	} EManipPart;
 
 	// For use in loops and range checking.
@@ -116,7 +124,10 @@ public:
 		LL_FACE_MAX	  = LL_FACE_NEGZ,
 		
 		LL_EDGE_MIN   = LL_EDGE_NEGX_NEGY,
-		LL_EDGE_MAX   = LL_EDGE_POSZ_POSX
+		LL_EDGE_MAX   = LL_EDGE_POSZ_POSX,
+
+		NK_PROFILE_MIN = NK_PROFILE_START,
+		NK_PROFILE_MAX = NK_PROFILE_END
 	} EManipPartRanges;
 public:
 	static void rebuild(LLViewerObject* vobj);
