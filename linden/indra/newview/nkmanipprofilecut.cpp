@@ -19,15 +19,16 @@
 #include "llviewerwindow.h"
 #include "v2math.h"
 #include "llviewercamera.h"
+#include "llmath.h"
 
 const F32 MANIPULATOR_WIDTH = 1.8f;
 const F32 SELECTED_MANIPULATOR_WIDTH = 3.6f;
-const F32 MANIPULATOR_HOTSPOT_WIDTH = 3.0f;
+const F32 MANIPULATOR_HOTSPOT_WIDTH = 6.0f; //*TODO make this a setting
 const F32 MANIPULATOR_SCALE_HALF_LIFE = 0.07f;
 const S32 NUM_MANIPULATORS = 6; //NK_PROFILE_END_TOP - NK_PROFILE_BEGIN + 1
 
 NKManipProfileCut::NKManipProfileCut()
-: LLManip (std::string("dummy"), NULL)
+: LLManip (std::string("Profile Cut"), NULL)
 {	for(S32 i=0; i<NUM_MANIPULATORS; i++){
 		std::vector<LLVector3>* vectorp = new std::vector<LLVector3>;
 		mManipParts.push_back(*vectorp);
@@ -108,6 +109,8 @@ void NKManipProfileCut::draw(){
 	//gsomething -> setup2DRender();
 	;
 }
+
+//render whatever is to be rendered
 void NKManipProfileCut::render(){
 	//are we in a drag?
 
@@ -200,7 +203,7 @@ void NKManipProfileCut::render(){
 	LLVector3 v(0.3,0.4,0.5);
 	renderXYZ(v);
 }
-
+///generate the handles that the user grabs
 void NKManipProfileCut::generateManipulators()
 {
 	LLVector3 pos;
@@ -219,6 +222,21 @@ void NKManipProfileCut::generateManipulators()
 			S32 sizeS = pathp->mPath.size();
 			S32 sizeT = profilep->mProfile.size();
 			S32 sizeTOuter = profilep->getTotalOut();
+			//only hollows have a TotalOut
+			//lazily test for faces and not actual params
+			if (sizeTOuter == 0)
+			{
+				if (volumep->mFaceMask & (LL_FACE_PROFILE_BEGIN | LL_FACE_PROFILE_END)){
+					sizeTOuter = sizeT - 1;	//idk why - Kaku
+				} else {
+					sizeTOuter = sizeT;
+				}
+			} else {
+				sizeTOuter = sizeTOuter;
+			}
+			//sizeTOuter = sizeTOuter? sizeTOuter: sizeT;
+			//Wobuffet? Wobuffet! Waa-buffet! - Kaku
+
 
 			//	NK_PROFILE_START - point @ profile start * path
 			mManipParts[0].clear();
@@ -270,8 +288,8 @@ void NKManipProfileCut::generateManipulators()
 
 				//for(S32 t = 0; t < 1; t++){
 
-				pos.mV[VX] = profilep->mProfile[sizeTOuter].mV[VX] * scale.mV[VX];
-				pos.mV[VY] = profilep->mProfile[sizeTOuter].mV[VY] * scale.mV[VY];
+				pos.mV[VX] = profilep->mProfile[sizeTOuter-1].mV[VX] * scale.mV[VX];
+				pos.mV[VY] = profilep->mProfile[sizeTOuter-1].mV[VY] * scale.mV[VY];
 				pos.mV[VZ] = 0.0f;
 				pos = pos * rot;
 				pos += pathp -> mPath[s].mPos;
@@ -308,6 +326,7 @@ void NKManipProfileCut::generateManipulators()
 
 	;
 }
+///generate the paths the manipulators move
 void NKManipProfileCut::generateManipulatorPaths()
 {
 
@@ -327,6 +346,8 @@ void NKManipProfileCut::generateManipulatorPaths()
 			S32 sizeS = pathp->mPath.size();
 			S32 sizeT = profilep->mProfile.size();
 			S32 sizeTOuter = profilep->getTotalOut();
+			sizeTOuter = (sizeTOuter != 0) ? sizeTOuter : sizeT;
+			//sizeTOuter = (sizeTOuter) ? sizeTOuter : sizeT;
 
 			switch (mHighlightedPart){
 			case NK_PROFILE_START:
@@ -341,10 +362,14 @@ void NKManipProfileCut::generateManipulatorPaths()
 
 	;
 }
+/// figure out which manipulator is the mouse pointing at
 void NKManipProfileCut::updateProximity(S32 x, S32 y)
 {
 	if(!mvo){return;}
 
+	//terrible names, I know.
+	LLVector3 selected_segment_1;
+	LLVector3 selected_segment_2;
 	//TODO: optimize this - no need to project if outside bbox of bbox
 
 	EManipPart part = LL_NO_PART;
@@ -374,6 +399,9 @@ void NKManipProfileCut::updateProximity(S32 x, S32 y)
 					if (line_to_mouse < MANIPULATOR_HOTSPOT_WIDTH){
 						if (line_to_mouse < dist){
 							dist = line_to_mouse;
+
+							//part = NK_PROFILE_MIN + i
+							//*FIXME: that's a type mismatch, somehow...
 							switch (i){
 							case 0: part = NK_PROFILE_START; break;
 							case 1: part = NK_PROFILE_START_BOTTOM; break;
@@ -384,12 +412,52 @@ void NKManipProfileCut::updateProximity(S32 x, S32 y)
 							default: part = LL_NO_PART;
 							}
 							mSelectedPosition = (j/numSegs) + b_param;
+							selected_segment_1 = b1;
+							selected_segment_2 = b2;
 						}
 					}
 				}
 			}
 		}
+		if (part != LL_NO_PART){ // one is selected
+
+
+			//still more bad variable names
+			LLCoordGL p1;
+			LLCoordGL p2;
+			LLViewerCamera::getInstance()->projectPosAgentToScreen(selected_segment_1, p1);
+			LLViewerCamera::getInstance()->projectPosAgentToScreen(selected_segment_2, p2);
+			//calculate cursor slope (= line slope + PI/2)
+			//[(0/4-1/8)*PI, (0/4+1/8)*PI] : UI_CURSOR_SIZEWE,
+			//[(1/4-1/8)*PI, (1/4+1/8)*PI] : UI_CURSOR_SIZENESW,
+			//[(2/4-1/8)*PI, (2/4+1/8)*PI] : UI_CURSOR_SIZENS,
+			//[(3/4-1/8)*PI, (3/4+1/8)*PI] : UI_CURSOR_SIZENWSE
+
+			//aka: (line slope + PI/2 + PI/8) / PI * 4 % 4
+			//GL coords is the same as trig coords (+y goes up)
+			//whose idea is it to have atan(y, x)...
+			S32 direction =	llfloor(
+				(atan2(p2.mY-p1.mY,p2.mX-p1.mX)
+				/ F_PI + (0.5f + 0.125f + 2.0f)) * 4.0f
+				) % 4;
+
+			//not a good idea to actually set it here
+			//assuming setting the cursor over and over has little performance penalty
+			LLWindow* window = gViewerWindow->getWindow();
+			switch (direction){
+			case 0: window->setCursor(UI_CURSOR_SIZEWE); break;
+			case 1: window->setCursor(UI_CURSOR_SIZENESW); break;
+			case 2: window->setCursor(UI_CURSOR_SIZENS); break;
+			case 3: window->setCursor(UI_CURSOR_SIZENWSE); break;
+			default:
+				LL_WARNS("NULL")<< "bad cursor direction "<< direction <<LL_ENDL;
+			}
+		} else {
+			gViewerWindow->getWindow()->setCursor(UI_CURSOR_ARROW);
+		}
 	}
+
+
 	mHighlightedPart = part;
 	;
 }
