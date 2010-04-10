@@ -1,5 +1,6 @@
 /**
- * @file ManipTest.cpp
+ * @file nkmanipprofilecut.cpp
+ * @brief NKManipProfileCut class definition, a tool for manipulating prim params directly
  *
  *  Created on: 2010-3-31
  *      Author: nekoyasha
@@ -21,6 +22,8 @@
 #include "llviewercamera.h"
 #include "llmath.h"
 #include "llquaternion.h"
+#include "llfloatertools.h"
+#include "llpanelobject.h"
 
 //*TODO scale apparent width by UI factor?
 const F32 MANIPULATOR_WIDTH = 1.8f;
@@ -29,6 +32,8 @@ const F32 MANIPULATOR_HOTSPOT_WIDTH = 6.0f; //*TODO make this a setting
 const F32 MANIPULATOR_PATH_WIDTH = 1.0f;
 const F32 MANIPULATOR_SCALE_HALF_LIFE = 0.07f; //unused
 const S32 NUM_MANIPULATORS = 6; //NK_PROFILE_END_TOP - NK_PROFILE_BEGIN + 1
+
+const F32 NK_PROFILE_OVERDRAG = 0.1;
 
 
 NKManipProfileCut::NKManipProfileCut()
@@ -71,7 +76,23 @@ BOOL NKManipProfileCut::handleMouseDown(S32 x, S32 y, MASK mask)
 		//if there is an active manipulator, enter drag
 		setMouseCapture(TRUE);
 		mLastParams.copyParams(mvo->getVolume()->getParams());
+		switch (mHighlightedPart)
+		{
+		case NK_PROFILE_START:
+		case NK_PROFILE_START_BOTTOM:
+		case NK_PROFILE_START_TOP:
+			mLastDragCoeff = mLastParams.getProfileParams().getBegin();
+			break;
+		case NK_PROFILE_END:
+		case NK_PROFILE_END_BOTTOM:
+		case NK_PROFILE_END_TOP:
+			mLastDragCoeff = mLastParams.getProfileParams().getEnd();
+			break;
+		default:
+			LL_WARNS("NKMANIP")<<"part from a different manipulator is selected" <<LL_ENDL;
+		}
 		generateManipulatorPaths();
+
 		return TRUE;
 		//*TODO test if in proxymity of manipulators
 	}
@@ -88,6 +109,15 @@ BOOL NKManipProfileCut::handleMouseUp(S32 x, S32 y, MASK mask)
 	//drag in process?
 	if(hasMouseCapture()){
 		setMouseCapture(FALSE);
+		if(!mvo || (!mvo->getVolume()))
+		{
+			return TRUE;
+		}
+		mvo->sendShapeUpdate();
+		if(gFloaterTools && gFloaterTools->mPanelObject)
+		{
+			gFloaterTools->mPanelObject->refresh();
+		}
 	}
 		//release it
 		//send stuff to server
@@ -241,9 +271,13 @@ void NKManipProfileCut::render(){
 //	}
 	glPopMatrix();
 	;
-
-	LLVector3 v(0.3,0.4,0.5);
-	renderXYZ(v);
+	if(hasMouseCapture() && mvo && mvo->getVolume())// && mvo->getVolume()->getParams())
+	{
+		const LLProfileParams& profile_params = mvo->getVolume()->getParams().getProfileParams();
+	//TODO write a custom one
+		LLVector3 v(profile_params.getBegin(),profile_params.getEnd(),0.0);
+		renderXYZ(v);
+	}
 }
 ///generate the handles that the user grabs
 void NKManipProfileCut::generateManipulators()
@@ -261,6 +295,8 @@ void NKManipProfileCut::generateManipulators()
 			LLQuaternion rot_agent = bbox.getRotation();
 			LLVector3 scale_agent = mvo->getScale();
 
+			//*FIXME if profile being == end there would not be a pathp
+			//(this will not happen normally, but who knows)
 			S32 sizeS = pathp->mPath.size();
 			S32 sizeT = profilep->mProfile.size();
 			S32 sizeTOuter = profilep->getTotalOut();
@@ -391,88 +427,112 @@ void NKManipProfileCut::generateManipulatorPaths()
 //			sizeTOuter = (sizeTOuter != 0) ? sizeTOuter : sizeT;
 			//sizeTOuter = (sizeTOuter) ? sizeTOuter : sizeT;
 
-			switch (mHighlightedPart){
-			case NK_PROFILE_START:
-			case NK_PROFILE_END:
+			//do stuff here
+			{
+				////////////////////////////
+				//first, generate path slice
+				LLPath::PathPt pt;
+				F32 segmentf = floor(mSelectedPosition * (sizeS - 1));
+				S32 segment = (S32) segmentf;
+				F32 coeff = mSelectedPosition*(sizeS - 1) - segmentf;
 
-				//do stuff here
+				switch (mHighlightedPart){
+				case NK_PROFILE_START:
+				case NK_PROFILE_END:
+					break;
+				case NK_PROFILE_START_BOTTOM:
+				case NK_PROFILE_END_BOTTOM:
+					segment = 0;
+					coeff = 0;
+					break;
+				case NK_PROFILE_START_TOP:
+				case NK_PROFILE_END_TOP:
+					segment = sizeS - 2;
+					coeff = 1.0f;
+					if (segment < 0){
+						LL_WARNS("NKMANIP")<<"bad segment"<<LL_ENDL;
+					}
+					break;
+				default:
+					LL_WARNS("NKMANIP")<< "invalid part" <<LL_ENDL;
+				}
+
+				//lerping the rotation instead of the result means the path will probably be a bit off
+				//...
+				//What the hek is a nlerp?
+				pt.mPos.set(lerp(pathp->mPath[segment].mPos, pathp->mPath[segment + 1].mPos, coeff));
+				pt.mScale.set(lerp(pathp->mPath[segment].mScale, pathp->mPath[segment + 1].mScale, coeff));
+				pt.mRot.set(nlerp(coeff,pathp->mPath[segment].mRot, pathp->mPath[segment + 1].mRot));
+
+				switch (mHighlightedPart){
+				case NK_PROFILE_START_BOTTOM:
+				case NK_PROFILE_END_BOTTOM:
+				case NK_PROFILE_START_TOP:
+				case NK_PROFILE_END_TOP:
+					//*HACK
+					pt.mScale *= mSelectedPosition;
+					break;
+				case NK_PROFILE_START:
+				case NK_PROFILE_END:
+				default:
+					break;
+				}
+				//texture coord is not needed
+				LL_INFOS(NULL)<< "segment = " << segmentf << " coeff= " << coeff << " sizeS= "<< sizeS << LL_ENDL;
+				LL_INFOS(NULL)<< pt.mPos << pt.mScale << LL_ENDL;
+
+				//*TODO: if coeff is exactly zero, don't interpolate
+				//	might be able to prevent array OOB when mSelectedPosition is exactly 1
+
+				/////////////////////////////
+				//next, generate full profile
+				LLProfileParams params;
+				params.copyParams(volumep->getParams().getProfileParams());
+				params.setBegin(0.f);
+				params.setEnd(1.f);
+
+				NKProfileUnlock unlock;
 				{
-					////////////////////////////
-					//first, generate path slice
-					LLPath::PathPt pt;
-					F32 segmentf = floor(mSelectedPosition * (sizeS - 1));
-					S32 segment = (S32) segmentf;
-					F32 coeff = mSelectedPosition*(sizeS - 1) - segmentf;
+					LLProfile profile; //NOTE: this is not profilep
 
-					//lerping the rotation instead of the result means the path will probably be a bit off
-					//...
-					//What the hek is a nlerp?
-					pt.mPos.set(lerp(pathp->mPath[segment].mPos, pathp->mPath[segment + 1].mPos, coeff));
-					pt.mScale.set(lerp(pathp->mPath[segment].mScale, pathp->mPath[segment + 1].mScale, coeff));
-					pt.mRot.set(nlerp(coeff,pathp->mPath[segment].mRot, pathp->mPath[segment + 1].mRot));
-					//texture coord is not needed
-					LL_INFOS(NULL)<< "segment = " << segmentf << " coeff= " << coeff << " sizeS= "<< sizeS << LL_ENDL;
-					LL_INFOS(NULL)<< pt.mPos << pt.mScale << LL_ENDL;
+					//detail is llvolume->mDetail
+					//*TODO: double it? what about the split?
+					profile.generate(params, pathp->isOpen(), volumep->getDetail(), 0);
 
-					//*TODO: if coeff is exactly zero, don't interpolate
-					//	might be able to prevent array OOB when mSelectedPosition is exactly 1
+					//////////////////////////////////////////
+					//finally, combine them for the whole path
+					mManipPath.clear();
+					S32 sizeT = profile.getTotalOut();
+					if (sizeT == 0){sizeT = profile.getTotal();}
+					//the manip path will never have a end face
+//						if (volumep->mFaceMask & (LL_FACE_PROFILE_END)){
+//							sizeT -= 1;
+//						}
+					//assuming the profile is closed here
 
-					/////////////////////////////
-					//next, generate full profile
-					LLProfileParams params;
-					params.copyParams(volumep->getParams().getProfileParams());
-					params.setBegin(0.f);
-					params.setEnd(1.f);
+					LLVector3 pos;
 
-					NKProfileUnlock unlock;
-					{
-						LLProfile profile; //NOTE: this is not profilep
+	//				LLVector2 scale = pathp->mPath[s].mScale;
+	//				LLQuaternion rot = pathp -> mPath[s]. mRot;
+					for (S32 t = 0; t < sizeT; t++){
 
-						//detail is llvolume->mDetail
-						//*TODO: double it? what about the split?
-						profile.generate(params, pathp->isOpen(), volumep->getDetail(), 0);
+						pos.mV[VX] = profile.mProfile[t].mV[VX] * pt.mScale.mV[VX];
+						pos.mV[VY] = profile.mProfile[t].mV[VY] * pt.mScale.mV[VY];
+						pos.mV[VZ] = 0.0f;
+						pos = pos * pt.mRot;
+						pos += pt.mPos;
 
-						//////////////////////////////////////////
-						//finally, combine them for the whole path
-						mManipPath.clear();
-						S32 sizeT = profile.getTotalOut();
-						if (sizeT == 0){sizeT = profile.getTotal();}
-						if (volumep->mFaceMask & (LL_FACE_PROFILE_END)){
-							sizeT -= 1;
-						}
-						//assuming the profile is closed here
+						//global transformation: first scale, then rotate, then trans
 
-						LLVector3 pos;
-
-		//				LLVector2 scale = pathp->mPath[s].mScale;
-		//				LLQuaternion rot = pathp -> mPath[s]. mRot;
-						for (S32 t = 0; t < sizeT; t++){
-
-							pos.mV[VX] = profile.mProfile[t].mV[VX] * pt.mScale.mV[VX];
-							pos.mV[VY] = profile.mProfile[t].mV[VY] * pt.mScale.mV[VY];
-							pos.mV[VZ] = 0.0f;
-							pos = pos * pt.mRot;
-							pos += pt.mPos;
-
-							//global transformation: first scale, then rotate, then trans
-
-							pos.scaleVec(scale_agent);
-							pos.rotVec(rot_agent);
-							pos += pos_agent;
-			//				}
-							mManipPath.push_back(pos);
-						}
+						pos.scaleVec(scale_agent);
+						pos.rotVec(rot_agent);
+						pos += pos_agent;
+		//				}
+						mManipPath.push_back(pos);
 					}
 				}
-				//Huzzah, we're finally done!
-				break;
-			case NK_PROFILE_START_BOTTOM:
-			case NK_PROFILE_END_BOTTOM:
-			case NK_PROFILE_START_TOP:
-			case NK_PROFILE_END_TOP:
-			default:
-				LL_WARNS("")<< "invalid part" <<LL_ENDL;
 			}
+			//Huzzah, we're finally done!
 		}
 	}
 
@@ -583,8 +643,126 @@ void NKManipProfileCut::updateProximity(S32 x, S32 y)
 	mHighlightedPart = part;
 	;
 }
+
+//see LLPanelObject::onCommitParametric()
 void NKManipProfileCut::drag(S32 x, S32 y, MASK mask)
 {
+	if(!mvo || !mvo->getVolume() || mvo->getPCode() != LL_PCODE_VOLUME)
+	{
+		//How did this happen...?
+		LL_WARNS("NKMANIP")<< "Trying to manipulate no object or a non-volume (i.e. not a prim) object" << LL_ENDL
+		return;
+	}
+	S32 numSegs = mManipPath.size() - 1;
+	//*FIXME
+	F32 dist = MANIPULATOR_HOTSPOT_WIDTH * 999;
+	F32 path_coeff;
+
+	//todo: reuse this code
+	//todo: special case for spheres (they can't be closed otherwise)
+	for (S32 i = 0; i < numSegs; i++)
+	{
+		LLVector3& b1 = mManipPath[i];
+		LLVector3& b2 = mManipPath[i+1];
+		F32 a_param;
+		F32 b_param;
+		if(!nearestPointOnLineFromMouse(x,y,b1,b2,a_param,b_param))
+		{
+			if (a_param > 0.0f && b_param >= 0.0f && b_param <= 1.0f)
+			{
+				//get the point b1+b_param(b2-b1)
+				LLVector3 b(b1 + b_param * (b2-b1));
+				LLCoordGL c;
+				LLViewerCamera::getInstance()->projectPosAgentToScreen(b,c,false);
+
+				//might want to break here to see if the coords match up
+				LLVector2 line_pos(c.mX, c.mY);
+				LLVector2 mouse_pos(x, y);
+
+				F32 line_to_mouse = dist_vec(line_pos, mouse_pos);
+
+				if (line_to_mouse < dist){
+					dist = line_to_mouse;
+					path_coeff = ((i+b_param)/numSegs);
+				}
+			}
+		}
+	}
+	//okay, now that it's found.... update the volume data
+	LLVolumeParams volume_params;
+	volume_params.copyParams(mvo->getVolume()->getParams());
+
+	BOOL is_uncut = ( mLastParams.getProfileParams().getBegin() == 0.0f
+			&& mLastParams.getProfileParams().getEnd() == 1.0f);
+
+	//"overdrag" - end into begin
+	if(mLastDragCoeff >= 1.f - NK_PROFILE_OVERDRAG && path_coeff <= 0.f + NK_PROFILE_OVERDRAG)
+	{
+		//*TODO change the name to NK_PROFILE_BEGIN for consistency
+		LL_INFOS("NKMANIP") << "overdrag <-, part " <<(S32) mHighlightedPart << ", last " << mLastDragCoeff << ", now " << path_coeff << LL_ENDL;
+		if(is_uncut && mHighlightedPart >= NK_PROFILE_END && mHighlightedPart <= NK_PROFILE_END_TOP){
+
+			switch (mHighlightedPart){
+				case NK_PROFILE_END:
+					mHighlightedPart = NK_PROFILE_START; break;
+				case NK_PROFILE_END_TOP:
+					mHighlightedPart = NK_PROFILE_START_TOP; break;
+				case NK_PROFILE_END_BOTTOM:
+					mHighlightedPart = NK_PROFILE_START_BOTTOM; break;
+				default:break;
+			}
+			volume_params.getProfileParams().setEnd(1.0f);
+		} else {
+			path_coeff = 1.0f;
+		}
+	//begin into end
+	} else if (path_coeff >= 1.f - NK_PROFILE_OVERDRAG && mLastDragCoeff <= 0.f + NK_PROFILE_OVERDRAG){
+		LL_INFOS("NKMANIP") << "overdrag ->, part " <<(S32) mHighlightedPart << ", last " << mLastDragCoeff << ", now " << path_coeff << LL_ENDL;
+		if(is_uncut && mHighlightedPart >= NK_PROFILE_START && mHighlightedPart < NK_PROFILE_END){
+			switch (mHighlightedPart){
+				case NK_PROFILE_START:
+					mHighlightedPart = NK_PROFILE_END; break;
+				case NK_PROFILE_START_TOP:
+					mHighlightedPart = NK_PROFILE_END_TOP; break;
+				case NK_PROFILE_START_BOTTOM:
+					mHighlightedPart = NK_PROFILE_END_BOTTOM; break;
+				default:break;
+			}
+			volume_params.getProfileParams().setBegin(0.f);
+		} else {
+			path_coeff = 0.f;
+		}
+	}
+	//now update the params
+	switch (mHighlightedPart){
+	case NK_PROFILE_START:
+	case NK_PROFILE_START_TOP:
+	case NK_PROFILE_START_BOTTOM:
+		if((volume_params.getProfileParams().getEnd() - path_coeff) < OBJECT_MIN_CUT_INC){
+			path_coeff = volume_params.getProfileParams().getEnd() - OBJECT_MIN_CUT_INC;
+		}
+		volume_params.getProfileParams().setBegin(path_coeff);
+		break;
+	case NK_PROFILE_END:
+	case NK_PROFILE_END_TOP:
+	case NK_PROFILE_END_BOTTOM:
+		if((path_coeff - volume_params.getProfileParams().getBegin() ) < OBJECT_MIN_CUT_INC){
+			path_coeff = volume_params.getProfileParams().getBegin() + OBJECT_MIN_CUT_INC;
+		}
+		volume_params.getProfileParams().setEnd(path_coeff);
+		break;
+	default:
+		break;
+	}
+	F32 detail = mvo->getVolume()->getDetail();
+	BOOL unique = mvo->getVolume()->isUnique();
+	if(mvo->setVolume(volume_params, detail, unique)){
+		mvo->markForUpdate(TRUE);
+	}
+	//*FIXME: this might not be necessary unless is_uncut
+	mLastDragCoeff = path_coeff;
+	generateManipulators();
+	//mvo->getVolume()->regen();
 	;
 }
 void NKManipProfileCut::updateSelection(){

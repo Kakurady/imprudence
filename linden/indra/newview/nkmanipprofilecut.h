@@ -54,6 +54,7 @@ protected:
 	void updateSelection();
 
 	LLVolumeParams mLastParams; /// hold params for checking object updates && drag
+	F32 mLastDragCoeff;
 };
 
 #endif /* NKMANIPPROFILECUT_H_ */
