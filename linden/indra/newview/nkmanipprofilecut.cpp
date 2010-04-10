@@ -1,5 +1,5 @@
-/*
- * NKManipTest.cpp
+/**
+ * @file ManipTest.cpp
  *
  *  Created on: 2010-3-31
  *      Author: nekoyasha
@@ -20,15 +20,20 @@
 #include "v2math.h"
 #include "llviewercamera.h"
 #include "llmath.h"
+#include "llquaternion.h"
 
+//*TODO scale apparent width by UI factor?
 const F32 MANIPULATOR_WIDTH = 1.8f;
 const F32 SELECTED_MANIPULATOR_WIDTH = 3.6f;
 const F32 MANIPULATOR_HOTSPOT_WIDTH = 6.0f; //*TODO make this a setting
-const F32 MANIPULATOR_SCALE_HALF_LIFE = 0.07f;
+const F32 MANIPULATOR_PATH_WIDTH = 1.0f;
+const F32 MANIPULATOR_SCALE_HALF_LIFE = 0.07f; //unused
 const S32 NUM_MANIPULATORS = 6; //NK_PROFILE_END_TOP - NK_PROFILE_BEGIN + 1
 
+
 NKManipProfileCut::NKManipProfileCut()
-: LLManip (std::string("Profile Cut"), NULL)
+: LLManip (std::string("Profile Cut"), NULL),
+  mLastParams()
 {	for(S32 i=0; i<NUM_MANIPULATORS; i++){
 		std::vector<LLVector3>* vectorp = new std::vector<LLVector3>;
 		mManipParts.push_back(*vectorp);
@@ -56,13 +61,23 @@ BOOL NKManipProfileCut::handleMouseDown(S32 x, S32 y, MASK mask)
 {
 	//first do normal hover
 	handleHover(x,y,mask);
+	if (mHighlightedPart == LL_NO_PART){
 		//didn't hit manipulators, select objects instead
 		//bad idea to pick on mouse DOWN though
-	//if there is an active manipulator, enter drag
-	//setMouseCapture(TRUE);
-	//*TODO test if in proxymity of manipulators
-	gViewerWindow->pickAsync(x, y, mask, pickCallback);
-	return TRUE;
+		gViewerWindow->pickAsync(x, y, mask, pickCallback);
+		return TRUE;
+	} else {
+		if (!mvo || !(mvo->getVolume())) {return FALSE;}
+		//if there is an active manipulator, enter drag
+		setMouseCapture(TRUE);
+		mLastParams.copyParams(mvo->getVolume()->getParams());
+		generateManipulatorPaths();
+		return TRUE;
+		//*TODO test if in proxymity of manipulators
+	}
+
+
+
 
 }
 BOOL NKManipProfileCut::handleMouseUp(S32 x, S32 y, MASK mask)
@@ -83,7 +98,14 @@ BOOL NKManipProfileCut::handleMouseUp(S32 x, S32 y, MASK mask)
 BOOL NKManipProfileCut::handleHover(S32 x, S32 y, MASK mask)
 {
 	//todo
-	updateProximity(x, y);
+	if (hasMouseCapture())
+	{
+		drag(x,y, mask);
+	}
+	else
+	{
+		updateProximity(x, y);
+	}
 	return TRUE;
 }
 ///Pick callback.
@@ -113,16 +135,26 @@ void NKManipProfileCut::draw(){
 //render whatever is to be rendered
 void NKManipProfileCut::render(){
 	//are we in a drag?
-
-	//start by polling the selection manager.
-	//*TODO: we really should be checking for LLVolume / Pcode here
-	LLViewerObject* VOp = LLSelectMgr::getInstance()->getEditSelection()-> getFirstObject();
-	if (VOp != mvo){
-		mvo=VOp;
-		generateManipulators();
-
+	if (!hasMouseCapture())
+	{
+		//start by polling the selection manager.
+		//*TODO: we really should be checking for LLVolume / Pcode here
+		LLViewerObject* VOp = LLSelectMgr::getInstance()->getEditSelection()-> getFirstObject();
+		if (VOp != mvo)
+		{
+			mvo=VOp;
+			if (mvo->getVolume())
+			{
+				mLastParams.copyParams(mvo->getVolume()->getParams());
+				generateManipulators();
+			}
+		}
+		else if (mvo -> getVolume() && mLastParams != mvo->getVolume()->getParams())
+		{
+			mLastParams.copyParams(mvo->getVolume()->getParams());
+			generateManipulators();
+		}
 	}
-
 	LLBBox bbox;
 
 
@@ -136,7 +168,7 @@ void NKManipProfileCut::render(){
 	}
 	gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 	if(mvo){
-		//*TODO: 2-pass rendering?
+		//*TODO: different colors for visible/hidden parts?
 		LLGLDepthTest gls_depth(GL_FALSE);
 
 		for(S32 i=0; i<NUM_MANIPULATORS; i++){
@@ -150,10 +182,20 @@ void NKManipProfileCut::render(){
 			}
 			glEnd();
 		}
+		if (hasMouseCapture()){
+			// draw the manipulator path as well.
+			glLineWidth(MANIPULATOR_PATH_WIDTH);
+			glColor4f(0.5f, 0.5f, 0.5f, 0.8f);
+			glBegin(GL_LINE_STRIP);
+			for (S32 i=0; i<mManipPath.size(); i++){
+				glVertex3fv(mManipPath[i].mV);
+			}
+			glEnd();
+		}
 	}
 
 //
-//	if (mvo)
+	//	if (mvo)
 //	{
 //		LLVolume* volumep = mvo->getVolume();
 //		if (volumep){
@@ -226,7 +268,7 @@ void NKManipProfileCut::generateManipulators()
 			//lazily test for faces and not actual params
 			if (sizeTOuter == 0)
 			{
-				if (volumep->mFaceMask & (LL_FACE_PROFILE_BEGIN | LL_FACE_PROFILE_END)){
+				if (volumep->mFaceMask & (LL_FACE_PROFILE_END)){
 					sizeTOuter = sizeT - 1;	//idk why - Kaku
 				} else {
 					sizeTOuter = sizeT;
@@ -344,16 +386,90 @@ void NKManipProfileCut::generateManipulatorPaths()
 			LLVector3 scale_agent = mvo->getScale();
 
 			S32 sizeS = pathp->mPath.size();
-			S32 sizeT = profilep->mProfile.size();
-			S32 sizeTOuter = profilep->getTotalOut();
-			sizeTOuter = (sizeTOuter != 0) ? sizeTOuter : sizeT;
+
+//			S32 sizeTOuter = profilep->getTotalOut();
+//			sizeTOuter = (sizeTOuter != 0) ? sizeTOuter : sizeT;
 			//sizeTOuter = (sizeTOuter) ? sizeTOuter : sizeT;
 
 			switch (mHighlightedPart){
 			case NK_PROFILE_START:
 			case NK_PROFILE_END:
+
 				//do stuff here
+				{
+					////////////////////////////
+					//first, generate path slice
+					LLPath::PathPt pt;
+					F32 segmentf = floor(mSelectedPosition * (sizeS - 1));
+					S32 segment = (S32) segmentf;
+					F32 coeff = mSelectedPosition*(sizeS - 1) - segmentf;
+
+					//lerping the rotation instead of the result means the path will probably be a bit off
+					//...
+					//What the hek is a nlerp?
+					pt.mPos.set(lerp(pathp->mPath[segment].mPos, pathp->mPath[segment + 1].mPos, coeff));
+					pt.mScale.set(lerp(pathp->mPath[segment].mScale, pathp->mPath[segment + 1].mScale, coeff));
+					pt.mRot.set(nlerp(coeff,pathp->mPath[segment].mRot, pathp->mPath[segment + 1].mRot));
+					//texture coord is not needed
+					LL_INFOS(NULL)<< "segment = " << segmentf << " coeff= " << coeff << " sizeS= "<< sizeS << LL_ENDL;
+					LL_INFOS(NULL)<< pt.mPos << pt.mScale << LL_ENDL;
+
+					//*TODO: if coeff is exactly zero, don't interpolate
+					//	might be able to prevent array OOB when mSelectedPosition is exactly 1
+
+					/////////////////////////////
+					//next, generate full profile
+					LLProfileParams params;
+					params.copyParams(volumep->getParams().getProfileParams());
+					params.setBegin(0.f);
+					params.setEnd(1.f);
+
+					NKProfileUnlock unlock;
+					{
+						LLProfile profile; //NOTE: this is not profilep
+
+						//detail is llvolume->mDetail
+						//*TODO: double it? what about the split?
+						profile.generate(params, pathp->isOpen(), volumep->getDetail(), 0);
+
+						//////////////////////////////////////////
+						//finally, combine them for the whole path
+						mManipPath.clear();
+						S32 sizeT = profile.getTotalOut();
+						if (sizeT == 0){sizeT = profile.getTotal();}
+						if (volumep->mFaceMask & (LL_FACE_PROFILE_END)){
+							sizeT -= 1;
+						}
+						//assuming the profile is closed here
+
+						LLVector3 pos;
+
+		//				LLVector2 scale = pathp->mPath[s].mScale;
+		//				LLQuaternion rot = pathp -> mPath[s]. mRot;
+						for (S32 t = 0; t < sizeT; t++){
+
+							pos.mV[VX] = profile.mProfile[t].mV[VX] * pt.mScale.mV[VX];
+							pos.mV[VY] = profile.mProfile[t].mV[VY] * pt.mScale.mV[VY];
+							pos.mV[VZ] = 0.0f;
+							pos = pos * pt.mRot;
+							pos += pt.mPos;
+
+							//global transformation: first scale, then rotate, then trans
+
+							pos.scaleVec(scale_agent);
+							pos.rotVec(rot_agent);
+							pos += pos_agent;
+			//				}
+							mManipPath.push_back(pos);
+						}
+					}
+				}
+				//Huzzah, we're finally done!
 				break;
+			case NK_PROFILE_START_BOTTOM:
+			case NK_PROFILE_END_BOTTOM:
+			case NK_PROFILE_START_TOP:
+			case NK_PROFILE_END_TOP:
 			default:
 				LL_WARNS("")<< "invalid part" <<LL_ENDL;
 			}
@@ -365,15 +481,21 @@ void NKManipProfileCut::generateManipulatorPaths()
 /// figure out which manipulator is the mouse pointing at
 void NKManipProfileCut::updateProximity(S32 x, S32 y)
 {
-	if(!mvo){return;}
+	//no selected object or not a prim - depends on short-circuiting
+	//don't even bother clearing the vectors
+	if(!mvo || (!mvo->getVolume())){mHighlightedPart = LL_NO_PART; return;}
 
-	//terrible names, I know.
+	//TODO: optimize this - no need to continue if cursor outside bounding box
+
+	//Used to figure out mouse cursor direction. Terrible names, I know.
 	LLVector3 selected_segment_1;
 	LLVector3 selected_segment_2;
-	//TODO: optimize this - no need to project if outside bbox of bbox
 
+	//selected part (tentative)
 	EManipPart part = LL_NO_PART;
+	//distance of closest part to mouse cursor
 	F32 dist = MANIPULATOR_HOTSPOT_WIDTH * 999;
+
 	//this will slow down framerate a lot...
 	S32 numParts = mManipParts.size();
 	for(S32 i = 0; i < numParts; i++){
@@ -411,7 +533,7 @@ void NKManipProfileCut::updateProximity(S32 x, S32 y)
 							case 5: part = NK_PROFILE_END_TOP; break;
 							default: part = LL_NO_PART;
 							}
-							mSelectedPosition = (j/numSegs) + b_param;
+							mSelectedPosition = ((j+b_param)/numSegs);
 							selected_segment_1 = b1;
 							selected_segment_2 = b2;
 						}
@@ -461,7 +583,7 @@ void NKManipProfileCut::updateProximity(S32 x, S32 y)
 	mHighlightedPart = part;
 	;
 }
-void NKManipProfileCut::drag(S32 x, S32 y)
+void NKManipProfileCut::drag(S32 x, S32 y, MASK mask)
 {
 	;
 }

@@ -5381,3 +5381,13 @@ LLVector3 calc_binormal_from_triangle(
 		return LLVector3( 0, 1 , 0 );
 	}
 }
+
+NKProfileUnlock::NKProfileUnlock()
+{
+	profile_delete_lock = 0;
+}
+
+NKProfileUnlock::~NKProfileUnlock()
+{
+	profile_delete_lock = 1;
+}

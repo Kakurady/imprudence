@@ -44,13 +44,16 @@ protected:
 
 	std::vector<LLVector3> mManipPath;
 	std::vector< std::vector<LLVector3> > mManipParts;
-	F32 mSelectedPosition; //0.0f-1.0f, where is the mouse on the particular part
+	F32 mSelectedPosition;	//0.0f-1.0f, where is the mouse on the particular part
+							//NOTE: Does *not* correspond to full path/profile, only the cut part
 
 	void generateManipulators();
 	void generateManipulatorPaths();
 	void updateProximity(S32 x, S32 y);
-	void drag(S32 x, S32 y);
+	void drag(S32 x, S32 y, MASK mask);
 	void updateSelection();
+
+	LLVolumeParams mLastParams; /// hold params for checking object updates && drag
 };
 
 #endif /* NKMANIPPROFILECUT_H_ */

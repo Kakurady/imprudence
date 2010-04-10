@@ -190,6 +190,7 @@ const U8 LL_SCULPT_FLAG_INVERT    = 64;
 const U8 LL_SCULPT_FLAG_MIRROR    = 128;
 
 
+
 class LLProfileParams
 {
 public:
@@ -982,6 +983,12 @@ BOOL LLLineSegmentBoxIntersect(const LLVector3& start, const LLVector3& end, con
 BOOL LLTriangleRayIntersect(const LLVector3& vert0, const LLVector3& vert1, const LLVector3& vert2, const LLVector3& orig, const LLVector3& dir,
 							F32* intersection_a, F32* intersection_b, F32* intersection_t, BOOL two_sided);
 	
-	
+/// a roundabout way of allowing deleting of LLProfile
+class NKProfileUnlock
+{
+public:
+	NKProfileUnlock();
+	virtual ~NKProfileUnlock();
+};
 
 #endif
