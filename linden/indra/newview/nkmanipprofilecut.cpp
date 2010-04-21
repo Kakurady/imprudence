@@ -650,13 +650,13 @@ void NKManipProfileCut::drag(S32 x, S32 y, MASK mask)
 	if(!mvo || !mvo->getVolume() || mvo->getPCode() != LL_PCODE_VOLUME)
 	{
 		//How did this happen...?
-		LL_WARNS("NKMANIP")<< "Trying to manipulate no object or a non-volume (i.e. not a prim) object" << LL_ENDL
+		LL_WARNS("NKMANIP")<< "Trying to manipulate no object or a non-volume object (i.e. not a prim)" << LL_ENDL;
 		return;
 	}
 	S32 numSegs = mManipPath.size() - 1;
 	//*FIXME
 	F32 dist = MANIPULATOR_HOTSPOT_WIDTH * 999;
-	F32 path_coeff;
+	F32 path_coeff = mLastDragCoeff; //initialized to keep gcc happy (and might fix some bugs)
 
 	//todo: reuse this code
 	//todo: special case for spheres (they can't be closed otherwise)
