@@ -66,6 +66,8 @@ include_directories(
 
 set(viewer_SOURCE_FILES
     emeraldboobutils.cpp
+    floaterao.cpp
+    floaterbusy.cpp
     floaterlogin.cpp
     hippoGridManager.cpp
     hippoLimits.cpp
@@ -309,6 +311,7 @@ set(viewer_SOURCE_FILES
     llpatchvertexarray.cpp
     llpolymesh.cpp
     llpolymorph.cpp
+    llprefsadvanced.cpp
     llprefschat.cpp
     llprefsim.cpp
     llprefsvoice.cpp
@@ -465,6 +468,7 @@ set(viewer_SOURCE_FILES
     rlvmultistringsearch.cpp
     rlvextensions.cpp
     rlvfloaterbehaviour.cpp
+    viewerversion.cpp
     )
 
 set(VIEWER_BINARY_NAME "imprudence-bin" CACHE STRING
@@ -488,6 +492,8 @@ set(viewer_HEADER_FILES
     CMakeLists.txt
     ViewerInstall.cmake
     emeraldboobutils.h
+    floaterao.h
+    floaterbusy.h
     floaterlogin.h
     hippoGridManager.h
     hippoLimits.h
@@ -733,6 +739,7 @@ set(viewer_HEADER_FILES
     llpatchvertexarray.h
     llpolymesh.h
     llpolymorph.h
+    llprefsadvanced.h
     llprefschat.h
     llprefsim.h
     llprefsvoice.h
@@ -899,6 +906,7 @@ set(viewer_HEADER_FILES
     rlvmultistringsearch.h
     rlvextensions.h
     rlvfloaterbehaviour.h
+    viewerversion.h
     )
 
 source_group("CMake Rules" FILES ViewerInstall.cmake)
@@ -1082,6 +1090,7 @@ set(viewer_XUI_FILES
     skins/default/xui/en-us/floater_active_speakers.xml
     skins/default/xui/en-us/floater_animation_list.xml
     skins/default/xui/en-us/floater_animation_preview.xml
+    skins/default/xui/en-us/floater_ao.xml
     skins/default/xui/en-us/floater_asset_browser.xml
     skins/default/xui/en-us/floater_auction.xml
     skins/default/xui/en-us/floater_audio_volume.xml
@@ -1091,6 +1100,7 @@ set(viewer_XUI_FILES
     skins/default/xui/en-us/floater_build_options.xml
     skins/default/xui/en-us/floater_bulk_perms.xml
     skins/default/xui/en-us/floater_bumps.xml
+    skins/default/xui/en-us/floater_busy.xml
     skins/default/xui/en-us/floater_buy_contents.xml
     skins/default/xui/en-us/floater_buy_currency.xml
     skins/default/xui/en-us/floater_buy_land.xml
@@ -1241,6 +1251,7 @@ set(viewer_XUI_FILES
     skins/default/xui/en-us/panel_overlaybar.xml
     skins/default/xui/en-us/panel_place_small.xml
     skins/default/xui/en-us/panel_place.xml
+    skins/default/xui/en-us/panel_preferences_advanced.xml
     skins/default/xui/en-us/panel_preferences_audio.xml
     skins/default/xui/en-us/panel_preferences_chat.xml
     skins/default/xui/en-us/panel_preferences_general.xml
@@ -1304,6 +1315,7 @@ set(viewer_APPSETTINGS_FILES
     app_settings/trees.xml
     app_settings/ultra_graphics.xml
     app_settings/viewerart.xml
+    app_settings/viewerversion.xml
     ${CMAKE_SOURCE_DIR}/../etc/message.xml
     ${CMAKE_SOURCE_DIR}/../scripts/messages/message_template.msg
     )

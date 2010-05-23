@@ -77,6 +77,7 @@ BOOL PanelRadar::postBuild()
 	childSetAction("im_btn", onClickIM, this);
 	childSetAction("profile_btn", onClickProfile, this);
 	childSetAction("offer_teleport_btn", onClickOfferTeleport, this);
+	childSetAction("teleport_btn", onClickTeleport, this);
 	childSetAction("track_btn", onClickTrack, this);
 	childSetAction("invite_btn", onClickInvite, this);
 	childSetAction("add_btn", onClickAddFriend, this);
@@ -269,12 +270,16 @@ void PanelRadar::populateRadar()
 			mRadarList->selectByID(mSelectedAvatar);
 		}
 		avatar_count << (int)avatar_ids.size();
+		childSetText("avatars_in", ((int)avatar_ids.size() > 1) ? 
+									getString("avatars_in_plural") : 
+									getString("avatars_in_singular"));
 	}
 	else
 	{
 		mTypingAvatars.clear();
 		mRadarList->addCommentText(getString("no_one_near"), ADD_TOP);
 		avatar_count << "0";
+		childSetText("avatars_in", getString("avatars_in_plural"));
 	}
 
 	childSetText("lblAvatarCount", avatar_count.str());
@@ -417,6 +422,7 @@ void PanelRadar::updateButtonStates()
 	childSetEnabled("im_btn", enable);
 	childSetEnabled("profile_btn", enable);
 	childSetEnabled("offer_teleport_btn", enable);
+	childSetEnabled("teleport_btn", enable);
 	childSetEnabled("track_btn", enable_track);
 	childSetEnabled("invite_btn", enable);
 	childSetEnabled("add_btn", enable);
@@ -585,6 +591,31 @@ void PanelRadar::onClickOfferTeleport(void* user_data)
 	}
 }
 
+//static
+void PanelRadar::onClickTeleport(void* userdata)
+{
+	PanelRadar *self = (PanelRadar*)userdata;
+ 	LLScrollListItem *item =   self->mRadarList->getFirstSelected();
+
+	if ( item )
+	{
+		LLUUID agent_id = item->getUUID();
+		std::string agent_name = getSelectedName(agent_id);
+		if ( !agent_name.empty()  )
+		{
+			LLViewerObject *av_obj = gObjectList.findObject(agent_id);
+					if (av_obj != NULL && av_obj->isAvatar())
+					{
+						LLVOAvatar* avatarp = (LLVOAvatar*)av_obj;
+						if (avatarp != NULL)
+						{
+							LLVector3d pos = avatarp->getPositionGlobal();
+							gAgent.teleportViaLocation(pos);
+						}
+					}
+		}
+	}
+}
 
 // static
 void PanelRadar::onClickTrack(void* user_data)

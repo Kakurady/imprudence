@@ -1,6 +1,5 @@
 
 #include "llviewerprecompiledheaders.h"
-#include "llviewermenu.h" 
 
 
 // system library includes
@@ -29,7 +28,6 @@
 #include "lldir.h"
 #include "llimage.h"
 #include "lllfsthread.h"
-#include "llviewercontrol.h"
 #include "llassetuploadresponders.h"
 #include "lleconomy.h"
 #include "llhttpclient.h"
@@ -38,28 +36,25 @@
 #include "llinventorymodel.h"	// gInventory
 #include "llviewercontrol.h"	// gSavedSettings
 #include "llviewermenu.h"	// gMenuHolder
-#include "llagent.h"
 #include "llfilepicker.h"
 #include "llfloateranimpreview.h"
 #include "llfloaterbuycurrency.h"
 #include "llfloaterimagepreview.h"
 #include "llfloaternamedesc.h"
 #include "llfloatersnapshot.h"
-#include "llinventorymodel.h"	// gInventory
 #include "llresourcedata.h"
 #include "llstatusbar.h"
-#include "llviewercontrol.h"	// gSavedSettings
 #include "llviewerimagelist.h"
 #include "lluictrlfactory.h"
-#include "llviewermenu.h"	// gMenuHolder
 #include "llviewerregion.h"
 #include "llviewerstats.h"
 #include "llviewerwindow.h"
-#include "llappviewer.h"
 #include "lluploaddialog.h"
 // Included to allow LLTextureCache::purgeTextures() to pause watchdog timeout
 #include "llappviewer.h" 
 #include "lltransactiontypes.h"
+
+#include "hippoGridManager.h"
 
 #include "primbackup.h" 
 
@@ -382,6 +377,10 @@ void primbackup::exportworker(void *userdata)
 
 			if(LLSelectMgr::getInstance()->getSelection()->applyToNodes(&func,false))
 			{
+				if(gHippoGridManager->getConnectedGrid()->isSecondLife())
+				{
+					LLNotifications::instance().add("NoTextureExportSL");
+				}
 				primbackup::getInstance()->export_state=EXPORT_STRUCTURE;
 			}
 			else
@@ -421,6 +420,15 @@ void primbackup::exportworker(void *userdata)
 		}
 
 		case EXPORT_TEXTURES: {
+			// Exporting object textures (or other content) from Second Life
+			// without checking creator is a violation of the Second Life
+			// Policy on Third-Party Viewers and Terms of Service.
+			if(gHippoGridManager->getConnectedGrid()->isSecondLife())
+			{
+				primbackup::getInstance()->export_state=EXPORT_DONE;
+				return;
+			}
+
 			if(primbackup::getInstance()->m_nexttextureready==false)
 				return;
 

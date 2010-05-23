@@ -54,7 +54,8 @@
 #include "llfloaterchat.h"	// for add_chat_history()
 #include "lloverlaybar.h" // for gOverlayBar
 #include "lluictrlfactory.h"
-#include "llversionviewer.h"
+
+#include "hippoGridManager.h"
 
 // [RLVa:KB] - Version: 1.22.11 | Checked: 2009-07-10 (RLVa-1.0.0e) | Added: RLVa-0.2.0b
 #include "rlvhandler.h"
@@ -551,6 +552,10 @@ void LLNotifyBox::format(std::string& msg, const LLStringUtil::format_map_t& arg
 
 	// targs["[SECOND_LIFE]"] = LLNotifications::instance().getGlobalString("SECOND_LIFE");
 	// targs["[VIEWER_NAME]"] = LLNotifications::instance().getGlobalString("VIEWER_NAME");
+
+	//targs["[GRID_NAME]"] = gHippoGridManager->getConnectedGrid()->getGridName();
+	//targs["[GRID_SITE]"] = gHippoGridManager->getConnectedGrid()->getWebSite();
+	//targs["[CURRENCY]"] = gHippoGridManager->getConnectedGrid()->getCurrencySymbol();
 
 	LLStringUtil::format(msg, targs);
 }

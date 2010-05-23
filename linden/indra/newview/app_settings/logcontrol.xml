@@ -40,29 +40,38 @@
 						</array>
 					<key>tags</key>
 						<array>
-							<string>DBUS</string>
-<!--Unused debug messages below--><!--
-							<string>OpenAL</string>
-              <string>APR</string>
-							<string>AudioEngine</string>
-							<string>MediaImpl</string>
-							<string>MediaInfo</string>
-							<string>MediaCallback</string>
-							<string>MediaBuffering</string>
-              <string>MediaManager</string>
-							<string>MediaState</string>
-							<string>ShaderLoading</string>
-              <string>XMLNode</string>
-							<string>Openjpeg</string>
 
+<!--Unused debug messages below-->
               
-              <string>RLV</string>
-              <string>Messaging</string>
-              <string>ViewerImages</string>
-              <string>Throttle</string>
-              <string>Voice</string>
-              <string>VivoxProtocolParser</string>
-              <string>Wearable</string>-->
+							<!--<string>DBUS</string>-->
+							<!--<string>OpenAL</string>-->
+              <!--<string>AppCache</string>-->
+							<!--<string>APR</string>-->
+							<!--<string>AudioEngine</string>-->
+              <!--<string>InitInfo</string>-->
+              <!--<string>MarkerFile</string>-->
+							<!--<string>MediaImpl</string>-->
+							<!--<string>MediaInfo</string>-->
+							<!--<string>MediaCallback</string>-->
+							<!--<string>MediaBuffering</string>-->
+							<!--<string>MediaManager</string>-->
+							<!--<string>MediaState</string>-->
+
+							<!--<string>Messaging</string>-->
+							<!--<string>ShaderLoading</string>-->
+
+							<!--<string>Openjpeg</string>-->
+							<!--<string>RLV</string>-->
+							<!--<string>VOAvatar</string>-->
+
+							<!--<string>ViewerImages</string>-->
+							<!--<string>Throttle</string>-->
+							<!--<string>Voice</string>-->
+							<!--<string>VivoxProtocolParser</string>-->
+							<!--<string>Wearable</string>-->
+
+							<!--<string>XMLNode</string>-->
+
 						</array>
 				</map>
 			</array>

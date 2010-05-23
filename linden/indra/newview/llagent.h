@@ -797,9 +797,11 @@ private:
 	std::set<U64>	mRegionsVisited;				// stat - what distinct regions has the avatar been to?
 	F64				mDistanceTraveled;				// stat - how far has the avatar moved?
 	LLVector3d		mLastPositionGlobal;			// Used to calculate travel distance
+protected:
+
 
 	LLPointer<LLVOAvatar> mAvatarObject;			// NULL until avatar object sent down from simulator
-
+private:
 	U8				mRenderState;					// Current behavior state of agent
 	LLFrameTimer	mTypingTimer;
 
@@ -913,6 +915,7 @@ private:
 	S32				mCurrentFidget;
 	BOOL			mFirstLogin;
 	BOOL			mGenderChosen;
+
 	
 	//--------------------------------------------------------------------
 	// Wearables
