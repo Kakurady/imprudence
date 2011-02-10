@@ -4,62 +4,108 @@
   <font name="default" comment="default font files (global fallbacks)">
     <file>DejaVuSansCondensed.ttf</file>
     <os name="Windows">
-      <file>meiryo.ttc</file>
       <file>MSGOTHIC.TTC</file>
-      <file>malgun.ttf</file>
       <file>gulim.ttc</file>
-      <file>msyh.ttf</file>
       <file>simhei.ttf</file>
       <file>ArialUni.ttf</file>
     </os>
     <os name="Mac">
-      <file>ヒラギノ角ゴ ProN W3.otf</file>
       <file>ヒラギノ角ゴ Pro W3.otf</file>
-      <file>AppleGothic.ttf</file>
+      <file>ヒラギノ角ゴ ProN W3.otf</file>
       <file>AppleGothic.dfont</file>
+      <file>AppleGothic.ttf</file>
       <file>华文细黑.ttf</file>
-      <file>儷黑 Pro.ttf</file>
-      <file>Apple Symbols.ttf</file>
     </os>
   </font>
 
-  <font name="SansSerif" comment="Name of san-serif font (Truetype file name)">
-    <file>DroidSans.ttf</file>
-  </font>
-
-  <font name="SansSerifBold" 
-	comment="Name of bold sans-serif font" 
-	font_style="Bold">
-    <file>DroidSans-Bold.ttf</file>
-  </font>
 
   <font name="Monospace"
 	comment="Name of monospace font">
-    <file>DejaVuSansMono.ttf</file>
+    <file>VeraMono.ttf</file>
+  </font>
+
+
+  <font name="DejaVu"
+        comment="Name of DejaVu font"
+        size_mult="1.00">
+    <file>DejaVuSansCondensed.ttf</file>
   </font>
 
   <font name="DejaVu"
-	comment="Name of DejaVu font">
-    <file>DejaVuSans.ttf</file>
+        comment="Name of DejaVu font (bold)"
+        size_mult="1.00"
+        font_style="BOLD">
+    <file>DejaVuSansCondensed-Bold.ttf</file>
   </font>
 
   <font name="DejaVu"
-	comment="Name of DejaVu font (bold)"
-	font_style="BOLD">
-    <file>DejaVuSansBold.ttf</file>
+        comment="Name of DejaVu font (italic)"
+        size_mult="1.00"
+        font_style="ITALIC">
+    <file>DejaVuSansCondensed-Oblique.ttf</file>
   </font>
 
   <font name="DejaVu"
-	comment="Name of DejaVu font (italic)"
-	font_style="ITALIC">
-    <file>DejaVuSansOblique.ttf</file>
+        comment="Name of DejaVu font (bold italic)"
+        size_mult="1.00"
+        font_style="BOLD|ITALIC">
+    <file>DejaVuSansCondensed-BoldOblique.ttf</file>
   </font>
 
-  <font name="DejaVu"
-	comment="Name of DejaVu font (bold italic)"
-	font_style="BOLD|ITALIC">
-    <file>DejaVuSansBoldOblique.ttf</file>
+
+  <font name="Delicious"
+        comment="Name of Delicious font"
+        size_mult="1.1">
+    <file>Delicious-Roman.otf</file>
   </font>
+
+  <font name="Delicious"
+        comment="Name of Delicious font (bold)"
+        size_mult="1.1"
+        font_style="BOLD">
+    <file>Delicious-Bold.otf</file>
+  </font>
+
+  <font name="Delicious"
+        comment="Name of Delicious font (italic)"
+        size_mult="1.1"
+        font_style="ITALIC">
+    <file>Delicious-Italic.otf</file>
+  </font>
+
+  <font name="Delicious"
+        comment="Name of Delicious font (bold italic)"
+        size_mult="1.1"
+        font_style="BOLD|ITALIC">
+    <file>Delicious-BoldItalic.otf</file>
+  </font>
+
+
+  <font name="Liberation"
+        comment="Name of Liberation font">
+    <file>LiberationSans-Regular.ttf</file>
+  </font>
+
+  <font name="Liberation"
+        comment="Name of Liberation font (bold)"
+        font_style="BOLD">
+    <file>LiberationSans-Bold.ttf</file>
+  </font>
+
+
+  <font name="DroidSans"
+        comment="Name of DroidSans font"
+        size_mult="1.0">
+    <file>DroidSans.ttf</file>
+  </font>
+
+  <font name="DroidSans"
+        comment="Name of DroidSans font (bold)"
+        size_mult="1.0"
+        font_style="BOLD">
+    <file>DroidSans-Bold.ttf</file>
+  </font>
+
 
   <font name="Helvetica"
 	comment="Name of Helvetica font">
@@ -91,23 +137,23 @@
 
   <font_size name="Monospace"
 	     comment="Size for monospaced font (points, or 1/72 of an inch)"
-	     size="8.0"
+	     size="9"
 	     />
   <font_size name="Huge"
 	     comment="Size of huge font (points, or 1/72 of an inch)"
-	     size="16.0"
+	     size="15"
 	     />
   <font_size name="Large"
 	     comment="Size of large font (points, or 1/72 of an inch)"
-	     size="12.0"
+	     size="12"
 	     />
   <font_size name="Medium"
 	     comment="Size of medium font (points, or 1/72 of an inch)"
-	     size="10.0"
+	     size="10"
 	     />
   <font_size name="Small"
 	     comment="Size of small font (points, or 1/72 of an inch)"
-	     size="9.0"
+	     size="8.5"
 	     />
 </fonts>
 

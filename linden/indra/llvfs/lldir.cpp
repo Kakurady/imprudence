@@ -43,6 +43,7 @@
 #include "lldir.h"
 #include "llerror.h"
 #include "lluuid.h"
+#include "lltimer.h"
 
 #if LL_WINDOWS
 #include "lldir_win32.h"
@@ -192,8 +193,9 @@ const std::string &LLDir::getOSUserAppDir() const
 	return mOSUserAppDir;
 }
 
-const std::string &LLDir::getLindenUserDir() const
+const std::string &LLDir::getLindenUserDir(bool empty_ok) const
 {
+	llassert(empty_ok || !mLindenUserDir.empty());
 	return mLindenUserDir;
 }
 
@@ -247,7 +249,7 @@ std::string LLDir::buildSLOSCacheDir() const
 	}
 	else
 	{
-		res = getOSCacheDir() + mDirDelimiter + "Imprudence";
+		res = getOSCacheDir() + mDirDelimiter + "ImprudenceExperimental";
 	}
 	return res;
 }
@@ -294,6 +296,10 @@ const std::string LLDir::getSkinBaseDir() const
 	return dir;
 }
 
+const std::string &LLDir::getLLPluginDir() const
+{
+	return mLLPluginDir;
+}
 
 std::string LLDir::getExpandedFilename(ELLPath location, const std::string& filename) const
 {
@@ -465,6 +471,8 @@ std::string LLDir::getDirName(const std::string& filepath) const
 
 std::string LLDir::getExtension(const std::string& filepath) const
 {
+	if (filepath.empty())
+		return std::string();
 	std::string basename = getBaseFileName(filepath, false);
 	std::size_t offset = basename.find_last_of('.');
 	std::string exten = (offset == std::string::npos || offset == 0) ? "" : basename.substr(offset+1);
@@ -542,19 +550,23 @@ void LLDir::setLindenUserDir(const std::string &grid, const std::string &first, 
 	{
 		// some platforms have case-sensitive filesystems, so be
 		// utterly consistent with our firstname/lastname case.
-		// std::string gridlower(grid);
-		// LLStringUtil::toLower(gridlower);
 		std::string firstlower(first);
 		LLStringUtil::toLower(firstlower);
 		std::string lastlower(last);
 		LLStringUtil::toLower(lastlower);
 		mLindenUserDir = getOSUserAppDir();
 		mLindenUserDir += mDirDelimiter;
-		// mLindenUserDir += gridlower;
-		// mLindenUserDir += "-";
 		mLindenUserDir += firstlower;
 		mLindenUserDir += "_";
 		mLindenUserDir += lastlower;
+
+		if (!grid.empty())
+		{
+			std::string gridlower(grid);
+			LLStringUtil::toLower(gridlower);
+			mLindenUserDir += "@";
+			mLindenUserDir += gridlower;
+		}
 	}
 	else
 	{
@@ -583,19 +595,23 @@ void LLDir::setPerAccountChatLogsDir(const std::string &grid, const std::string 
 	{
 		// some platforms have case-sensitive filesystems, so be
 		// utterly consistent with our firstname/lastname case.
-		// std::string gridlower(grid);
-		// LLStringUtil::toLower(gridlower);
 		std::string firstlower(first);
 		LLStringUtil::toLower(firstlower);
 		std::string lastlower(last);
 		LLStringUtil::toLower(lastlower);
 		mPerAccountChatLogsDir = getChatLogsDir();
 		mPerAccountChatLogsDir += mDirDelimiter;
-		// mPerAccountChatLogsDir += gridlower;
-		// mPerAccountChatLogsDir += "-";
 		mPerAccountChatLogsDir += firstlower;
 		mPerAccountChatLogsDir += "_";
 		mPerAccountChatLogsDir += lastlower;
+
+		if (!grid.empty())
+		{
+			std::string gridlower(grid);
+			LLStringUtil::toLower(gridlower);
+			mPerAccountChatLogsDir += "@";
+			mPerAccountChatLogsDir += gridlower;
+		}
 	}
 	else
 	{

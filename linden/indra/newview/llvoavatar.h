@@ -39,6 +39,7 @@
 #include <string>
 #include <vector>
 
+#include "imageids.h"			// IMG_INVISIBLE
 #include "llchat.h"
 #include "lldrawpoolalpha.h"
 #include "llviewerobject.h"
@@ -146,6 +147,7 @@ public:
 	void updateAttachmentVisibility(U32 camera_mode);
 	void clampAttachmentPositions();
 	S32 getAttachmentCount(); // Warning: order(N) not order(1)
+
 
 	// HUD functions
 	BOOL hasHUDAttachment() const;
@@ -287,6 +289,9 @@ public:
 
 	BOOL isWearingAttachment( const LLUUID& inv_item_id );
 	LLViewerObject* getWornAttachment( const LLUUID& inv_item_id );
+// [RLVa:KB] - Checked: 2009-12-18 (RLVa-1.1.0i) | Added: RLVa-1.1.0i
+	LLViewerJointAttachment* getWornAttachmentPoint(const LLUUID& inv_item_id);
+// [/RLVa:KB]
 	const std::string getAttachedPointName(const LLUUID& inv_item_id);
 
 	static LLVOAvatar* findAvatarFromAttachment( LLViewerObject* obj );
@@ -303,7 +308,7 @@ public:
 	LLVOAvatarDefines::ETextureIndex	getBakedTE( LLTexLayerSet* layerset );
 	void			updateComposites();
 	void			onGlobalColorChanged( LLTexGlobalColor* global_color, BOOL set_by_user );
-	BOOL			getLocalTextureRaw( LLVOAvatarDefines::ETextureIndex index, LLImageRaw* image_raw_pp );
+// Removed:	BOOL		getLocalTextureRaw( LLVOAvatarDefines::ETextureIndex index, LLImageRaw* image_raw_pp );
 	BOOL			getLocalTextureGL( LLVOAvatarDefines::ETextureIndex index, LLImageGL** image_gl_pp );
 	const LLUUID&	getLocalTextureID( LLVOAvatarDefines::ETextureIndex index );
 	LLGLuint		getScratchTexName( LLGLenum format, U32* texture_bytes );
@@ -342,7 +347,7 @@ public:
 	BOOL			teToColorParams( LLVOAvatarDefines::ETextureIndex te, const char* param_name[3] );
 
 	BOOL			isWearingWearableType( EWearableType type );
-	void			wearableUpdated( EWearableType type );
+	void			wearableUpdated(EWearableType type, BOOL upload_result = TRUE);
 
 	//--------------------------------------------------------------------
 	// texture compositing
@@ -602,6 +607,7 @@ private:
 	BOOL mIsBuilt; // state of deferred character building
 	F32 mSpeedAccum; // measures speed (for diagnostics mostly).
 
+	BOOL mSupportsAlphaLayers; // For backwards compatibility, TRUE for 1.23+ clients
 	
 	// LLFrameTimer mUpdateLODTimer; // controls frequency of LOD change calculations
 	BOOL mDirtyMesh;
@@ -656,10 +662,11 @@ private:
 	static LLVector3d sBeamLastAt;
 	static LLSD sClientResolutionList;
 
+public: //anything against having this public?
 	static void resolveClient(LLColor4& avatar_name_color, std::string& client, LLVOAvatar* avatar);
 //Imprudence FIXME
 //	friend class LLFloaterAvatarList;
-
+//	friend class LLHoverView;
 protected:
 	LLPointer<LLHUDEffectSpiral> mBeam;
 	LLFrameTimer mBeamTimer;
@@ -827,7 +834,7 @@ inline BOOL LLVOAvatar::isTextureDefined(U8 te) const
 
 inline BOOL LLVOAvatar::isTextureVisible(U8 te) const
 {
-	return ((isTextureDefined(te) || isSelf())
+	return ((isTextureDefined(te) || mIsSelf)
 			&& (getTEImage(te)->getID() != IMG_INVISIBLE 
 				|| LLDrawPoolAlpha::sShowDebugAlpha));
 }

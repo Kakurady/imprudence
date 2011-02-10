@@ -120,7 +120,7 @@ LLCurl::Responder::~Responder()
 }
 
 // virtual
-void LLCurl::Responder::error(
+void LLCurl::Responder::errorWithContent(
 	U32 status,
 	const std::string& reason,
 	const LLSD&)
@@ -161,7 +161,7 @@ void LLCurl::Responder::completed(U32 status, const std::string& reason, const L
 	}
 	else
 	{
-		error(status, reason, content);
+		errorWithContent(status, reason, content);
 	}
 }
 
@@ -1020,7 +1020,7 @@ void LLCurl::initClass()
 	S32 mutex_count = CRYPTO_num_locks();
 	for (S32 i=0; i<mutex_count; i++)
 	{
-		sSSLMutex.push_back(new LLMutex(NULL));
+		sSSLMutex.push_back(new LLMutex);
 	}
 	CRYPTO_set_id_callback(&LLCurl::ssl_thread_id);
 	CRYPTO_set_locking_callback(&LLCurl::ssl_locking_callback);

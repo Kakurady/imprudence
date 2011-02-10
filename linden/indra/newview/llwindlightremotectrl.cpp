@@ -41,6 +41,7 @@
 #include "lluictrlfactory.h"
 #include "llwlparammanager.h"
 #include "llviewercontrol.h"
+#include "llviewerwindow.h"
 
 // [RLVa:KB] - Alternate: Imprudence-1.2.0
 #include "rlvhandler.h"
@@ -57,10 +58,9 @@ private:
 };
 
 
-LLWindlightRemoteCtrl::LLWindlightRemoteCtrl() 	
+LLWindlightRemoteCtrl::LLWindlightRemoteCtrl() :
+	mObserver(NULL)
 {
-	mPresetsCombo = NULL;
-	mObserver = NULL;
 	setIsChrome(TRUE);
 
 	build();
@@ -93,7 +93,7 @@ void LLWindlightRemoteCtrl::draw()
 	if (rlv_handler_t::isEnabled())
 	{
 		childSetEnabled("Environment", !gRlvHandler.hasBehaviour(RLV_BHVR_SETENV));
-		mPresetsCombo->setEnabled(!gRlvHandler.hasBehaviour(RLV_BHVR_SETENV));
+		getChild<LLComboBox>("Presets")->setEnabled(!gRlvHandler.hasBehaviour(RLV_BHVR_SETENV));
 	}
 // [/RLVA:KB]
 
@@ -118,11 +118,12 @@ BOOL LLWindlightRemoteCtrl::postBuild()
 	childSetAction("Environment", onClickToggleEnvironment, this);
 	childSetAction("Popup", onClickPopupBtn, this);
 
-	mPresetsCombo = getChild<LLComboBox>("Presets");
-	if (mPresetsCombo)
+	LLComboBox*	presetsCombo = getChild<LLComboBox>("Presets");
+	if (presetsCombo)
 	{
-		mPresetsCombo->setCommitCallback(onCommitPreset);
-		mPresetsCombo->setCallbackUserData(this);
+		presetsCombo->setSimple(LLWLParamManager::instance()->mCurParams.mName);
+		presetsCombo->setCommitCallback(onCommitPreset);
+		presetsCombo->setCallbackUserData(this);
 
 		// set up observer to follow changes
 		mObserver = new LLWindlightRemoteObserver(this);
@@ -137,45 +138,49 @@ BOOL LLWindlightRemoteCtrl::postBuild()
 
 void LLWindlightRemoteCtrl::refreshPresets()
 {
-	// Just in case, let's not ever crash here
-	mPresetsCombo = getChild<LLComboBox>("Presets");
-	if (mPresetsCombo)
+	// If we're teleporting or just logging in, no UI to refresh
+	if (gViewerWindow->getShowProgress())
+	{
+		return;
+	}
+
+	LLComboBox*	presetsCombo = getChild<LLComboBox>("Presets", TRUE, TRUE);
+	if (presetsCombo)
 	{
 		// snag current preset
 		LLWLParamManager * param_mgr = LLWLParamManager::instance();
 		LLWLParamSet& currentParams = param_mgr->mCurParams;
 		
 		// clear in case presets names have changed
-		mPresetsCombo->clearRows();
+		presetsCombo->clearRows();
 
 		std::map<std::string, LLWLParamSet>::iterator mIt = 
 			param_mgr->mParamList.begin();
 		for(; mIt != param_mgr->mParamList.end(); mIt++) 
 		{
-			mPresetsCombo->add(mIt->first);
+			presetsCombo->add(mIt->first);
 		}
 		
 		// insert separator and add World menu options
-		// mPresetsCombo->addSeparator(ADD_BOTTOM);
-		// mPresetsCombo->addSimpleElement(getString("atmosphere"), ADD_BOTTOM);
-		// mPresetsCombo->addSimpleElement(getString("lighting"), ADD_BOTTOM);
-		// mPresetsCombo->addSimpleElement(getString("clouds"), ADD_BOTTOM);
-		// mPresetsCombo->addSimpleElement(getString("advanced_water"), ADD_BOTTOM);
-		mPresetsCombo->addSeparator(ADD_BOTTOM);
-		mPresetsCombo->addSimpleElement(getString("sunrise"), ADD_BOTTOM);
-		mPresetsCombo->addSimpleElement(getString("noon"), ADD_BOTTOM);
-		mPresetsCombo->addSimpleElement(getString("sunset"), ADD_BOTTOM);
-		mPresetsCombo->addSimpleElement(getString("midnight"), ADD_BOTTOM);
-		mPresetsCombo->addSimpleElement(getString("revert_region"), ADD_BOTTOM);
+		// presetsCombo->addSeparator(ADD_BOTTOM);
+		// presetsCombo->addSimpleElement(getString("atmosphere"), ADD_BOTTOM);
+		// presetsCombo->addSimpleElement(getString("lighting"), ADD_BOTTOM);
+		// presetsCombo->addSimpleElement(getString("clouds"), ADD_BOTTOM);
+		// presetsCombo->addSimpleElement(getString("advanced_water"), ADD_BOTTOM);
+		presetsCombo->addSeparator(ADD_BOTTOM);
+		presetsCombo->addSimpleElement(getString("sunrise"), ADD_BOTTOM);
+		presetsCombo->addSimpleElement(getString("noon"), ADD_BOTTOM);
+		presetsCombo->addSimpleElement(getString("sunset"), ADD_BOTTOM);
+		presetsCombo->addSimpleElement(getString("midnight"), ADD_BOTTOM);
+		presetsCombo->addSimpleElement(getString("revert_region"), ADD_BOTTOM);
 
-		if (mPresetsCombo->getSelectedItemLabel() != currentParams.mName &&
-			!currentParams.mName.empty())
+		if (!currentParams.mName.empty())
 		{
-			mPresetsCombo->selectByValue(LLSD(currentParams.mName));
+			presetsCombo->selectByValue(LLSD(currentParams.mName));
 		}
 		else
 		{
-			mPresetsCombo->selectByValue(LLSD("Default"));
+			presetsCombo->selectByValue(LLSD("Default"));
 		}
 	}
 }
@@ -185,7 +190,9 @@ void LLWindlightRemoteCtrl::onCommitPreset(LLUICtrl* ctrl, void* data)
 {
 	LLWindlightRemoteCtrl* self = (LLWindlightRemoteCtrl*)data;
 
-	LLCtrlListInterface* presets = self->mPresetsCombo ? self->mPresetsCombo->getListInterface() : NULL;
+	LLComboBox*	presetsCombo = self->getChild<LLComboBox>("Presets");
+
+	LLCtrlListInterface* presets = presetsCombo ? presetsCombo->getListInterface() : NULL;
 	if (presets)
 	{
 		S32 index = presets->getFirstSelectedIndex();
@@ -197,7 +204,7 @@ void LLWindlightRemoteCtrl::onCommitPreset(LLUICtrl* ctrl, void* data)
 		}
 
 		// check for World menu options; if none, apply preset
-		std::string selected = self->mPresetsCombo->getSelectedValue().asString();
+		std::string selected = presetsCombo->getSelectedValue().asString();
 
 		if (selected == self->getString("atmosphere"))
 		{

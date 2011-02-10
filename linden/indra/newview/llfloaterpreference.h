@@ -40,7 +40,6 @@
 #define LL_LLFLOATERPREFERENCE_H
 
 #include "llfloater.h"
-#include "lltabcontainervertical.h"
 
 class LLPanelGeneral;
 class LLPanelInput;
@@ -57,6 +56,8 @@ class LLPrefsIM;
 class LLPanelMsgs;
 class LLPanelSkins;
 class LLPrefsAdvanced;
+class ImpPrefsFonts;
+class LLPrefsColors;
 class LLScrollListCtrl;
 
 class LLPreferenceCore
@@ -94,6 +95,8 @@ private:
 	LLPanelMsgs				*mMsgPanel;
 	LLPanelLCD				*mLCDPanel;
 	LLPrefsAdvanced			*mPrefsAdvanced;
+	LLPrefsColors			*mPrefsColors;
+  ImpPrefsFonts* mPrefsFonts;
 };
 
 // Floater to control preferences (display, audio, bandwidth, general.
@@ -119,12 +122,10 @@ protected:
 
 	/*virtual*/ void		onClose(bool app_quitting);
 
-	LLButton*	mAboutBtn;
 	LLButton	*mOKBtn;
 	LLButton	*mCancelBtn;
 	LLButton	*mApplyBtn;
 
-	static void		onClickAbout(void*);
 	static void		onBtnOK(void*);
 	static void		onBtnCancel(void*);
 	static void		onBtnApply(void*);

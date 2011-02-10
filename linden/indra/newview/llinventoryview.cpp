@@ -86,6 +86,10 @@
 
 #include "llsdserialize.h"
 
+// [RLVa:KB]
+#include "rlvhandler.h"
+// [/RLVa:KB]
+
 static LLRegisterWidget<LLInventoryPanel> r("inventory_panel");
 
 LLDynamicArray<LLInventoryView*> LLInventoryView::sActiveViews;
@@ -486,7 +490,8 @@ LLInventoryView::LLInventoryView(const std::string& name,
 								 LLInventoryModel* inventory) :
 	LLFloater(name, rect, std::string("Inventory"), RESIZE_YES,
 			  INV_MIN_WIDTH, INV_MIN_HEIGHT, DRAG_ON_TOP,
-			  MINIMIZE_NO, CLOSE_YES)
+			  MINIMIZE_NO, CLOSE_YES),
+	mActivePanel(NULL)
 	//LLHandle<LLFloater> mFinderHandle takes care of its own initialization
 {
 	init(inventory);
@@ -497,7 +502,8 @@ LLInventoryView::LLInventoryView(const std::string& name,
 								 LLInventoryModel* inventory) :
 	LLFloater(name, rect, std::string("Inventory"), RESIZE_YES,
 			  INV_MIN_WIDTH, INV_MIN_HEIGHT, DRAG_ON_TOP,
-			  MINIMIZE_NO, CLOSE_YES)
+			  MINIMIZE_NO, CLOSE_YES),
+	mActivePanel(NULL)
 	//LLHandle<LLFloater> mFinderHandle takes care of its own initialization
 {
 	init(inventory);
@@ -522,8 +528,8 @@ void LLInventoryView::init(LLInventoryModel* inventory)
 	addBoolControl("Inventory.FoldersAlwaysByName", sort_folders_by_name );
 	addBoolControl("Inventory.SystemFoldersToTop", sort_system_folders_to_top );
 
-	//Search Controls
-	U32 search_type = gSavedSettings.getU32("InventorySearchType");
+	//Search Controls - RKeast
+	U32 search_type = gSavedPerAccountSettings.getU32("InventorySearchType");
 	BOOL search_by_name = (search_type == 0);
 
 	addBoolControl("Inventory.SearchByName", search_by_name);
@@ -544,6 +550,10 @@ void LLInventoryView::init(LLInventoryModel* inventory)
 	if (mActivePanel)
 	{
 		// "All Items" is the previous only view, so it gets the InventorySortOrder
+
+		//Fix for gSavedSettings use - rkeast
+		mActivePanel->getFilter()->setSearchType(search_type);
+
 		mActivePanel->setSortOrder(gSavedSettings.getU32("InventorySortOrder"));
 		mActivePanel->getFilter()->markDefault();
 		mActivePanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
@@ -572,15 +582,15 @@ void LLInventoryView::init(LLInventoryModel* inventory)
 	std::ostringstream filterSaveName;
 	filterSaveName << gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, "filters.xml");
 	llinfos << "LLInventoryView::init: reading from " << filterSaveName << llendl;
-    llifstream file(filterSaveName.str());
+	llifstream file(filterSaveName.str());
 	LLSD savedFilterState;
-    if (file.is_open())
-    {
-        LLSDSerialize::fromXML(savedFilterState, file);
+	if (file.is_open())
+	{
+		LLSDSerialize::fromXML(savedFilterState, file);
 		file.close();
 
 		// Load the persistent "Recent Items" settings.
-		// Note that the "All Items" settings do not persist.
+		// Note that the "All Items" and "Worn Items" settings do not persist per-account.
 		if(recent_items_panel)
 		{
 			if(savedFilterState.has(recent_items_panel->getFilter()->getName()))
@@ -590,8 +600,7 @@ void LLInventoryView::init(LLInventoryModel* inventory)
 				recent_items_panel->getFilter()->fromLLSD(recent_items);
 			}
 		}
-
-    }
+	}
 
 	//Initialize item count - rkeast
 	mItemCount = gSavedPerAccountSettings.getS32("InventoryPreviousCount");
@@ -674,14 +683,24 @@ void LLInventoryView::draw()
 {
  	if (LLInventoryModel::isEverythingFetched())
 	{
-		LLLocale locale(LLLocale::USER_LOCALE);
-		std::ostringstream title;
-		title << "Inventory";
-		std::string item_count_string;
-		LLResMgr::getInstance()->getIntegerString(item_count_string, gInventory.getItemCount());
-		title << " (" << item_count_string << " items)";
-		title << mFilterText;
-		setTitle(title.str());
+		S32 item_count = gInventory.getItemCount();
+
+		//don't let llfloater work more than necessary
+		if (item_count != mOldItemCount || mOldFilterText != mFilterText)
+		{
+			LLLocale locale(LLLocale::USER_LOCALE);
+			std::ostringstream title;
+			title << "Inventory"; //*TODO: make translatable
+			std::string item_count_string;
+			LLResMgr::getInstance()->getIntegerString(item_count_string, item_count);
+			title << " (" << item_count_string << " items)";
+			title << mFilterText;
+			setTitle(title.str());
+		}
+
+		mOldFilterText = mFilterText;
+		mOldItemCount = item_count;
+
 	}
 	if (mActivePanel && mSearchEditor)
 	{
@@ -1034,9 +1053,16 @@ void LLInventoryView::onClearSearch(void* user_data)
 	LLInventoryView* self = (LLInventoryView*)user_data;
 	if(!self) return;
 
+	LLFloater *finder = self->getFinder();
 	if (self->mActivePanel)
 	{
 		self->mActivePanel->setFilterSubString(LLStringUtil::null);
+		self->mActivePanel->setFilterTypes(LLInventoryType::NIT_ALL);
+	}
+
+	if (finder)
+	{
+		LLInventoryViewFinder::selectAllTypes(finder);
 	}
 
 	// re-open folders that were initially open
@@ -1485,6 +1511,12 @@ std::string get_item_icon_name(LLInventoryType::NType inv_ntype,
 		case LLInventoryType::NIT_SKIRT:
 			idx = CLOTHING_SKIRT_ICON_NAME;
 			break;
+		case LLInventoryType::NIT_ALPHA:
+			idx = CLOTHING_ALPHA_ICON_NAME;
+			break;
+		case LLInventoryType::NIT_TATTOO:
+			idx = CLOTHING_TATTOO_ICON_NAME;
+			break;
 
 		case LLInventoryType::NIT_CLOTHING:
 			idx = CLOTHING_ICON_NAME;
@@ -1579,6 +1611,137 @@ std::string get_item_icon_name(LLInventoryType::NType inv_ntype,
 	return ICON_NAME[idx];
 }
 
+std::string get_item_icon_name(LLAssetType::EType asset_type,
+                               LLInventoryType::NType inv_ntype,
+                               U32 flags,
+                               BOOL item_is_multi)
+{
+	EInventoryIcon idx = OBJECT_ICON_NAME;
+	if ( item_is_multi )
+	{
+		idx = OBJECT_MULTI_ICON_NAME;
+	}
+	
+	switch(asset_type)
+	{
+	case LLAssetType::AT_TEXTURE:
+		if(LLInventoryType::NIT_SNAPSHOT == inv_ntype)
+		{
+			idx = SNAPSHOT_ICON_NAME;
+		}
+		else
+		{
+			idx = TEXTURE_ICON_NAME;
+		}
+		break;
+
+	case LLAssetType::AT_SOUND:
+		idx = SOUND_ICON_NAME;
+		break;
+	case LLAssetType::AT_CALLINGCARD:
+		if(flags != 0)
+		{
+			idx = CALLINGCARD_ONLINE_ICON_NAME;
+		}
+		else
+		{
+			idx = CALLINGCARD_OFFLINE_ICON_NAME;
+		}
+		break;
+	case LLAssetType::AT_LANDMARK:
+		if(flags!= 0)
+		{
+			idx = LANDMARK_VISITED_ICON_NAME;
+		}
+		else
+		{
+			idx = LANDMARK_ICON_NAME;
+		}
+		break;
+	case LLAssetType::AT_SCRIPT:
+	case LLAssetType::AT_LSL_TEXT:
+	case LLAssetType::AT_LSL_BYTECODE:
+		idx = SCRIPT_ICON_NAME;
+		break;
+	case LLAssetType::AT_CLOTHING:
+		idx = CLOTHING_ICON_NAME;
+		switch(LLInventoryItem::II_FLAGS_WEARABLES_MASK & flags)
+		{
+		case WT_SHIRT:
+			idx = CLOTHING_SHIRT_ICON_NAME;
+			break;
+		case WT_PANTS:
+			idx = CLOTHING_PANTS_ICON_NAME;
+			break;
+		case WT_SHOES:
+			idx = CLOTHING_SHOES_ICON_NAME;
+			break;
+		case WT_SOCKS:
+			idx = CLOTHING_SOCKS_ICON_NAME;
+			break;
+		case WT_JACKET:
+			idx = CLOTHING_JACKET_ICON_NAME;
+			break;
+		case WT_GLOVES:
+			idx = CLOTHING_GLOVES_ICON_NAME;
+			break;
+		case WT_UNDERSHIRT:
+			idx = CLOTHING_UNDERSHIRT_ICON_NAME;
+			break;
+		case WT_UNDERPANTS:
+			idx = CLOTHING_UNDERPANTS_ICON_NAME;
+			break;
+		case WT_SKIRT:
+			idx = CLOTHING_SKIRT_ICON_NAME;
+			break;
+		case WT_ALPHA:
+			idx = CLOTHING_ALPHA_ICON_NAME;
+			break;
+		case WT_TATTOO:
+			idx = CLOTHING_TATTOO_ICON_NAME;
+			break;
+		default:
+			// no-op, go with choice above
+			break;
+		}
+		break;
+	case LLAssetType::AT_BODYPART:
+		idx = BODYPART_ICON_NAME;
+		switch(LLInventoryItem::II_FLAGS_WEARABLES_MASK & flags)
+		{
+		case WT_SHAPE:
+			idx = BODYPART_SHAPE_ICON_NAME;
+			break;
+		case WT_SKIN:
+			idx = BODYPART_SKIN_ICON_NAME;
+			break;
+		case WT_HAIR:
+			idx = BODYPART_HAIR_ICON_NAME;
+			break;
+		case WT_EYES:
+			idx = BODYPART_EYES_ICON_NAME;
+			break;
+		default:
+			// no-op, go with choice above
+			break;
+		}
+		break;
+	case LLAssetType::AT_NOTECARD:
+		idx = NOTECARD_ICON_NAME;
+		break;
+	case LLAssetType::AT_ANIMATION:
+		idx = ANIMATION_ICON_NAME;
+		break;
+	case LLAssetType::AT_GESTURE:
+		idx = GESTURE_ICON_NAME;
+		break;
+	default:
+		break;
+	}
+	
+	return ICON_NAME[idx];
+}
+
 LLUIImagePtr get_item_icon(LLAssetType::EType asset_type,
 							 LLInventoryType::EType inventory_type,
 							 U32 attachment_point,
@@ -1590,6 +1753,7 @@ LLUIImagePtr get_item_icon(LLAssetType::EType asset_type,
 
 const std::string LLInventoryPanel::DEFAULT_SORT_ORDER = std::string("InventorySortOrder");
 const std::string LLInventoryPanel::RECENTITEMS_SORT_ORDER = std::string("RecentItemsSortOrder");
+const std::string LLInventoryPanel::WORNITEMS_SORT_ORDER = std::string("WornItemsSortOrder");
 const std::string LLInventoryPanel::INHERIT_SORT_ORDER = std::string("");
 
 LLInventoryPanel::LLInventoryPanel(const std::string& name,
@@ -1718,6 +1882,19 @@ void LLInventoryPanel::draw()
 		setSelection(mSelectThisID, false);
 	}
 	LLPanel::draw();
+}
+
+
+//fix to get rid of gSavedSettings use - rkeast
+void LLInventoryPanel::setSearchType(U32 type)
+{
+	mFolders->getFilter()->setSearchType(type);
+}
+
+//fix to get rid of gSavedSettings use - rkeast
+U32 LLInventoryPanel::getSearchType()
+{
+	return mFolders->getFilter()->getSearchType();
 }
 
 void LLInventoryPanel::setFilterTypes(U32 filter_types)
@@ -1908,9 +2085,9 @@ void LLInventoryPanel::buildNewViews(const LLUUID& id)
 		if (objectp->getType() <= LLAssetType::AT_NONE ||
 			objectp->getType() >= LLAssetType::AT_COUNT)
 		{
-			llwarns << "LLInventoryPanel::buildNewViews called with objectp->mType == " 
+			LL_DEBUGS("Inventory") << "LLInventoryPanel::buildNewViews called with objectp->mType == " 
 				<< ((S32) objectp->getType())
-				<< " (shouldn't happen)" << llendl;
+				<< " (shouldn't happen)" << LL_ENDL;
 		}
 		else if (objectp->getType() == LLAssetType::AT_CATEGORY) // build new view for category
 		{

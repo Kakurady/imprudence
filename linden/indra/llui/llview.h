@@ -53,6 +53,7 @@
 #include "stdenums.h"
 #include "lluistring.h"
 #include "llcursortypes.h"
+#include "llfocusmgr.h"
 
 const U32	FOLLOWS_NONE	= 0x00;
 const U32	FOLLOWS_LEFT	= 0x01;
@@ -207,7 +208,7 @@ public:
 	}
 };
 
-class LLView : public LLMouseHandler, public LLMortician
+class LLView : public LLMouseHandler, public LLMortician, public LLFocusableElement
 {
 
 public:
@@ -398,9 +399,11 @@ public:
 	virtual BOOL	canSnapTo(const LLView* other_view);
 
 	virtual void	snappedTo(const LLView* snap_view);
+	
+	// inherited from LLFocusableElement
+	/* virtual */ BOOL	handleKey(KEY key, MASK mask, BOOL called_from_parent);
+	/* virtual */ BOOL	handleUnicodeChar(llwchar uni_char, BOOL called_from_parent);
 
-	virtual BOOL	handleKey(KEY key, MASK mask, BOOL called_from_parent);
-	virtual BOOL	handleUnicodeChar(llwchar uni_char, BOOL called_from_parent);
 	virtual BOOL	handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 									  EDragAndDropType cargo_type,
 									  void* cargo_data,
@@ -421,8 +424,9 @@ public:
 	BOOL getSaveToXML() const { return mSaveToXML; }
 	void setSaveToXML(BOOL b) { mSaveToXML = b; }
 
-	virtual void onFocusLost();
-	virtual void onFocusReceived();
+	// inherited from LLFocusableElement
+	/* virtual */ void onFocusLost();
+	/* virtual */ void onFocusReceived();
 
 	typedef enum e_hit_test_type
 	{
@@ -489,7 +493,7 @@ public:
 			// did we find *something* with that name?
 			if (child)
 			{
-				llwarns << "Found child named " << name << " but of wrong type " << typeid(child).name() << ", expecting " << typeid(T).name() << llendl;
+				LL_DEBUGS("View") << "Found child named " << name << " but of wrong type " << typeid(child).name() << ", expecting " << typeid(T).name() << LL_ENDL;
 			}
 			if (create_if_missing)
 			{
@@ -516,7 +520,7 @@ public:
 			std::string xml_tag = LLWidgetClassRegistry::getInstance()->getTag<T>();
 			if (xml_tag.empty())
 			{
-				llwarns << "No xml tag registered for this class " << llendl;
+				LL_DEBUGS("View") << "No xml tag registered for this class " << LL_ENDL;
 				return NULL;
 			}
 			// create dummy xml node (<button name="foo"/>)
@@ -527,13 +531,13 @@ public:
 			if (widget)
 			{
 				// need non-const to update private dummy widget cache
-				llwarns << "Making dummy " << xml_tag << " named " << name << " in " << getName() << llendl;
+				LL_DEBUGS("View") << "Making dummy " << xml_tag << " named " << name << " in " << getName() << LL_ENDL;
 				mDummyWidgets.insert(std::make_pair(name, widget));
 			}
 			else
 			{
 				// dynamic cast will fail if T::fromXML only registered for base class
-				llwarns << "Failed to create dummy widget of requested type " << llendl;
+				LL_DEBUGS("View") << "Failed to create dummy widget of requested type " << LL_ENDL;
 				return NULL;
 			}
 		}

@@ -75,11 +75,29 @@ class ViewerManifest(LLManifest):
 
         # Include our fonts
         if self.prefix(src="fonts"):
-            self.path("DejaVuSansCondensed.ttf")
-            self.path("DejaVuSansMono.ttf")
+            self.path("GPL.txt")
+            self.path("Liberation-License.txt")
+            self.path("LiberationSans-Bold.ttf")
+            self.path("LiberationSans-Regular.ttf")
+
+            self.path("Delicious-License.txt")
+            self.path("Delicious-BoldItalic.otf")
+            self.path("Delicious-Bold.otf")
+            self.path("Delicious-Italic.otf")
+            self.path("Delicious-Roman.otf")
+
+            self.path("Droid-License.txt")
+            self.path("DroidSans-Bold.ttf")
             self.path("DroidSans.ttf")
-            self.path("DroidSans-Bold.ttf")                        
-            self.path("*.txt")
+
+            self.path("DejaVu-License.txt")
+            self.path("DejaVuSansCondensed-BoldOblique.ttf")
+            self.path("DejaVuSansCondensed-Bold.ttf")
+            self.path("DejaVuSansCondensed-Oblique.ttf")
+            self.path("DejaVuSansCondensed.ttf")
+
+            self.path("Vera-License.txt")
+            self.path("VeraMono.ttf")
             self.end_prefix("fonts")
 
         # skins
@@ -142,6 +160,10 @@ class ViewerManifest(LLManifest):
         # whether or not this is present
         return self.args.get('login_channel')
 
+    def standalone(self):
+        return self.args['standalone'] == "ON"
+    def debug(self):
+        return self.args['buildtype'] == "DEBUG"
     def grid(self):
         return self.args['grid']
     def channel(self):
@@ -209,6 +231,14 @@ class WindowsManifest(ViewerManifest):
             self.end_prefix("../..")
 
 
+        self.path("imprudence.url")
+
+        # Plugin host application
+        self.path(os.path.join(os.pardir,
+                               'llplugin', 'slplugin', self.args['configuration'], "SLPlugin.exe"),
+                  "SLPlugin.exe")
+
+
         self.path("featuretable.txt")
 
         # For use in crash reporting (generates minidumps)
@@ -216,6 +246,19 @@ class WindowsManifest(ViewerManifest):
 
         # For using FMOD for sound... DJS
         #self.path("fmod.dll")
+        
+        # For spellchecking
+        if self.prefix(src=self.args['configuration'], dst=""):
+            self.path("libhunspell.dll")
+            self.end_prefix()
+
+        # Get llcommon and deps.
+        if self.prefix(src=self.args['configuration'], dst=""):
+            self.path('libapr-1.dll')
+            self.path('libaprutil-1.dll')
+            self.path('libapriconv-1.dll')
+            self.path('llcommon.dll')
+            self.end_prefix()
 
         # For textures
         if self.prefix(src="../../libraries/i686-win32/lib/release", dst=""):
@@ -228,7 +271,41 @@ class WindowsManifest(ViewerManifest):
             self.path("alut.dll")
             self.end_prefix()           
 
-        # Mozilla appears to force a dependency on these files so we need to ship it (CP) - updated to vc8 versions (nyx)
+        # Media plugins - QuickTime
+        if self.prefix(src='../media_plugins/quicktime/%s' % self.args['configuration'], dst="llplugin"):
+            self.path("media_plugin_quicktime.dll")
+            self.end_prefix()
+
+        # Media plugins - WebKit/Qt
+        if self.prefix(src='../media_plugins/webkit/%s' % self.args['configuration'], dst="llplugin"):
+            self.path("media_plugin_webkit.dll")
+            self.end_prefix()
+ 
+        # For WebKit/Qt plugin runtimes
+        if self.prefix(src="../../libraries/i686-win32/lib/release", dst="llplugin"):
+            self.path("libeay32.dll")
+            self.path("qtcore4.dll")
+            self.path("qtgui4.dll")
+            self.path("qtnetwork4.dll")
+            self.path("qtopengl4.dll")
+            self.path("qtwebkit4.dll")
+            self.path("qtxmlpatterns4.dll")
+            self.path("ssleay32.dll")
+            self.end_prefix()
+
+        # For WebKit/Qt plugin runtimes (image format plugins)
+        if self.prefix(src="../../libraries/i686-win32/lib/release/imageformats", dst="llplugin/imageformats"):
+            self.path("qgif4.dll")
+            self.path("qico4.dll")
+            self.path("qjpeg4.dll")
+            self.path("qmng4.dll")
+            self.path("qsvg4.dll")
+            self.path("qtiff4.dll")
+            self.end_prefix()
+
+	# Per platform MIME config on the cheap.  See SNOW-307 / DEV-41388
+        self.path("skins/default/xui/en-us/mime_types_windows.xml", "skins/default/xui/en-us/mime_types.xml")
+
         # These need to be installed as a SxS assembly, currently a 'private' assembly.
         # See http://msdn.microsoft.com/en-us/library/ms235291(VS.80).aspx
         if self.prefix(src=self.args['configuration'], dst=""):
@@ -246,114 +323,87 @@ class WindowsManifest(ViewerManifest):
         self.path(src="%s/imprudence-bin.exe.config" % self.args['configuration'], dst=self.final_exe() + ".config")
 
         # We need this one too, so that llkdu loads at runtime - DEV-41194
-        self.path(src="%s/imprudence-bin.exe.config" % self.args['configuration'], dst="llkdu.dll.2.config")
+        #self.path(src="%s/imprudence-bin.exe.config" % self.args['configuration'], dst="llkdu.dll.2.config")
+        self.path("llkdu.dll.2.config")
 
         # We need this one too, so that win_crash_logger.exe loads at runtime - DEV-19004
-        self.path(src="%s/imprudence-bin.exe.config" % self.args['configuration'], dst="win_crash_logger.exe.config")
+        #self.path(src="%s/imprudence-bin.exe.config" % self.args['configuration'], dst="win_crash_logger.exe.config")
 
         # same thing for auto-updater.
-        self.path(src="%s/imprudence-bin.exe.config" % self.args['configuration'], dst="updater.exe.config")
+        #self.path(src="%s/imprudence-bin.exe.config" % self.args['configuration'], dst="updater.exe.config")
 
-        # Mozilla runtime DLLs (CP)
-        if self.prefix(src="../../libraries/i686-win32/lib/release", dst=""):
-            self.path("freebl3.dll")
-            self.path("js3250.dll")
-            self.path("nspr4.dll")
-            self.path("nss3.dll")
-            self.path("nssckbi.dll")
-            self.path("plc4.dll")
-            self.path("plds4.dll")
-            self.path("smime3.dll")
-            self.path("softokn3.dll")
-            self.path("ssl3.dll")
-            self.path("xpcom.dll")
-            self.path("xul.dll")
-            self.end_prefix()
-
-        # Mozilla runtime misc files (CP)
-        if self.prefix(src="app_settings/mozilla"):
-            self.path("chrome/*.*")
-            self.path("components/*.*")
-            self.path("greprefs/*.*")
-            self.path("plugins/*.*")
-            self.path("res/*.*")
-            self.path("res/*/*")
-            self.end_prefix()
-
-        # Mozilla hack to get it to accept newer versions of msvc*80.dll than are listed in manifest
-        # necessary as llmozlib2-vc80.lib refers to an old version of msvc*80.dll - can be removed when new version of llmozlib is built - Nyx
         # Vivox runtimes
-        #if self.prefix(src="vivox-runtime/i686-win32", dst=""):
+        if self.prefix(src="vivox-runtime/i686-win32", dst=""):
         #    self.path("alut.dll")
-        #    self.path("wrap_oal.dll")
-
-        #    self.path("SLVoice.exe")
+            self.path("wrap_oal.dll")
+            self.path("SLVoice.exe")
         #    self.path("SLVoiceAgent.exe")
         #    self.path("libeay32.dll")
         #    self.path("srtp.dll")
         #    self.path("ssleay32.dll")
         #    self.path("tntk.dll")
-        #    self.path("vivoxsdk.dll")
-        #    self.path("ortp.dll")
+            self.path("vivoxsdk.dll")
+            self.path("ortp.dll")
 
+            self.end_prefix()
+# Gstreamer is not used in webkit_plugins. The librries are never delivered/extracted to
+# ../../libraries/i686-win32/lib/release . Commented out until decision made to use or drop.
+        # Gstreamer plugins
+        #if self.prefix(src="lib/gstreamer-plugins", dst=""):
+        #    self.path("*.dll", dst="lib/gstreamer-plugins/*.dll")
         #    self.end_prefix()
 
-        # Gstreamer plugins
-        if self.prefix(src="lib/gstreamer-plugins", dst=""):
-            self.path("*.dll", dst="lib/gstreamer-plugins/*.dll")
-            self.end_prefix()
-
         # Gstreamer libs
-        if self.prefix(src="../../libraries/i686-win32/lib/release", dst=""):
-            self.path("iconv.dll")
-            self.path("libxml2.dll")
-            self.path("libcairo-2.dll")
-            self.path("libgio-2.0-0.dll")
-            self.path("libglib-2.0-0.dll")
-            self.path("libgmodule-2.0-0.dll")
-            self.path("libgobject-2.0-0.dll")
-            self.path("libgthread-2.0-0.dll")
-            self.path("charset.dll")
-            self.path("intl.dll")
-            self.path("libgcrypt-11.dll")
-            self.path("libgnutls-26.dll")
-            self.path("libgpg-error-0.dll")
-            self.path("libgstapp.dll")
-            self.path("libgstaudio.dll")
-            self.path("libgstbase-0.10.dll")
-            self.path("libgstcdda.dll")
-            self.path("libgstcontroller-0.10.dll")
-            self.path("libgstdataprotocol-0.10.dll")
-            self.path("libgstdshow.dll")
-            self.path("libgstfft.dll")
-            self.path("libgstinterfaces.dll")
-            self.path("libgstnet-0.10.dll")
-            self.path("libgstnetbuffer.dll")
-            self.path("libgstpbutils.dll")
-            self.path("libgstreamer-0.10.dll")
-            self.path("libgstriff.dll")
-            self.path("libgstrtp.dll")
-            self.path("libgstrtsp.dll")
-            self.path("libgstsdp.dll")
-            self.path("libgsttag.dll")
-            self.path("libgstvideo.dll")
-            self.path("libjpeg.dll")
-            self.path("libmp3lame-0.dll")
-            self.path("libneon-27.dll")
-            self.path("libogg-0.dll")
-            self.path("liboil-0.3-0.dll")
-            self.path("libopenjpeg-2.dll")
-            self.path("libpng12-0.dll")
-            self.path("libschroedinger-1.0-0.dll")
-            self.path("libspeex-1.dll")
-            self.path("libtheora-0.dll")
-            self.path("libvorbis-0.dll")
-            self.path("libvorbisenc-2.dll")
-            self.path("libxml2-2.dll")
-            self.path("glew32.dll")
-            self.path("xvidcore.dll")
-            self.path("zlib1.dll")
-            self.end_prefix()            
+        #if (not self.standalone()) and self.prefix(src="../../libraries/i686-win32/lib/release", dst=""):
+        #    self.path("iconv.dll")
+        #    self.path("libxml2.dll")
+        #    self.path("libcairo-2.dll")
+        #    self.path("libgio-2.0-0.dll")
+        #    self.path("libglib-2.0-0.dll")
+        #    self.path("libgmodule-2.0-0.dll")
+        #    self.path("libgobject-2.0-0.dll")
+        #    self.path("libgthread-2.0-0.dll")
+        #    self.path("charset.dll")
+        #    self.path("intl.dll")
+        #    self.path("libgcrypt-11.dll")
+        #    self.path("libgnutls-26.dll")
+        #    self.path("libgpg-error-0.dll")
+        #    self.path("libgstapp.dll")
+        #    self.path("libgstaudio.dll")
+        #    self.path("libgstbase-0.10.dll")
+        #    self.path("libgstcdda.dll")
+        #    self.path("libgstcontroller-0.10.dll")
+        #    self.path("libgstdataprotocol-0.10.dll")
+        #    self.path("libgstdshow.dll")
+        #    self.path("libgstfft.dll")
+        #    self.path("libgstinterfaces.dll")
+        #    self.path("libgstnet-0.10.dll")
+        #    self.path("libgstnetbuffer.dll")
+        #    self.path("libgstpbutils.dll")
+        #    self.path("libgstreamer-0.10.dll")
+        #    self.path("libgstriff.dll")
+        #    self.path("libgstrtp.dll")
+        #    self.path("libgstrtsp.dll")
+        #    self.path("libgstsdp.dll")
+        #    self.path("libgsttag.dll")
+        #    self.path("libgstvideo.dll")
+        #    self.path("libjpeg.dll")
+        #    self.path("libmp3lame-0.dll")
+        #    self.path("libneon-27.dll")
+        #    self.path("libogg-0.dll")
+        #    self.path("liboil-0.3-0.dll")
+        #    self.path("libopenjpeg-2.dll")
+        #    self.path("libpng12-0.dll")
+        #    self.path("libschroedinger-1.0-0.dll")
+        #    self.path("libspeex-1.dll")
+        #    self.path("libtheora-0.dll")
+        #    self.path("libvorbis-0.dll")
+        #    self.path("libvorbisenc-2.dll")
+        #    self.path("libxml2-2.dll")
+        #    self.path("glew32.dll")
+        #    self.path("xvidcore.dll")
+        #    self.path("zlib1.dll")
+        #    self.end_prefix()
 
 #        # pull in the crash logger and updater from other projects
 #        self.path(src=self.find_existing_file( # tag:"crash-logger" here as a cue to the exporter
@@ -492,8 +542,12 @@ class WindowsManifest(ViewerManifest):
 
         # We use the Unicode version of NSIS, available from
         # http://www.scratchpaper.com/
-        NSIS_path = 'C:\\Program Files\\NSIS\\Unicode\\makensis.exe'
-        self.run_command('"' + proper_windows_path(NSIS_path) + '" ' + self.dst_path_of(tempfile))
+        try:
+            NSIS_path = 'C:\\Program Files\\NSIS\\Unicode\\makensis.exe'
+            self.run_command('"' + proper_windows_path(NSIS_path) + '" ' + self.dst_path_of(tempfile))
+        except:
+            NSIS_path = 'C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe'
+            self.run_command('"' + proper_windows_path(NSIS_path) + '" ' + self.dst_path_of(tempfile))
         # self.remove(self.dst_path_of(tempfile))
         # If we're on a build machine, sign the code using our Authenticode certificate. JC
         sign_py = 'C:\\buildscripts\\code-signing\\sign.py'
@@ -511,16 +565,14 @@ class DarwinManifest(ViewerManifest):
         self.path(self.args['configuration'] + "/Imprudence.app", dst="")
 
         if self.prefix(src="", dst="Contents"):  # everything goes in Contents
-            # Expand the tar file containing the assorted mozilla bits into
-            #  <bundle>/Contents/MacOS/
-            self.contents_of_tar(self.args['source']+'/mozilla-universal-darwin.tgz', 'MacOS')
-
+            
             self.path("Info-Imprudence.plist", dst="Info.plist")
 
             # copy additional libs in <bundle>/Contents/MacOS/
-            if self.prefix(src="../../libraries/universal-darwin/lib_release", dst="MacOS/"):
+            if (not self.standalone()) and self.prefix(src="../../libraries/universal-darwin/lib_release", dst="MacOS/"):
 
                 self.path("libndofdev.dylib")
+                self.path("libhunspell-1.2.dylib")
                 
                 self.path("libopenal.1.dylib")
                 self.path("libalut.0.dylib")
@@ -530,44 +582,41 @@ class DarwinManifest(ViewerManifest):
                 self.path("libgobject-2.0.dylib")
                 self.path("libgthread-2.0.dylib")
                 
-                self.path("libgstreamer-0.10.dylib")
-                self.path("libgstapp-0.10.dylib")
-                self.path("libgstaudio-0.10.dylib")
-                self.path("libgstbase-0.10.dylib")
-                self.path("libgstcdda-0.10.dylib")
-                self.path("libgstcontroller-0.10.dylib")
-                self.path("libgstdataprotocol-0.10.dylib")
-                self.path("libgstfft-0.10.dylib")
-                self.path("libgstinterfaces-0.10.dylib")
-                self.path("libgstnet-0.10.dylib")
-                self.path("libgstnetbuffer-0.10.dylib")
-                self.path("libgstpbutils-0.10.dylib")
-                self.path("libgstriff-0.10.dylib")
-                self.path("libgstrtp-0.10.dylib")
-                self.path("libgstrtsp-0.10.dylib")
-                self.path("libgstsdp-0.10.dylib")
-                self.path("libgsttag-0.10.dylib")
-                self.path("libgstvideo-0.10.dylib")
+                # self.path("libgstreamer-0.10.dylib")
+                # self.path("libgstapp-0.10.dylib")
+                # self.path("libgstaudio-0.10.dylib")
+                # self.path("libgstbase-0.10.dylib")
+                # self.path("libgstcdda-0.10.dylib")
+                # self.path("libgstcontroller-0.10.dylib")
+                # self.path("libgstdataprotocol-0.10.dylib")
+                # self.path("libgstfft-0.10.dylib")
+                # self.path("libgstinterfaces-0.10.dylib")
+                # self.path("libgstnet-0.10.dylib")
+                # self.path("libgstnetbuffer-0.10.dylib")
+                # self.path("libgstpbutils-0.10.dylib")
+                # self.path("libgstriff-0.10.dylib")
+                # self.path("libgstrtp-0.10.dylib")
+                # self.path("libgstrtsp-0.10.dylib")
+                # self.path("libgstsdp-0.10.dylib")
+                # self.path("libgsttag-0.10.dylib")
+                # self.path("libgstvideo-0.10.dylib")
 
                 self.path("libxml2.2.dylib")
+                # self.path("libfaad.2.dylib")
+                # self.path("libFLAC.8.dylib")
                 self.path("libintl.3.dylib")
                 self.path("libjpeg.62.dylib")
                 self.path("libpng12.0.dylib")
                 self.path("libneon.27.dylib")
                 self.path("libogg.0.dylib")
                 self.path("liboil-0.3.0.dylib")
-                self.path("libtheora.0.dylib")
+                self.path("libopenjpeg.1.4.dylib")
+                # self.path("libtheora.0.dylib")
                 self.path("libvorbis.0.dylib")
                 self.path("libvorbisenc.2.dylib")
                 self.path("libvorbisfile.3.dylib")
 
                 self.end_prefix("../../libraries/universal-darwin/lib_release")
-
-            # replace the default theme with our custom theme (so scrollbars work).
-            if self.prefix(src="mozilla-theme", dst="MacOS/chrome"):
-                self.path("classic.jar")
-                self.path("classic.manifest")
-                self.end_prefix("MacOS/chrome")
 
             # most everything goes in the Resources directory
             if self.prefix(src="", dst="Resources"):
@@ -608,94 +657,133 @@ class DarwinManifest(ViewerManifest):
                 self.path("zh-Hans.lproj")
 
 
-                if self.prefix(src="../../libraries/universal-darwin/lib_release/gstreamer-plugins", dst="lib/gstreamer-plugins"):
-                    self.path("libgstaacparse.so")
-                    self.path("libgstadder.so")
-                    self.path("libgstaiffparse.so")
-                    self.path("libgstamrparse.so")
-                    self.path("libgstapp.so")
-                    self.path("libgstaudioconvert.so")
-                    self.path("libgstaudiorate.so")
-                    self.path("libgstaudioresample.so")
-                    self.path("libgstautodetect.so")
-                    self.path("libgstavi.so")
-                    self.path("libgstcoreelements.so")
-                    self.path("libgstcoreindexers.so")
-                    self.path("libgstdebug.so")
-                    self.path("libgstdecodebin.so")
-                    self.path("libgstdecodebin2.so")
-                    self.path("libgstdeinterlace2.so")
-                    self.path("libgstequalizer.so")
-                    self.path("libgstffmpeg.so")
-                    self.path("libgstffmpegcolorspace.so")
-                    self.path("libgstffmpegscale.so")
-                    self.path("libgstfilter.so")
-                    self.path("libgstflac.so")
-                    self.path("libgstflv.so")
-                    self.path("libgstgdp.so")
-                    self.path("libgsth264parse.so")
-                    self.path("libgsticydemux.so")
-                    self.path("libgstid3demux.so")
-                    self.path("libgstinterleave.so")
-                    self.path("libgstjpeg.so")
-                    self.path("libgstlevel.so")
-                    self.path("libgstmetadata.so")
-                    self.path("libgstmpeg4videoparse.so")
-                    self.path("libgstmpegdemux.so")
-                    self.path("libgstmpegvideoparse.so")
-                    self.path("libgstmultifile.so")
-                    self.path("libgstmultipart.so")
-                    self.path("libgstneonhttpsrc.so")
-                    self.path("libgstogg.so")
-                    self.path("libgstosxaudio.so")
-                    self.path("libgstosxvideosink.so")
-                    self.path("libgstplaybin.so")
-                    self.path("libgstpng.so")
-                    self.path("libgstpostproc.so")
-                    self.path("libgstqtdemux.so")
-                    #self.path("libgstqtwrapper.so")
-                    self.path("libgstqueue2.so")
-                    self.path("libgstreal.so")
-                    self.path("libgstrtp.so")
-                    self.path("libgstrtpmanager.so")
-                    self.path("libgstrtsp.so")
-                    self.path("libgstsdpelem.so")
-                    self.path("libgstselector.so")
-                    self.path("libgststereo.so")
-                    self.path("libgsttcp.so")
-                    self.path("libgsttheora.so")
-                    self.path("libgsttypefindfunctions.so")
-                    self.path("libgstudp.so")
-                    self.path("libgstvideobalance.so")
-                    self.path("libgstvideobox.so")
-                    self.path("libgstvideocrop.so")
-                    self.path("libgstvideoflip.so")
-                    self.path("libgstvideomixer.so")
-                    self.path("libgstvideorate.so")
-                    self.path("libgstvideoscale.so")
-                    self.path("libgstvideosignal.so")
-                    self.path("libgstvolume.so")
-                    self.path("libgstvorbis.so")
-                    self.path("libgstwavparse.so")
+                # if (not self.standalone()) and self.prefix(src="../../libraries/universal-darwin/lib_release/gstreamer-plugins", dst="lib/gstreamer-plugins"):
+                #     self.path("libgstaacparse.so")
+                #     self.path("libgstadder.so")
+                #     self.path("libgstaiffparse.so")
+                #     self.path("libgstamrparse.so")
+                #     self.path("libgstapp.so")
+                #     self.path("libgstaudioconvert.so")
+                #     self.path("libgstaudiorate.so")
+                #     self.path("libgstaudioresample.so")
+                #     self.path("libgstautodetect.so")
+                #     self.path("libgstavi.so")
+                #     self.path("libgstcoreelements.so")
+                #     self.path("libgstcoreindexers.so")
+                #     self.path("libgstdebug.so")
+                #     self.path("libgstdecodebin.so")
+                #     self.path("libgstdecodebin2.so")
+                #     self.path("libgstdeinterlace2.so")
+                #     self.path("libgstequalizer.so")
+                #     self.path("libgstfaad.so")
+                #     self.path("libgstffmpeg.so")
+                #     self.path("libgstffmpegcolorspace.so")
+                #     self.path("libgstffmpegscale.so")
+                #     self.path("libgstfilter.so")
+                #     self.path("libgstflac.so")
+                #     self.path("libgstflv.so")
+                #     self.path("libgstgdp.so")
+                #     self.path("libgsth264parse.so")
+                #     self.path("libgsticydemux.so")
+                #     self.path("libgstid3demux.so")
+                #     self.path("libgstinterleave.so")
+                #     self.path("libgstjpeg.so")
+                #     self.path("libgstlevel.so")
+                #     self.path("libgstmetadata.so")
+                #     self.path("libgstmpeg4videoparse.so")
+                #     self.path("libgstmpegdemux.so")
+                #     self.path("libgstmpegvideoparse.so")
+                #     self.path("libgstmultifile.so")
+                #     self.path("libgstmultipart.so")
+                #     self.path("libgstneonhttpsrc.so")
+                #     self.path("libgstogg.so")
+                #     self.path("libgstosxaudio.so")
+                #     self.path("libgstosxvideosink.so")
+                #     self.path("libgstplaybin.so")
+                #     self.path("libgstpng.so")
+                #     self.path("libgstpostproc.so")
+                #     self.path("libgstqtdemux.so")
+                #     #self.path("libgstqtwrapper.so")
+                #     self.path("libgstqueue2.so")
+                #     self.path("libgstreal.so")
+                #     self.path("libgstrtp.so")
+                #     self.path("libgstrtpmanager.so")
+                #     self.path("libgstrtsp.so")
+                #     self.path("libgstsdpelem.so")
+                #     self.path("libgstselector.so")
+                #     self.path("libgststereo.so")
+                #     self.path("libgsttcp.so")
+                #     self.path("libgsttheora.so")
+                #     self.path("libgsttypefindfunctions.so")
+                #     self.path("libgstudp.so")
+                #     self.path("libgstvideobalance.so")
+                #     self.path("libgstvideobox.so")
+                #     self.path("libgstvideocrop.so")
+                #     self.path("libgstvideoflip.so")
+                #     self.path("libgstvideomixer.so")
+                #     self.path("libgstvideorate.so")
+                #     self.path("libgstvideoscale.so")
+                #     self.path("libgstvideosignal.so")
+                #     self.path("libgstvolume.so")
+                #     self.path("libgstvorbis.so")
+                #     self.path("libgstwavparse.so")
                     
-                    self.end_prefix("../../libraries/universal-darwin/lib_release/gstreamer-plugins")
+                #     self.end_prefix("../../libraries/universal-darwin/lib_release/gstreamer-plugins")
 
 
                 # SLVoice and vivox lols
-                #self.path("vivox-runtime/universal-darwin/libalut.dylib", "libalut.dylib")
-                #self.path("vivox-runtime/universal-darwin/libopenal.dylib", "libopenal.dylib")
-                #self.path("vivox-runtime/universal-darwin/libortp.dylib", "libortp.dylib")
-                #self.path("vivox-runtime/universal-darwin/libvivoxsdk.dylib", "libvivoxsdk.dylib")
-                #self.path("vivox-runtime/universal-darwin/SLVoice", "SLVoice")
+                self.path("vivox-runtime/universal-darwin/libalut.dylib", "libalut.dylib")
+                self.path("vivox-runtime/universal-darwin/libopenal.dylib", "libopenal.dylib")
+                self.path("vivox-runtime/universal-darwin/libortp.dylib", "libortp.dylib")
+                self.path("vivox-runtime/universal-darwin/libvivoxsdk.dylib", "libvivoxsdk.dylib")
+                self.path("vivox-runtime/universal-darwin/SLVoice", "SLVoice")
                 #self.path("vivox-runtime/universal-darwin/SLVoiceAgent.app", "SLVoiceAgent.app")
 
-                #libfmodwrapper.dylib
-                #self.path(self.args['configuration'] + "/libfmodwrapper.dylib", "libfmodwrapper.dylib")
-                
-                # our apps
-#                self.path("../mac_crash_logger/" + self.args['configuration'] + "/mac-crash-logger.app", "mac-crash-logger.app")
-                self.path("../mac_updater/" + self.args['configuration'] + "/mac-updater.app", "mac-updater.app")
+                libdir = "../../libraries/universal-darwin/lib_release"
 
+                self.path(os.path.join(os.pardir,
+                                       "llcommon",
+                                       self.args['configuration'],
+                                       "libllcommon.dylib"),
+                          dst="libllcommon.dylib")
+
+
+                for libfile in ("libapr-1.0.3.7.dylib",
+                                "libaprutil-1.0.3.8.dylib",
+                                "libexpat.0.5.0.dylib"):
+                    self.path(os.path.join(libdir, libfile), libfile)
+
+                # our apps
+                # self.path("../mac_crash_logger/" + self.args['configuration'] + "/mac-crash-logger.app", "mac-crash-logger.app")
+                # self.path("../mac_updater/" + self.args['configuration'] + "/mac-updater.app", "mac-updater.app")
+
+                # plugin launcher
+                self.path("../llplugin/slplugin/" + self.args['configuration'] + "/SLPlugin.app", "SLPlugin.app")
+
+                # symlinks for SLPlugin.app dependencies
+                slplugin_res_path = self.dst_path_of("SLPlugin.app/Contents/Resources")
+                for libfile in ("libllcommon.dylib",
+                                "libapr-1.0.3.7.dylib",
+                                "libaprutil-1.0.3.8.dylib",
+                                "libexpat.0.5.0.dylib",
+                                ):
+                    target_lib = os.path.join('../../..', libfile)
+                    self.run_command("ln -sf %(target)r %(link)r" % 
+                                     {'target': target_lib,
+                                      'link' : os.path.join(slplugin_res_path, libfile)}
+                                     )
+
+                # plugins
+                if self.prefix(src="", dst="llplugin"):
+                    self.path("../media_plugins/quicktime/" + self.args['configuration'] + "/media_plugin_quicktime.dylib", "media_plugin_quicktime.dylib")
+                    self.path("../media_plugins/webkit/" + self.args['configuration'] + "/media_plugin_webkit.dylib", "media_plugin_webkit.dylib")
+                    self.path("../../libraries/universal-darwin/lib_release/libllqtwebkit.dylib", "libllqtwebkit.dylib")
+
+                    self.end_prefix("llplugin")
+
+                # Per platform MIME config on the cheap.  See SNOW-307 / DEV-41388
+                self.path("skins/default/xui/en-us/mime_types_mac.xml", "skins/default/xui/en-us/mime_types.xml")
+ 
                 # command line arguments for connecting to the proper grid
                 self.put_in_file(self.flags_list(), 'arguments.txt')
 
@@ -738,7 +826,7 @@ class DarwinManifest(ViewerManifest):
         # make sure we don't have stale files laying about
         self.remove(sparsename, finalname)
 
-        self.run_command('hdiutil create "%(sparse)s" -volname "%(vol)s" -fs HFS+ -type SPARSE -megabytes 300 -layout SPUD' % {
+        self.run_command('hdiutil create "%(sparse)s" -volname "%(vol)s" -fs HFS+ -type SPARSE -megabytes 400 -layout SPUD' % {
                 'sparse':sparsename,
                 'vol':volname})
 
@@ -806,7 +894,7 @@ class LinuxManifest(ViewerManifest):
         self.path("res/imprudence_icon.png","imprudence_icon.png")
         if self.prefix("linux_tools", dst=""):
             #self.path("client-readme.txt","README-linux.txt")
-            #self.path("client-readme-voice.txt","README-linux-voice.txt")
+            self.path("client-readme-voice.txt","README-linux-voice.txt")
             #self.path("client-readme-joystick.txt","README-linux-joystick.txt")
             self.path("wrapper.sh","imprudence")
             self.path("handle_secondlifeprotocol.sh")
@@ -822,6 +910,23 @@ class LinuxManifest(ViewerManifest):
 
         # Create an appropriate gridargs.dat for this package, denoting required grid.
         self.put_in_file(self.flags_list(), 'gridargs.dat')
+        self.path("linux_tools/launch_url.sh","launch_url.sh")
+        self.path("../llplugin/slplugin/SLPlugin", "bin/SLPlugin")
+        if self.prefix("res-sdl"):
+            self.path("*")
+            # recurse
+            self.end_prefix("res-sdl")
+
+        # plugins
+        if self.prefix(src="", dst="bin/llplugin"):
+            self.path("../media_plugins/webkit/libmedia_plugin_webkit.so", "libmedia_plugin_webkit.so")
+            self.path("../media_plugins/gstreamer010/libmedia_plugin_gstreamer010.so", "libmedia_plugin_gstreamer.so")
+            self.end_prefix("bin/llplugin")
+
+        # Per platform MIME config on the cheap.  See SNOW-307 / DEV-41388
+        self.path("skins/default/xui/en-us/mime_types_linux.xml", "skins/default/xui/en-us/mime_types.xml")
+
+        self.path("featuretable_linux.txt")
 
 
     def package_finish(self):
@@ -874,30 +979,25 @@ class LinuxManifest(ViewerManifest):
 class Linux_i686Manifest(LinuxManifest):
     def construct(self):
         super(Linux_i686Manifest, self).construct()
-        self.path("imprudence-stripped","bin/do-not-directly-run-imprudence-bin")
-#        self.path("../linux_crash_logger/linux-crash-logger-stripped","linux-crash-logger.bin")
-        self.path("linux_tools/launch_url.sh","launch_url.sh")
-        if self.prefix("res-sdl"):
-            self.path("*")
-            # recurse
-            self.end_prefix("res-sdl")
+        if self.debug():
+            self.path("imprudence-bin","bin/do-not-directly-run-imprudence-bin")
+        else:
+            self.path("imprudence-stripped","bin/do-not-directly-run-imprudence-bin")
 
-        self.path("featuretable_linux.txt")
-        #self.path("secondlife-i686.supp")
+        self.path("../llcommon/libllcommon.so", "lib/libllcommon.so")
 
-        self.path("app_settings/mozilla-runtime-linux-i686")
-
-        if self.prefix("../../libraries/i686-linux/lib_release_client", dst="lib"):
+        if (not self.standalone()) and self.prefix("../../libraries/i686-linux/lib_release_client", dst="lib"):
             self.path("libapr-1.so.0")
             self.path("libaprutil-1.so.0")
             self.path("libdb-4.2.so")
             self.path("libcrypto.so.0.9.7")
             self.path("libexpat.so.1")
+            self.path("libhunspell-1.2.so.0.0.0", "libhunspell-1.2.so.0")
             self.path("libssl.so.0.9.7")
             self.path("libuuid.so", "libuuid.so.1")
             self.path("libSDL-1.2.so.0")
             self.path("libELFIO.so")
-            self.path("libopenjpeg.so.1.3.0", "libopenjpeg.so.1.3")
+            self.path("libopenjpeg.so.2")
             self.path("libxml2.so.2")
             self.path("libz.so.1")
 
@@ -906,93 +1006,107 @@ class Linux_i686Manifest(LinuxManifest):
             self.path("libalut.so.0")
 
             # GTK+ and dependencies
-            self.path("libatk-1.0.so.0")
-            self.path("libcairo.so.2")
-            self.path("libfontconfig.so.1")
-            self.path("libfreetype.so.6")
+            ## Lets just use the system libraries for all of these:
+            ##self.path("libatk-1.0.so.0")
+            ##self.path("libcairo.so.2")
+            ##self.path("libfontconfig.so.1")
+            ##self.path("libfreetype.so.6")
            # self.path("libgdk_pixbuf-2.0.so.0") # see linux64 why
-            self.path("libgdk-x11-2.0.so.0")
-            self.path("libgtk-x11-2.0.so.0")
+            ##self.path("libgdk-x11-2.0.so.0")
+            ##self.path("libgtk-x11-2.0.so.0")
            # self.path("libpango-1.0.so.0")	 # dto.
            # self.path("libpangoft2-1.0.so.0")
            # self.path("libpangox-1.0.so.0")
            # self.path("libpangoxft-1.0.so.0")
-            self.path("libpixman-1.so.0")
+            ##self.path("libpixman-1.so.0")
 
-            # Gstreamer libs
-            self.path("libgstbase-0.10.so.0")
-            self.path("libgstreamer-0.10.so.0")
-            self.path("libgstaudio-0.10.so.0")
-            self.path("libgstbase-0.10.so.0")
-            self.path("libgstcontroller-0.10.so.0")
-            self.path("libgstdataprotocol-0.10.so.0")
-            self.path("libgstinterfaces-0.10.so.0")
-            self.path("libgstnetbuffer-0.10.so.0")
-            self.path("libgstpbutils-0.10.so.0")
-            self.path("libgstriff-0.10.so.0")
-            self.path("libgstrtp-0.10.so.0")
-            self.path("libgstrtsp-0.10.so.0")
-            self.path("libgstsdp-0.10.so.0")
-            self.path("libgsttag-0.10.so.0")
-            self.path("libgstvideo-0.10.so.0")
+#KILL IT WITH FIRE
+            ## Gstreamer libs
+            #self.path("libgstbase-0.10.so.0")
+            #self.path("libgstreamer-0.10.so.0")
+            #self.path("libgstaudio-0.10.so.0")
+            #self.path("libgstbase-0.10.so.0")
+            #self.path("libgstcontroller-0.10.so.0")
+            #self.path("libgstdataprotocol-0.10.so.0")
+            #self.path("libgstinterfaces-0.10.so.0")
+            #self.path("libgstnetbuffer-0.10.so.0")
+            #self.path("libgstpbutils-0.10.so.0")
+            #self.path("libgstriff-0.10.so.0")
+            #self.path("libgstrtp-0.10.so.0")
+            #self.path("libgstrtsp-0.10.so.0")
+            #self.path("libgstsdp-0.10.so.0")
+            #self.path("libgsttag-0.10.so.0")
+            #self.path("libgstvideo-0.10.so.0")
 
-            # Gstreamer plugin dependencies
-            self.path("libogg.so.0")
-            self.path("libtheora.so.0")
-            self.path("libvorbis.so.0")
-            self.path("libvorbisenc.so.2")
-            self.path("liboil-0.3.so.0")
+            ## Gstreamer plugin dependencies
+            #self.path("libfaad.so.0")
+            #self.path("libogg.so.0")
+            #self.path("libtheora.so.0")
+            #self.path("libvorbis.so.0")
+            #self.path("libvorbisenc.so.2")
+            #self.path("liboil-0.3.so.0")
 
-            # Gstreamer plugins
-            if self.prefix("gstreamer-plugins"):
-                self.path("libgstalsa.so")
-                self.path("libgstasf.so")
-                self.path("libgstaudioconvert.so")
-                self.path("libgstaudioresample.so")
-                self.path("libgstautodetect.so")
-                self.path("libgstavi.so")
-                self.path("libgstcoreelements.so")
-                self.path("libgstcoreindexers.so")
-                self.path("libgstdecodebin2.so")
-                self.path("libgstdecodebin.so")
-                self.path("libgstesd.so")
-                self.path("libgstffmpeg.so")
-                self.path("libgstgnomevfs.so")
-                self.path("libgsticydemux.so")
-                self.path("libgstid3demux.so")
-                self.path("libgstmpegdemux.so")
-                self.path("libgstmultifile.so")
-                self.path("libgstmultipart.so")
-                self.path("libgstogg.so")
-                self.path("libgstossaudio.so")
-                self.path("libgstplaybin.so")
-                self.path("libgstpulse.so")
-                self.path("libgstqtdemux.so")
-                self.path("libgstqueue2.so")
-                self.path("libgsttcp.so")
-                self.path("libgsttheora.so")
-                self.path("libgsttypefindfunctions.so")
-                self.path("libgstudp.so")
-                self.path("libgstvideoscale.so")
-                self.path("libgstvolume.so")
-                self.path("libgstvorbis.so")
-                self.path("libgstwavparse.so")
+            ## Gstreamer plugins
+            #if self.prefix("gstreamer-plugins"):
+                #self.path("libgstalsa.so")
+                #self.path("libgstasf.so")
+                #self.path("libgstaudioconvert.so")
+                #self.path("libgstaudioresample.so")
+                #self.path("libgstautodetect.so")
+                #self.path("libgstavi.so")
+                #self.path("libgstcoreelements.so")
+                #self.path("libgstcoreindexers.so")
+                #self.path("libgstdecodebin2.so")
+                #self.path("libgstdecodebin.so")
+                #self.path("libgstesd.so")
+                #self.path("libgstfaad.so")
+                #self.path("libgstffmpeg.so")
+                #self.path("libgstgnomevfs.so")
+                #self.path("libgsticydemux.so")
+                #self.path("libgstid3demux.so")
+                #self.path("libgstmpegdemux.so")
+                #self.path("libgstmultifile.so")
+                #self.path("libgstmultipart.so")
+                #self.path("libgstogg.so")
+                #self.path("libgstossaudio.so")
+                #self.path("libgstplaybin.so")
+                #self.path("libgstpulse.so")
+                #self.path("libgstqtdemux.so")
+                #self.path("libgstqueue2.so")
+                #self.path("libgsttcp.so")
+                #self.path("libgsttheora.so")
+                #self.path("libgsttypefindfunctions.so")
+                #self.path("libgstudp.so")
+                #self.path("libgstvideoscale.so")
+                #self.path("libgstvolume.so")
+                #self.path("libgstvorbis.so")
+                #self.path("libgstwavparse.so")
                 
-                self.end_prefix("gstreamer-plugins")
+                #self.end_prefix("gstreamer-plugins")
             
             self.end_prefix("lib")
 
-            # Vivox runtimes
-            #if self.prefix(src="vivox-runtime/i686-linux", dst="bin"):
-            #        self.path("SLVoice")
-            #        self.end_prefix()
-            
+            # Vivox runtimes and libs
+            if self.prefix(src="vivox-runtime/i686-linux", dst="bin"):
+                self.path("SLVoice")
+                self.end_prefix("bin")
+
+            if self.prefix(src="vivox-runtime/i686-linux", dst="lib"):
+                self.path("libalut.so")
+                self.path("libortp.so")
+                self.path("libvivoxsdk.so")
+                self.end_prefix("lib")
 
 class Linux_x86_64Manifest(LinuxManifest):
     def construct(self):
         super(Linux_x86_64Manifest, self).construct()
-        self.path("imprudence-stripped","bin/do-not-directly-run-imprudence-bin")
+        if self.debug():
+            self.path("imprudence-bin","bin/do-not-directly-run-imprudence-bin")
+        else:
+            self.path("imprudence-stripped","bin/do-not-directly-run-imprudence-bin")
 #        self.path("../linux_crash_logger/linux-crash-logger-stripped","linux-crash-logger.bin")
+
+        self.path("../llcommon/libllcommon.so", "lib64/libllcommon.so")
 
         self.path("linux_tools/launch_url.sh","launch_url.sh")
         if self.prefix("res-sdl"):
@@ -1003,14 +1117,13 @@ class Linux_x86_64Manifest(LinuxManifest):
         self.path("featuretable_linux.txt")
         #self.path("secondlife-x86_64.supp")
 
-        self.path("app_settings/mozilla-runtime-linux-x86_64")
-
-        if self.prefix("../../libraries/x86_64-linux/lib_release_client", dst="lib64"):
+        if (not self.standalone()) and self.prefix("../../libraries/x86_64-linux/lib_release_client", dst="lib64"):
             self.path("libapr-1.so.0")
             self.path("libaprutil-1.so.0")
             self.path("libdb-4.2.so")
             self.path("libcrypto.so.0.9.8")
             self.path("libexpat.so.1")
+            self.path("libhunspell-1.2.so.0.0.0", "libhunspell-1.2.so.0")
             self.path("libssl.so.0.9.8")
             self.path("libuuid.so", "libuuid.so.1")
             self.path("libSDL-1.2.so.0")
@@ -1019,101 +1132,114 @@ class Linux_x86_64Manifest(LinuxManifest):
             self.path("libpng12.so.0")
             self.path("libopenjpeg.so.2")
             self.path("libxml2.so.2")
-            self.path("libz.so.1")
+            #self.path("libz.so.1") #not needed
 
             # OpenAL
             self.path("libopenal.so.1")
             self.path("libalut.so.0")
 
             # GTK+ and dependencies
-            self.path("libatk-1.0.so.0")
-            self.path("libcairo.so.2")
-            self.path("libfontconfig.so.1")
-            self.path("libfreetype.so.6")
-#            self.path("libgdk_pixbuf-2.0.so.0")	# use systems gdk pixbufs instead
-            self.path("libgdk-x11-2.0.so.0")
-            self.path("libgtk-x11-2.0.so.0")
+            ## Lets just use the system libraries for all of these:
+            ##self.path("libatk-1.0.so.0")
+            ##self.path("libcairo.so.2")
+            ##self.path("libfontconfig.so.1")
+            ##self.path("libfreetype.so.6")
+            self.path("libgdk_pixbuf-2.0.so.0")	# was commented to use systems gdk pixbufs instead -
+	    					# but seems webkit needs it o_O . Packaging for testing now.
+            ##self.path("libgdk-x11-2.0.so.0")
+            ##self.path("libgtk-x11-2.0.so.0")
 #            self.path("libpango-1.0.so.0")		# use systems pango instead
 #            self.path("libpangoft2-1.0.so.0")		# Both gdk pixbufs and pango would load systems modules
 #            self.path("libpangox-1.0.so.0")		# and crash if not compatible or present. 
 #            self.path("libpangoxft-1.0.so.0")		# So we depend system gdk pixbufs and pango anyway.
-            self.path("libpixman-1.so.0")
+            ##self.path("libpixman-1.so.0")
 
-            # Gstreamer libs
-            self.path("libgstbase-0.10.so.0")
-            self.path("libgstreamer-0.10.so.0")
-            self.path("libgstaudio-0.10.so.0")
-            self.path("libgstbase-0.10.so.0")
-            self.path("libgstcontroller-0.10.so.0")
-            self.path("libgstdataprotocol-0.10.so.0")
-            self.path("libgstinterfaces-0.10.so.0")
-            self.path("libgstnetbuffer-0.10.so.0")
-            self.path("libgstpbutils-0.10.so.0")
-            self.path("libgstriff-0.10.so.0")
-            self.path("libgstrtp-0.10.so.0")
-            self.path("libgstrtsp-0.10.so.0")
-            self.path("libgstsdp-0.10.so.0")
-            self.path("libgsttag-0.10.so.0")
-            self.path("libgstvideo-0.10.so.0")
+#KILL IT WITH FIRE
+            ## Gstreamer libs
+            #self.path("libgstbase-0.10.so.0")
+            #self.path("libgstreamer-0.10.so.0")
+            #self.path("libgstaudio-0.10.so.0")
+            #self.path("libgstbase-0.10.so.0")
+            #self.path("libgstcontroller-0.10.so.0")
+            #self.path("libgstdataprotocol-0.10.so.0")
+            #self.path("libgstinterfaces-0.10.so.0")
+            #self.path("libgstnetbuffer-0.10.so.0")
+            #self.path("libgstpbutils-0.10.so.0")
+            #self.path("libgstriff-0.10.so.0")
+            #self.path("libgstrtp-0.10.so.0")
+            #self.path("libgstrtsp-0.10.so.0")
+            #self.path("libgstsdp-0.10.so.0")
+            #self.path("libgsttag-0.10.so.0")
+            #self.path("libgstvideo-0.10.so.0")
 
-            # Gstreamer plugin dependencies
-            self.path("libogg.so.0")
-            self.path("libtheora.so.0")
-            self.path("libvorbis.so.0")
-            self.path("libvorbisenc.so.2")
-            self.path("liboil-0.3.so.0")
+            ## Gstreamer plugin dependencies
+            #self.path("libfaad.so.0")
+            #self.path("libogg.so.0")
+            #self.path("libtheora.so.0")
+            #self.path("libvorbis.so.0")
+            #self.path("libvorbisenc.so.2")
+            #self.path("liboil-0.3.so.0")
 
-            # Gstreamer plugins
-            if self.prefix("gstreamer-plugins"):
-                self.path("libgstalsa.so")
-                self.path("libgstasf.so")
-                self.path("libgstaudioconvert.so")
-                self.path("libgstaudioresample.so")
-                self.path("libgstautodetect.so")
-                self.path("libgstavi.so")
-                self.path("libgstcoreelements.so")
-                self.path("libgstcoreindexers.so")
-                self.path("libgstdecodebin2.so")
-                self.path("libgstdecodebin.so")
-                self.path("libgstesd.so")
-                self.path("libgstffmpeg.so")
-                self.path("libgstffmpegcolorspace.so")
-                self.path("libgstgnomevfs.so")
-                self.path("libgsticydemux.so")
-                self.path("libgstid3demux.so")
-                self.path("libgstmpegdemux.so")
-                self.path("libgstmultifile.so")
-                self.path("libgstmultipart.so")
-                self.path("libgstogg.so")
-                self.path("libgstossaudio.so")
-                self.path("libgstplaybin.so")
-                self.path("libgstpulse.so")
-                self.path("libgstqtdemux.so")
-                self.path("libgstqueue2.so")
-                self.path("libgsttcp.so")
-                self.path("libgsttheora.so")
-                self.path("libgsttypefindfunctions.so")
-                self.path("libgstudp.so")
-                self.path("libgstvideoscale.so")
-                self.path("libgstvolume.so")
-                self.path("libgstvorbis.so")
-                self.path("libgstwavparse.so")
+            ## Gstreamer plugins
+            #if self.prefix("gstreamer-plugins"):
+                #self.path("libgstalsa.so")
+                #self.path("libgstasf.so")
+                #self.path("libgstaudioconvert.so")
+                #self.path("libgstaudioresample.so")
+                #self.path("libgstautodetect.so")
+                #self.path("libgstavi.so")
+                #self.path("libgstcoreelements.so")
+                #self.path("libgstcoreindexers.so")
+                #self.path("libgstdecodebin2.so")
+                #self.path("libgstdecodebin.so")
+                #self.path("libgstesd.so")
+                #self.path("libgstfaad.so")
+                #self.path("libgstffmpeg.so")
+                #self.path("libgstffmpegcolorspace.so")
+                #self.path("libgstgnomevfs.so")
+                #self.path("libgsticydemux.so")
+                #self.path("libgstid3demux.so")
+                #self.path("libgstmpegdemux.so")
+                #self.path("libgstmultifile.so")
+                #self.path("libgstmultipart.so")
+                #self.path("libgstogg.so")
+                #self.path("libgstossaudio.so")
+                #self.path("libgstplaybin.so")
+                #self.path("libgstpulse.so")
+                #self.path("libgstqtdemux.so")
+                #self.path("libgstqueue2.so")
+                #self.path("libgsttcp.so")
+                #self.path("libgsttheora.so")
+                #self.path("libgsttypefindfunctions.so")
+                #self.path("libgstudp.so")
+                #self.path("libgstvideoscale.so")
+                #self.path("libgstvolume.so")
+                #self.path("libgstvorbis.so")
+                #self.path("libgstwavparse.so")
                 
-                self.end_prefix("gstreamer-plugins")
+                #self.end_prefix("gstreamer-plugins")
             self.end_prefix("lib64")
         
-#	if self.prefix("../../libraries/x86_64-linux/lib_release_client/32bit-compat", dst="lib32"):
-#            self.path("libalut.so")
-#	    self.path("libidn.so.11")
-#	    self.path("libopenal.so.1")
-#	    self.path("libortp.so")
-#	    self.path("libuuid.so.1")
-#        self.end_prefix("lib32")
-            # Vivox runtimes
-            #if self.prefix(src="vivox-runtime/i686-linux", dst="bin"):
-            #        self.path("SLVoice")
-            #        self.end_prefix()
-            
+
+            # Vivox runtimes and libs
+            if self.prefix(src="vivox-runtime/i686-linux", dst="bin"):
+                self.path("SLVoice")
+                self.end_prefix("bin")
+
+            if self.prefix(src="vivox-runtime/i686-linux", dst="lib32"):
+                #self.path("libalut.so")
+                self.path("libortp.so")
+                self.path("libvivoxsdk.so")
+                self.end_prefix("lib32")
+
+        # 32bit libs needed for voice
+        if self.prefix("../../libraries/x86_64-linux/lib_release_client/32bit-compat", dst="lib32"):
+            self.path("libalut.so")
+            self.path("libidn.so.11")
+            self.path("libopenal.so.1")
+            # self.path("libortp.so")
+            self.path("libuuid.so.1")
+            self.end_prefix("lib32")
 
 if __name__ == "__main__":
     main()

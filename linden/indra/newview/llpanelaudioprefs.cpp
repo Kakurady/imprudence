@@ -42,7 +42,7 @@
 #include "llfontgl.h"
 
 // project includes
-#include "audioengine.h"
+#include "llaudioengine.h"
 #include "llbutton.h"
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
@@ -62,7 +62,7 @@
 #include "llviewerwindow.h"
 #include "llviewercontrol.h"
 
-#include "hippoGridManager.h"
+#include "hippogridmanager.h"
 
 //
 // Static functions
@@ -91,6 +91,7 @@ BOOL LLPanelAudioPrefs::postBuild()
 {
 	refreshValues(); // initialize member data from saved settings
 	childSetLabelArg("L$ Change Threshold", "[CURRENCY]", gHippoGridManager->getConnectedGrid()->getCurrencySymbol());
+	childSetValue("mute_wind_check", !gSavedSettings.getBOOL("MuteWind"));
 
 	return TRUE;
 }
@@ -104,7 +105,6 @@ void LLPanelAudioPrefs::refreshValues()
 	mPreviousMusicVolume = gSavedSettings.getF32("AudioLevelMusic");
 	mPreviousMediaVolume = gSavedSettings.getF32("AudioLevelMedia");
 	mPreviousDoppler = gSavedSettings.getF32("AudioLevelDoppler");
-	mPreviousDistance = gSavedSettings.getF32("AudioLevelDistance");
 	mPreviousRolloff = gSavedSettings.getF32("AudioLevelRolloff");
 
 	mPreviousMoneyThreshold = gSavedSettings.getF32("UISndMoneyChangeThreshold");
@@ -117,6 +117,13 @@ void LLPanelAudioPrefs::refreshValues()
 	mPreviousMuteWhenMinimized = gSavedSettings.getBOOL("MuteWhenMinimized");
 }
 
+void LLPanelAudioPrefs::apply()
+{
+	refreshValues();
+
+	gSavedSettings.setBOOL("MuteWind", !(BOOL)(childGetValue("mute_wind_check").asBoolean()));
+}
+
 void LLPanelAudioPrefs::cancel()
 {
 	gSavedSettings.setF32("AudioLevelMaster", mPreviousVolume );
@@ -126,7 +133,6 @@ void LLPanelAudioPrefs::cancel()
 	gSavedSettings.setF32("AudioLevelMusic", mPreviousMusicVolume);
 	gSavedSettings.setF32("AudioLevelMedia", mPreviousMediaVolume);
 	gSavedSettings.setF32("AudioLevelDoppler", mPreviousDoppler );
-	gSavedSettings.setF32("AudioLevelDistance", mPreviousDistance );
 	gSavedSettings.setF32("AudioLevelRolloff", mPreviousRolloff );
 
 	gSavedSettings.setF32("UISndMoneyChangeThreshold", mPreviousMoneyThreshold );

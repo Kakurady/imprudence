@@ -112,8 +112,10 @@ public:
 	static void useDebugMenus();
 	static void useSculptedPrim();
 	static void useMedia();
+	static void useLoginScreen();
 	static void callbackClientTags(const LLSD& notification, const LLSD& response);
 	static void ClientTags();
+	static void voiceLicenseAgreement();
 	
 protected:
 	static std::set<std::string> sConfigVariables;
@@ -125,10 +127,6 @@ public:
 	static void useRlvDetach()		{ showRlvFirstUseNotification(RLV_SETTING_FIRSTUSE_DETACH); }
 	static void useRlvEnableWear()	{ showRlvFirstUseNotification(RLV_SETTING_FIRSTUSE_ENABLEWEAR); }
 	static void useRlvFartouch()	{ showRlvFirstUseNotification(RLV_SETTING_FIRSTUSE_FARTOUCH); }
-
-	static void warnRlvGiveToRLV();
-protected:
-	static void onRlvGiveToRLVConfirmation(S32 idxOption, void* pUserParam);
 // [/RLVa:KB]
 };
 

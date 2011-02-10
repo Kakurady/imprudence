@@ -39,7 +39,7 @@
 #include "llfloaterurldisplay.h"
 #include "llfloaterdirectory.h"
 #include "llfloaterworldmap.h"
-#include "llfloaterhtmlhelp.h"
+#include "llfloatermediabrowser.h"
 #include "llpanellogin.h"
 #include "llstartup.h"			// gStartupState
 #include "llurlsimstring.h"
@@ -53,6 +53,7 @@ const std::string SLURL_SL_HELP_PREFIX		= "secondlife://app.";
 const std::string SLURL_SL_PREFIX			= "sl://";
 const std::string SLURL_SECONDLIFE_PREFIX	= "secondlife://";
 const std::string SLURL_SLURL_PREFIX		= "http://slurl.com/secondlife/";
+const std::string SLURL_SLURL_ALT_PREFIX	= "http://maps.secondlife.com/secondlife/";
 
 const std::string SLURL_APP_TOKEN = "app/";
 
@@ -64,7 +65,7 @@ public:
 	static bool isSLURLCommand(const std::string& url);
 
 	static bool dispatch(const std::string& url,
-						 LLWebBrowserCtrl* web,
+						 LLMediaCtrl* web,
 						 bool trusted_browser);
 		// returns true if handled or explicitly blocked.
 
@@ -73,7 +74,7 @@ public:
 private:
 	static bool dispatchCore(const std::string& url, 
 							 bool right_mouse,
-							 LLWebBrowserCtrl* web,
+							 LLMediaCtrl* web,
 							 bool trusted_browser);
 		// handles both left and right click
 
@@ -83,7 +84,7 @@ private:
 
 	static bool dispatchApp(const std::string& url,
 							bool right_mouse,
-							LLWebBrowserCtrl* web,
+							LLMediaCtrl* web,
 							bool trusted_browser);
 		// Handles secondlife:///app/agent/<agent_id>/about and similar
 		// by showing panel in Search floater.
@@ -117,6 +118,7 @@ bool LLURLDispatcherImpl::isSLURL(const std::string& url)
 	if (matchPrefix(url, SLURL_SL_PREFIX)) return true;
 	if (matchPrefix(url, SLURL_SECONDLIFE_PREFIX)) return true;
 	if (matchPrefix(url, SLURL_SLURL_PREFIX)) return true;
+	if (matchPrefix(url, SLURL_SLURL_ALT_PREFIX)) return true;
 	return false;
 }
 
@@ -125,7 +127,8 @@ bool LLURLDispatcherImpl::isSLURLCommand(const std::string& url)
 { 
 	if (matchPrefix(url, SLURL_SL_PREFIX + SLURL_APP_TOKEN)
 		|| matchPrefix(url, SLURL_SECONDLIFE_PREFIX + "/" + SLURL_APP_TOKEN)
-		|| matchPrefix(url, SLURL_SLURL_PREFIX + SLURL_APP_TOKEN) )
+		|| matchPrefix(url, SLURL_SLURL_PREFIX + SLURL_APP_TOKEN)
+		|| matchPrefix(url, SLURL_SLURL_ALT_PREFIX + SLURL_APP_TOKEN))
 	{
 		return true;
 	}
@@ -135,7 +138,7 @@ bool LLURLDispatcherImpl::isSLURLCommand(const std::string& url)
 // static
 bool LLURLDispatcherImpl::dispatchCore(const std::string& url,
 									   bool right_mouse,
-									   LLWebBrowserCtrl* web,
+									   LLMediaCtrl* web,
 									   bool trusted_browser)
 {
 	if (url.empty()) return false;
@@ -155,7 +158,7 @@ bool LLURLDispatcherImpl::dispatchCore(const std::string& url,
 
 // static
 bool LLURLDispatcherImpl::dispatch(const std::string& url,
-								   LLWebBrowserCtrl* web,
+								   LLMediaCtrl* web,
 								   bool trusted_browser)
 {
 	llinfos << "url: " << url << llendl;
@@ -168,7 +171,7 @@ bool LLURLDispatcherImpl::dispatchRightClick(const std::string& url)
 {
 	llinfos << "url: " << url << llendl;
 	const bool right_click = true;
-	LLWebBrowserCtrl* web = NULL;
+	LLMediaCtrl* web = NULL;
 	const bool trusted_browser = false;
 	return dispatchCore(url, right_click, web, trusted_browser);
 }
@@ -189,7 +192,7 @@ bool LLURLDispatcherImpl::dispatchHelp(const std::string& url, bool right_mouse)
 // static
 bool LLURLDispatcherImpl::dispatchApp(const std::string& url, 
 									  bool right_mouse,
-									  LLWebBrowserCtrl* web,
+									  LLMediaCtrl* web,
 									  bool trusted_browser)
 {
 	if (!isSLURL(url))
@@ -364,6 +367,10 @@ std::string LLURLDispatcherImpl::stripProtocol(const std::string& url)
 	{
 		stripped.erase(0, SLURL_SLURL_PREFIX.length());
 	}
+	else if (matchPrefix(stripped, SLURL_SLURL_ALT_PREFIX))
+	{
+		stripped.erase(0, SLURL_SLURL_ALT_PREFIX.length());
+	}
 	return stripped;
 }
 
@@ -379,7 +386,7 @@ public:
 	LLTeleportHandler() : LLCommandHandler("teleport", true) { }
 
 	bool handle(const LLSD& tokens, const LLSD& query_map,
-				LLWebBrowserCtrl* web)
+				LLMediaCtrl* web)
 	{
 		// construct a "normal" SLURL, resolve the region to
 		// a global position, and teleport to it
@@ -419,7 +426,7 @@ bool LLURLDispatcher::isSLURLCommand(const std::string& url)
 
 // static
 bool LLURLDispatcher::dispatch(const std::string& url,
-							   LLWebBrowserCtrl* web,
+							   LLMediaCtrl* web,
 							   bool trusted_browser)
 {
 	return LLURLDispatcherImpl::dispatch(url, web, trusted_browser);
@@ -441,7 +448,7 @@ bool LLURLDispatcher::dispatchFromTextEditor(const std::string& url)
 	// click on it.
 	// *TODO: Make this trust model more refined.  JC
 	const bool trusted_browser = true;
-	LLWebBrowserCtrl* web = NULL;
+	LLMediaCtrl* web = NULL;
 	return LLURLDispatcherImpl::dispatch(url, web, trusted_browser);
 }
 

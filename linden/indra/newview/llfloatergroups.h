@@ -102,6 +102,7 @@ protected:
 
 	// highlight_id is a group id to highlight
 	void enableButtons();
+	void applyChangesToGroups();
 
 	static void onGroupList(LLUICtrl* ctrl, void* userdata);
 	static void onBtnCreate(void* userdata);
@@ -112,7 +113,9 @@ protected:
 	static void onBtnSearch(void* userdata);
 	static void onBtnVote(void* userdata);
 	static void onBtnInvite(void* userdata);
+	static void onBtnTitles(void* userdata);
 	static void onDoubleClickGroup(void* userdata);
+	static void onGroupSearchKeystroke(const std::string& search_string, void* user_data);
 
 	void create();
 	void activate();
@@ -122,9 +125,10 @@ protected:
 	void search();
 	void callVote();
 	void invite();
+	void titles();
+	void filterContacts(const std::string& search_string);
 
 	static bool callbackLeaveGroup(const LLSD& notification, const LLSD& response);
-
 };
 
 

@@ -75,6 +75,7 @@ public:
 	{
 		PARTITION_HUD=0,
 		PARTITION_TERRAIN,
+		PARTITION_VOIDWATER,
 		PARTITION_WATER,
 		PARTITION_TREE,
 		PARTITION_PARTICLE,
@@ -131,6 +132,7 @@ public:
 
 	void setWaterHeight(F32 water_level);
 	F32 getWaterHeight() const;
+	void rebuildWater();
 
 	BOOL isVoiceEnabled() const;
 
@@ -314,9 +316,10 @@ public:
 	LLDynamicArray<U32> mMapAvatars;
 	LLDynamicArray<LLUUID> mMapAvatarIDs;
 
-private:
 	// The surfaces and other layers
 	LLSurface*	mLandp;
+
+private:
 
 	// Region geometry data
 	LLVector3d	mOriginGlobal;	// Location of southwest corner of region (meters)

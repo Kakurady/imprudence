@@ -47,7 +47,6 @@
 #include "llcheckboxctrl.h"
 #include "llviewercontrol.h"
 #include "lllineeditor.h"
-#include "lltabcontainervertical.h"
 #include "lltextbox.h"
 #include "llviewertexteditor.h"
 #include "lltexturectrl.h"
@@ -59,6 +58,10 @@
 #include "llfloaterworldmap.h"
 #include "llviewerregion.h"
 #include "llviewerwindow.h"
+
+// [RLVa:KB]
+#include "rlvhandler.h"
+// [/RLVa:KB]
 
 //static
 std::list<LLPanelPick*> LLPanelPick::sAllPanels;

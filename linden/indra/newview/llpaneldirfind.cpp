@@ -50,6 +50,7 @@
 #include "llviewercontrol.h"
 #include "llmenucommands.h"
 #include "llmenugl.h"
+#include "llpluginclassmedia.h"
 #include "lltextbox.h"
 #include "lluiconstants.h"
 #include "llviewerimagelist.h"
@@ -61,6 +62,7 @@
 #include "lluictrlfactory.h"
 #include "llfloaterdirectory.h"
 #include "llpaneldirbrowser.h"
+#include "llpluginclassmedia.h"
 
 #include <boost/tokenizer.hpp>
 #if LL_WINDOWS
@@ -72,7 +74,7 @@
 #include "boost/lexical_cast.hpp"
 #endif
 
-#include "hippoGridManager.h"
+#include "hippogridmanager.h"
 
 //---------------------------------------------------------------------------
 // LLPanelDirFindAll - Google search appliance based search
@@ -143,9 +145,11 @@ BOOL LLPanelDirFind::postBuild()
 	}
 	
 	
-	mWebBrowser = getChild<LLWebBrowserCtrl>(mBrowserName);
+	mWebBrowser = getChild<LLMediaCtrl>(mBrowserName);
 	if (mWebBrowser)
 	{
+		mWebBrowser->addObserver(this);
+		
 		// new pages appear in same window as the results page now
 		mWebBrowser->setOpenInInternalBrowser( false );
 		mWebBrowser->setOpenInExternalBrowser( false );	
@@ -156,9 +160,6 @@ BOOL LLPanelDirFind::postBuild()
 		// redirect 404 pages from S3 somewhere else
 		mWebBrowser->set404RedirectUrl( getString("redirect_404_url") );
 
-		// Track updates for progress display.
-		mWebBrowser->addObserver(this);
-
 		navigateToDefaultPage();
 	}
 
@@ -167,8 +168,6 @@ BOOL LLPanelDirFind::postBuild()
 
 LLPanelDirFind::~LLPanelDirFind()
 {
-	if (mWebBrowser) 
-		mWebBrowser->remObserver(this);
 }
 
 // virtual
@@ -198,10 +197,17 @@ void LLPanelDirFind::draw()
 // virtual
 void LLPanelDirFind::onVisibilityChange(BOOL new_visibility)
 {
+	LLPluginClassMedia::EPriority new_priority;
 	if (new_visibility)
 	{
 		mFloaterDirectory->hideAllDetailPanels();
+		new_priority = LLPluginClassMedia::PRIORITY_NORMAL;
 	}
+	else
+		new_priority = LLPluginClassMedia::PRIORITY_HIDDEN;
+
+	mWebBrowser->getMediaPlugin()->setPriority(new_priority);
+
 	LLPanel::onVisibilityChange(new_visibility);
 }
 
@@ -262,11 +268,33 @@ void LLPanelDirFind::focus()
 
 void LLPanelDirFind::navigateToDefaultPage()
 {
-	std::string start_url;
+	std::string start_url = "";
 	// Note: we use the web panel in OpenSim as well as Second Life -- MC
-	if (gHippoGridManager->getConnectedGrid()->isSecondLife()) 
+	if (gHippoGridManager->getConnectedGrid()->getSearchUrl().empty() && 
+		!gHippoGridManager->getConnectedGrid()->isSecondLife())
 	{
-		start_url = gSavedSettings.getString("SearchURLDefault");
+		// OS-based but doesn't have its own web search url -- MC
+		start_url = gSavedSettings.getString("SearchURLDefaultOpenSim");
+	}
+	else
+	{
+		if (gHippoGridManager->getConnectedGrid()->isSecondLife()) 
+		{
+			if (mBrowserName == "showcase_browser")
+			{
+				// note that the showcase URL in floater_directory.xml is no longer used
+				start_url = gSavedSettings.getString("ShowcaseURLDefault");
+			}
+			else
+			{
+				start_url = gSavedSettings.getString("SearchURLDefault");
+			}
+		}
+		else
+		{
+			// OS-based but has its own web search url -- MC
+			start_url = gHippoGridManager->getConnectedGrid()->getSearchUrl();
+		}
 
 		BOOL inc_pg = childGetValue("incpg").asBoolean();
 		BOOL inc_mature = childGetValue("incmature").asBoolean();
@@ -279,13 +307,9 @@ void LLPanelDirFind::navigateToDefaultPage()
 		}
 	
 		start_url += getSearchURLSuffix(inc_pg, inc_mature, inc_adult, true);
-	} 
-	else 
-	{
-		start_url = gSavedSettings.getString("SearchURLDefaultOpenSim");
 	}
 
-	llinfos << "default url: "  << start_url << llendl;
+	llinfos << "default web search url: "  << start_url << llendl;
 
 	if (mWebBrowser)
 	{
@@ -297,9 +321,12 @@ std::string LLPanelDirFind::buildSearchURL(const std::string& search_text, const
 										   bool inc_pg, bool inc_mature, bool inc_adult, bool is_web)
 {
 	std::string url;
-	if (search_text.empty()) {
+	if (search_text.empty()) 
+	{
 		url = gHippoGridManager->getConnectedGrid()->getSearchUrl(HippoGridInfo::SEARCH_ALL_EMPTY, is_web);
-	} else {
+	} 
+	else 
+	{
 		// Replace spaces with "+" for use by Google search appliance
 		// Yes, this actually works for double-spaces
 		// " foo  bar" becomes "+foo++bar" and works fine. JC
@@ -340,7 +367,7 @@ std::string LLPanelDirFind::buildSearchURL(const std::string& search_text, const
 
 	}
 	url += getSearchURLSuffix(inc_pg, inc_mature, inc_adult, is_web);
-	llinfos << "search url " << url << llendl;
+	llinfos << "web search url " << url << llendl;
 	return url;
 }
 // static
@@ -350,8 +377,9 @@ std::string LLPanelDirFind::getSearchURLSuffix(bool inc_pg, bool inc_mature, boo
 
 	if (!url.empty())
 	{
-		// Note: opensim's template (SearchURLSuffixOpenSim) is currently empty -- MC
-		if (gHippoGridManager->getConnectedGrid()->isSecondLife())
+		// Note: opensim's default template (SearchURLSuffixOpenSim) is currently empty -- MC
+		if (gHippoGridManager->getConnectedGrid()->isSecondLife() || 
+			!gHippoGridManager->getConnectedGrid()->getSearchUrl().empty())
 		{
 			// if the mature checkbox is unchecked, modify query to remove 
 			// terms with given phrase from the result set
@@ -463,19 +491,27 @@ void LLPanelDirFind::onClickSearch(void* data)
 	LLFloaterDirectory::sNewSearchCount++;
 }
 
-void LLPanelDirFind::onNavigateBegin( const EventType& eventIn )
+void LLPanelDirFind::handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event)
 {
-	childSetText("status_text", getString("loading_text"));
-}
+	switch(event)
+	{
+		case MEDIA_EVENT_NAVIGATE_BEGIN:
+			childSetText("status_text", getString("loading_text"));
+		break;
+		
+		case MEDIA_EVENT_NAVIGATE_COMPLETE:
+			childSetText("status_text", getString("done_text"));
+		break;
+		
+		case MEDIA_EVENT_LOCATION_CHANGED:
+			// Debugging info to console
+			llinfos << self->getLocation() << llendl;
+		break;
 
-void LLPanelDirFind::onNavigateComplete( const EventType& eventIn )
-{
-	childSetText("status_text", getString("done_text"));
-}
-
-void LLPanelDirFind::onLocationChange( const EventType& eventIn )
-{
-	llinfos << eventIn.getStringValue() << llendl;
+		default:
+			// Having a default case makes the compiler happy.
+		break;
+	}
 }
 
 //---------------------------------------------------------------------------

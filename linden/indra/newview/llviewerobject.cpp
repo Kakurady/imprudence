@@ -34,7 +34,7 @@
 
 #include "llviewerobject.h"
 
-#include "audioengine.h"
+#include "llaudioengine.h"
 #include "imageids.h"
 #include "indra_constants.h"
 #include "llmath.h"
@@ -98,6 +98,10 @@
 #include "llvowlsky.h"
 #include "llmanip.h"
 
+// [RLVa:KB]
+#include "rlvhandler.h"
+// [/RLVa:KB]
+
 //#define DEBUG_UPDATE_TYPE
 
 BOOL gVelocityInterpolate = TRUE;
@@ -144,6 +148,8 @@ LLViewerObject *LLViewerObject::createObject(const LLUUID &id, const LLPCode pco
 	  res = new LLVOSurfacePatch(id, pcode, regionp); break;
 	case LL_VO_SKY:
 	  res = new LLVOSky(id, pcode, regionp); break;
+	case LL_VO_VOID_WATER:
+	  res = new LLVOVoidWater(id, pcode, regionp); break;
 	case LL_VO_WATER:
 	  res = new LLVOWater(id, pcode, regionp); break;
 	case LL_VO_GROUND:
@@ -1419,7 +1425,7 @@ U32 LLViewerObject::processUpdateMessage(LLMessageSystem *mesgsys,
 					coloru.mV[3] = 255 - coloru.mV[3];
 					mText->setColor(LLColor4(coloru));
 					mText->setStringUTF8(temp_string);
-// [RLVa:KB] - Version: 1.22.11 | Checked: 2009-07-09 (RLVa-1.0.0f) | Added: RLVa-1.0.0f
+// [RLVa:KB] - Version: 1.23.4 | Checked: 2009-07-09 (RLVa-1.0.0f) | Added: RLVa-1.0.0f
 					if (rlv_handler_t::isEnabled())
 					{
 						mText->setObjectText(temp_string);
@@ -1614,6 +1620,24 @@ U32 LLViewerObject::processUpdateMessage(LLMessageSystem *mesgsys,
 								gObjectList.killObject(this);
 								return retval;
 							}
+// [RLVa:KB] - Checked: 2009-12-27 (RLVa-1.1.0k) | Added: RLVa-1.1.0k
+							if ( (rlv_handler_t::isEnabled()) && (sent_parentp->isAvatar()) && (sent_parentp->getID() == gAgent.getID()) )
+							{
+								// Rezzed object that's being worn as an attachment (we're assuming this will be due to llAttachToAvatar())
+								S32 idxAttachPt = ATTACHMENT_ID_FROM_STATE(getState());
+								if (gRlvHandler.isLockedAttachment(idxAttachPt, RLV_LOCK_ANY))
+								{
+									// If this will end up on an "add locked" attachment point then treat the attach as a user action
+									LLNameValue* nvItem = getNVPair("AttachItemID");
+									if (nvItem)
+									{
+										LLUUID idItem(nvItem->getString());
+										if (idItem.notNull())
+											gRlvHandler.onWearAttachment(idItem);
+									}
+								}
+							}
+// [/RLVa:KB]
 							sent_parentp->addChild(this);
 							// make sure this object gets a non-damped update
 							if (sent_parentp->mDrawable.notNull())
@@ -4389,12 +4413,14 @@ void LLViewerObject::setAttachedSound(const LLUUID &audio_uuid, const LLUUID& ow
 			mAudioSourcep->play(LLUUID::null);
 		}
 		
-		// Play this sound if region maturity permits
+		/*// Play this sound if region maturity permits
 		if( gAgent.canAccessMaturityAtGlobal(this->getPositionGlobal()) )
 		{
 			//llinfos << "Playing attached sound " << audio_uuid << llendl;
 			mAudioSourcep->play(audio_uuid);
-		}
+		}*/
+		// Actually, always play sounds regardless of maturity -- MC
+		mAudioSourcep->play(audio_uuid);
 	}
 }
 

@@ -10,7 +10,9 @@ include(DirectX)
 include(ELFIO)
 include(FMOD)
 include(OPENAL)
+include(HUNSPELL)
 include(FindOpenGL)
+include(JsonCpp)
 include(LLAddBuildTest)
 include(LLAudio)
 include(LLCharacter)
@@ -19,8 +21,8 @@ include(LLImage)
 include(LLImageJ2COJ)
 include(LLInventory)
 include(LLMath)
-include(LLMedia)
 include(LLMessage)
+include(LLPlugin)
 include(LLPrimitive)
 include(LLRender)
 include(LLUI)
@@ -29,7 +31,6 @@ include(LLWindow)
 include(LLXML)
 include(LScript)
 include(Linking)
-include(Mozlib)
 include(NDOF)
 include(GooglePerfTools)
 include(TemplateCheck)
@@ -44,15 +45,17 @@ endif (WINDOWS)
 
 include_directories(
     ${DBUSGLIB_INCLUDE_DIRS}
+    ${HUNSPELL_INCLUDE_DIR}
     ${ELFIO_INCLUDE_DIR}
+    ${JSONCPP_INCLUDE_DIRS}
     ${LLAUDIO_INCLUDE_DIRS}
     ${LLCHARACTER_INCLUDE_DIRS}
     ${LLCOMMON_INCLUDE_DIRS}
     ${LLIMAGE_INCLUDE_DIRS}
     ${LLINVENTORY_INCLUDE_DIRS}
     ${LLMATH_INCLUDE_DIRS}
-    ${LLMEDIA_INCLUDE_DIRS}
     ${LLMESSAGE_INCLUDE_DIRS}
+    ${LLPLUGIN_INCLUDE_DIRS}
     ${LLPRIMITIVE_INCLUDE_DIRS}
     ${LLRENDER_INCLUDE_DIRS}
     ${LLUI_INCLUDE_DIRS}
@@ -61,18 +64,32 @@ include_directories(
     ${LLXML_INCLUDE_DIRS}
     ${LSCRIPT_INCLUDE_DIRS}
     ${LSCRIPT_INCLUDE_DIRS}/lscript_compile
-    ${GSTREAMER_INCLUDE_DIRS}
     )
 
 set(viewer_SOURCE_FILES
+	lggautocorrectfloater.cpp
+	lggautocorrect.cpp
+	lgghunspell_wrapper.cpp
+	lggdicdownload.cpp
+	aoremotectrl.cpp
+	chatbar_as_cmdline.cpp
     emeraldboobutils.cpp
     floaterao.cpp
     floaterbusy.cpp
-    floaterlogin.cpp
-    hippoGridManager.cpp
-    hippoLimits.cpp
-    hippoRestRequest.cpp
+    floatercommandline.cpp
+    floatergriddefault.cpp
+    floatergridmanager.cpp
+    floaterlocalassetbrowse.cpp
+    floatervoicelicense.cpp
+    hbfloatergrouptitles.cpp
+    hippogridmanager.cpp
+    hippolimits.cpp
+    hipporestrequest.cpp
+    impprefsfonts.cpp
     jcfloater_animation_list.cpp
+    jcfloaterareasearch.cpp
+    kowopenregionsettings.cpp
+    lightshare.cpp
     llagent.cpp
     llagentaccess.cpp
     llagentdata.cpp
@@ -167,9 +184,8 @@ set(viewer_SOURCE_FILES
     llfloatergroups.cpp
     llfloaterhandler.cpp
     llfloaterhardwaresettings.cpp
-    llfloaterhtml.cpp
     llfloaterhtmlcurrency.cpp
-    llfloaterhtmlhelp.cpp
+    llfloatermediabrowser.cpp
     llfloaterhtmlsimple.cpp
     llfloaterhud.cpp
     llfloaterimagepreview.cpp
@@ -181,6 +197,8 @@ set(viewer_SOURCE_FILES
     llfloaterlandmark.cpp
     llfloatermap.cpp
     llfloatermemleak.cpp
+    llfloatermessagebuilder.cpp
+    llfloatermessagelog.cpp
     llfloatermute.cpp
     llfloaternamedesc.cpp
     llfloaternewim.cpp
@@ -203,6 +221,7 @@ set(viewer_SOURCE_FILES
     llfloatersnapshot.cpp
     llfloaterstats.cpp
     llfloatertelehub.cpp
+    llfloaterteleporthistory.cpp
     llfloatertest.cpp
     llfloatertools.cpp
     llfloatertopobjects.cpp
@@ -293,11 +312,12 @@ set(viewer_SOURCE_FILES
     llpanelinput.cpp
     llpanelinventory.cpp
     llpanelland.cpp
+    llpanellandaudio.cpp
     llpanellandmedia.cpp
     llpanellandobjects.cpp
     llpanellandoptions.cpp
     llpanellogin.cpp
-    llpanelmorph.cpp
+    llpanelmediahud.cpp
     llpanelmsgs.cpp
     llpanelnetwork.cpp
     llpanelobject.cpp
@@ -313,6 +333,7 @@ set(viewer_SOURCE_FILES
     llpolymorph.cpp
     llprefsadvanced.cpp
     llprefschat.cpp
+    llprefscolors.cpp
     llprefsim.cpp
     llprefsvoice.cpp
     llpreviewanim.cpp
@@ -372,6 +393,7 @@ set(viewer_SOURCE_FILES
     lltoolview.cpp
     lltracker.cpp
     lltrans.cpp
+    lltranslate.cpp
     lluploaddialog.cpp
     llurl.cpp
     llurldispatcher.cpp
@@ -402,6 +424,8 @@ set(viewer_SOURCE_FILES
     llviewerkeyboard.cpp
     llviewerlayer.cpp
     llviewermedia.cpp
+    llviewermediafocus.cpp
+    llviewermedia_streamingaudio.cpp
     llviewermenu.cpp
     llviewermenufile.cpp
     llviewermessage.cpp
@@ -448,7 +472,7 @@ set(viewer_SOURCE_FILES
     llwearable.cpp
     llwearablelist.cpp
     llweb.cpp
-    llwebbrowserctrl.cpp
+    llmediactrl.cpp
     llwindlightremotectrl.cpp
     llwind.cpp
     llwlanimator.cpp
@@ -461,14 +485,23 @@ set(viewer_SOURCE_FILES
     llxmlrpctransaction.cpp
     noise.cpp
     panelradar.cpp
+    panelradarentry.cpp
     pipeline.cpp
     primbackup.cpp
+    qtoolalign.cpp
     rlvhandler.cpp
     rlvhelper.cpp
+    rlvcommon.cpp
     rlvmultistringsearch.cpp
     rlvextensions.cpp
     rlvfloaterbehaviour.cpp
+    viewertime.cpp
     viewerversion.cpp
+    windlightsettingsupdate.cpp
+    wlfloatermanager.cpp
+    wlfloaterwindlightsend.cpp
+    wlretrievesettings.cpp
+    wlsettingsmanager.cpp
     )
 
 set(VIEWER_BINARY_NAME "imprudence-bin" CACHE STRING
@@ -491,14 +524,28 @@ endif (LINUX)
 set(viewer_HEADER_FILES
     CMakeLists.txt
     ViewerInstall.cmake
+    aoremotectrl.h
+	chatbar_as_cmdline.h
     emeraldboobutils.h
     floaterao.h
     floaterbusy.h
-    floaterlogin.h
-    hippoGridManager.h
-    hippoLimits.h
-    hippoRestRequest.h
+    floatercommandline.h
+    floatergriddefault.h
+    floatergridmanager.h
+    floaterlocalassetbrowse.h
+    floatervoicelicense.h
+    hbfloatergrouptitles.h
+    hippogridmanager.h
+    hippolimits.h
+    hipporestrequest.h
+    impprefsfonts.h
     jcfloater_animation_list.h
+    jcfloaterareasearch.h
+    lightshare.h
+	lggautocorrectfloater.h
+	lggautocorrect.h
+	lggdicdownload.h
+	lgghunspell_wrapper.h
     llagent.h
     llagentaccess.h
     llagentdata.h
@@ -595,9 +642,8 @@ set(viewer_HEADER_FILES
     llfloatergroups.h
     llfloaterhandler.h
     llfloaterhardwaresettings.h
-    llfloaterhtml.h
     llfloaterhtmlcurrency.h
-    llfloaterhtmlhelp.h
+    llfloatermediabrowser.h
     llfloaterhtmlsimple.h
     llfloaterhud.h
     llfloaterimagepreview.h
@@ -609,6 +655,8 @@ set(viewer_HEADER_FILES
     llfloaterlandmark.h
     llfloatermap.h
     llfloatermemleak.h
+    llfloatermessagebuilder.h
+    llfloatermessagelog.h
     llfloatermute.h
     llfloaternamedesc.h
     llfloaternewim.h
@@ -631,6 +679,7 @@ set(viewer_HEADER_FILES
     llfloatersnapshot.h
     llfloaterstats.h
     llfloatertelehub.h
+    llfloaterteleporthistory.h
     llfloatertest.h
     llfloatertools.h
     llfloatertopobjects.h
@@ -720,12 +769,13 @@ set(viewer_HEADER_FILES
     llpanelinput.h
     llpanelinventory.h
     llpanelland.h
+    llpanellandaudio.h
     llpanellandmedia.h
     llpanellandobjects.h
     llpanellandoptions.h
     llpanelLCD.h
     llpanellogin.h
-    llpanelmorph.h
+    llpanelmediahud.h
     llpanelmsgs.h
     llpanelnetwork.h
     llpanelobject.h
@@ -741,6 +791,7 @@ set(viewer_HEADER_FILES
     llpolymorph.h
     llprefsadvanced.h
     llprefschat.h
+    llprefscolors.h
     llprefsim.h
     llprefsvoice.h
     llpreview.h
@@ -802,6 +853,7 @@ set(viewer_HEADER_FILES
     lltoolview.h
     lltracker.h
     lltrans.h
+    lltranslate.h
     lluiconstants.h
     lluploaddialog.h
     llurl.h
@@ -831,6 +883,8 @@ set(viewer_HEADER_FILES
     llviewerkeyboard.h
     llviewerlayer.h
     llviewermedia.h
+    llviewermediaobserver.h
+    llviewermediafocus.h
     llviewermenu.h
     llviewermenufile.h
     llviewermessage.h
@@ -879,7 +933,7 @@ set(viewer_HEADER_FILES
     llwearable.h
     llwearablelist.h
     llweb.h
-    llwebbrowserctrl.h
+    llmediactrl.h
     llwind.h
     llwindebug.h
     llwindlightremotectrl.h
@@ -892,21 +946,29 @@ set(viewer_HEADER_FILES
     llworldmapview.h
     llxmlrpctransaction.h
     macmain.h
+    meta7windlight.h
     noise.h
     panelradar.h
+    panelradarentry.h
     pipeline.h
     primbackup.h
+    qtoolalign.h
     randgauss.h
-    VertexCache.h
-    VorbisFramework.h
     rlvdefines.h
-    rlvevent.h
     rlvhandler.h
     rlvhelper.h
+    rlvcommon.h
     rlvmultistringsearch.h
     rlvextensions.h
     rlvfloaterbehaviour.h
+    VertexCache.h
+    VorbisFramework.h
+    viewertime.h
     viewerversion.h
+    wlfloatermanager.h
+    wlfloaterwindlightsend.h
+    wlretrievesettings.h
+    wlsettingsmanager.h
     )
 
 source_group("CMake Rules" FILES ViewerInstall.cmake)
@@ -918,11 +980,13 @@ if (DARWIN)
   find_library(APPKIT_LIBRARY AppKit)
   find_library(COCOA_LIBRARY Cocoa)
   find_library(IOKIT_LIBRARY IOKit)
+  find_library(SECURITY_LIBRARY SECURITY)
 
   set(viewer_LIBRARIES
     ${COCOA_LIBRARY}
     ${AGL_LIBRARY}
     ${IOKIT_LIBRARY}
+    ${SECURITY_LIBRARY}
     )
 
   # Add resource files to the project.
@@ -951,7 +1015,7 @@ endif (DARWIN)
 
 if (LINUX)
     LIST(APPEND viewer_SOURCE_FILES llappviewerlinux.cpp)
-    LIST(APPEND CMAKE_EXE_LINKER_FLAGS -Wl,--as-needed)
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
 
     set(viewer_LIBRARIES
         Xinerama
@@ -1077,218 +1141,26 @@ if (WINDOWS)
     if (INTEL_MEMOPS_LIBRARY)
       list(APPEND viewer_LIBRARIES ${INTEL_MEMOPS_LIBRARY})
     endif (INTEL_MEMOPS_LIBRARY)
+    use_prebuilt_binary(dbghelp)
 endif (WINDOWS)
 
 # Add the xui files. This is handy for searching for xui elements
-# from within the IDE
+# from within the IDE.
+
+file(GLOB viewer_XUI_FILE_GLOB_LIST
+     ${CMAKE_CURRENT_SOURCE_DIR}/skins/default/xui/en-us/*.xml)
+
 set(viewer_XUI_FILES
-    skins/default/colors.xml
-    skins/default/colors_base.xml
-    skins/default/xui/en-us/alerts.xml
-    skins/default/xui/en-us/floater_about_land.xml
-    skins/default/xui/en-us/floater_about.xml
-    skins/default/xui/en-us/floater_active_speakers.xml
-    skins/default/xui/en-us/floater_animation_list.xml
-    skins/default/xui/en-us/floater_animation_preview.xml
-    skins/default/xui/en-us/floater_ao.xml
-    skins/default/xui/en-us/floater_asset_browser.xml
-    skins/default/xui/en-us/floater_auction.xml
-    skins/default/xui/en-us/floater_audio_volume.xml
-    skins/default/xui/en-us/floater_avatar_picker.xml
-    skins/default/xui/en-us/floater_avatar_textures.xml
-    skins/default/xui/en-us/floater_beacons.xml
-    skins/default/xui/en-us/floater_build_options.xml
-    skins/default/xui/en-us/floater_bulk_perms.xml
-    skins/default/xui/en-us/floater_bumps.xml
-    skins/default/xui/en-us/floater_busy.xml
-    skins/default/xui/en-us/floater_buy_contents.xml
-    skins/default/xui/en-us/floater_buy_currency.xml
-    skins/default/xui/en-us/floater_buy_land.xml
-    skins/default/xui/en-us/floater_buy_object.xml
-    skins/default/xui/en-us/floater_camera.xml
-    skins/default/xui/en-us/floater_chat_history.xml
-    skins/default/xui/en-us/floater_chatterbox.xml
-    skins/default/xui/en-us/floater_choose_group.xml
-    skins/default/xui/en-us/floater_color_picker.xml
-    skins/default/xui/en-us/floater_critical.xml
-    skins/default/xui/en-us/floater_customize.xml
-    skins/default/xui/en-us/floater_day_cycle_options.xml
-    skins/default/xui/en-us/floater_device_settings.xml
-    skins/default/xui/en-us/floater_directory.xml
-    skins/default/xui/en-us/floater_env_settings.xml
-    skins/default/xui/en-us/floater_font_test.xml
-    skins/default/xui/en-us/floater_gesture.xml
-    skins/default/xui/en-us/floater_god_tools.xml
-    skins/default/xui/en-us/floater_group_info.xml
-    skins/default/xui/en-us/floater_hardware_settings.xml
-    skins/default/xui/en-us/floater_html.xml
-    skins/default/xui/en-us/floater_html_simple.xml
-    skins/default/xui/en-us/floater_hud.xml
-    skins/default/xui/en-us/floater_image_preview.xml
-    skins/default/xui/en-us/floater_im.xml
-    skins/default/xui/en-us/floater_inspect.xml
-    skins/default/xui/en-us/floater_instant_message_ad_hoc.xml
-    skins/default/xui/en-us/floater_instant_message_group.xml
-    skins/default/xui/en-us/floater_instant_message.xml
-    skins/default/xui/en-us/floater_inventory_item_properties.xml
-    skins/default/xui/en-us/floater_inventory_view_finder.xml
-    skins/default/xui/en-us/floater_inventory.xml
-    skins/default/xui/en-us/floater_joystick.xml
-    skins/default/xui/en-us/floater_lagmeter.xml
-    skins/default/xui/en-us/floater_land_holdings.xml
-    skins/default/xui/en-us/floater_landmark_ctrl.xml
-    skins/default/xui/en-us/floater_live_lsleditor.xml
-    skins/default/xui/en-us/floater_lsl_guide.xml
-    skins/default/xui/en-us/floater_media_browser.xml
-    skins/default/xui/en-us/floater_mini_map.xml
-    skins/default/xui/en-us/floater_moveview.xml
-    skins/default/xui/en-us/floater_mute_object.xml
-    skins/default/xui/en-us/floater_mute.xml
-    skins/default/xui/en-us/floater_my_friends.xml
-    skins/default/xui/en-us/floater_name_description.xml
-    skins/default/xui/en-us/floater_new_im.xml
-    skins/default/xui/en-us/floater_new_outfit_dialog.xml
-    skins/default/xui/en-us/floater_notifications_console.xml
-    skins/default/xui/en-us/floater_notification.xml
-    skins/default/xui/en-us/floater_object_im_info.xml
-    skins/default/xui/en-us/floater_openobject.xml
-    skins/default/xui/en-us/floater_pay_object.xml
-    skins/default/xui/en-us/floater_pay.xml
-    skins/default/xui/en-us/floater_postcard.xml
-    skins/default/xui/en-us/floater_post_process.xml
-    skins/default/xui/en-us/floater_perm_prefs.xml
-    skins/default/xui/en-us/floater_preferences.xml
-    skins/default/xui/en-us/floater_preview_animation.xml
-    skins/default/xui/en-us/floater_preview_classified.xml
-    skins/default/xui/en-us/floater_preview_embedded_texture.xml
-    skins/default/xui/en-us/floater_preview_event.xml
-    skins/default/xui/en-us/floater_preview_existing_landmark.xml
-    skins/default/xui/en-us/floater_preview_gesture.xml
-    skins/default/xui/en-us/floater_preview_notecard_keep_discard.xml
-    skins/default/xui/en-us/floater_preview_notecard.xml
-    skins/default/xui/en-us/floater_preview_sound.xml
-    skins/default/xui/en-us/floater_preview_texture_keep_discard.xml
-    skins/default/xui/en-us/floater_preview_texture.xml
-    skins/default/xui/en-us/floater_preview_url.xml
-    skins/default/xui/en-us/floater_price_for_listing.xml
-    skins/default/xui/en-us/floater_profile.xml
-    skins/default/xui/en-us/floater_region_info.xml
-    skins/default/xui/en-us/floater_report_abuse.xml
-    skins/default/xui/en-us/floater_report_bug.xml
-    skins/default/xui/en-us/floater_script_debug.xml
-    skins/default/xui/en-us/floater_script_ed_panel.xml
-    skins/default/xui/en-us/floater_script_preview.xml
-    skins/default/xui/en-us/floater_script_queue.xml
-    skins/default/xui/en-us/floater_script_search.xml
-    skins/default/xui/en-us/floater_select_key.xml
-    skins/default/xui/en-us/floater_sell_land.xml
-    skins/default/xui/en-us/floater_settings_debug.xml
-    skins/default/xui/en-us/floater_sim_release_message.xml
-    skins/default/xui/en-us/floater_snapshot.xml
-    skins/default/xui/en-us/floater_sound_preview.xml
-    skins/default/xui/en-us/floater_statistics.xml
-    skins/default/xui/en-us/floater_telehub.xml
-    skins/default/xui/en-us/floater_test.xml
-    skins/default/xui/en-us/floater_texture_ctrl.xml
-    skins/default/xui/en-us/floater_tools.xml
-    skins/default/xui/en-us/floater_top_objects.xml
-    skins/default/xui/en-us/floater_tos.xml
-    skins/default/xui/en-us/floater_url_entry.xml
-    skins/default/xui/en-us/floater_voice_wizard.xml
-    skins/default/xui/en-us/floater_water.xml
-    skins/default/xui/en-us/floater_wearable_save_as.xml
-    skins/default/xui/en-us/floater_windlight_options.xml
-    skins/default/xui/en-us/floater_world_map.xml
-    skins/default/xui/en-us/fonts.xml
-    skins/default/xui/en-us/legacy_menu_pie_attachment.xml
-	skins/default/xui/en-us/legacy_menu_pie_avatar.xml
-	skins/default/xui/en-us/legacy_menu_pie_land.xml
-	skins/default/xui/en-us/legacy_menu_pie_object.xml
-	skins/default/xui/en-us/legacy_menu_pie_self.xml
-    skins/default/xui/en-us/menu_inventory.xml
-    skins/default/xui/en-us/menu_login.xml
-    skins/default/xui/en-us/menu_mini_map.xml
-    skins/default/xui/en-us/menu_pie_attachment.xml
-    skins/default/xui/en-us/menu_pie_avatar.xml
-    skins/default/xui/en-us/menu_pie_hud.xml
-    skins/default/xui/en-us/menu_pie_land.xml
-    skins/default/xui/en-us/menu_mini_map.xml
-    skins/default/xui/en-us/menu_pie_object.xml
-    skins/default/xui/en-us/menu_pie_self.xml
-    skins/default/xui/en-us/menu_slurl.xml
-    skins/default/xui/en-us/menu_viewer.xml
-    skins/default/xui/en-us/mime_types.xml
-    skins/default/xui/en-us/notifications.xml
-    skins/default/xui/en-us/notify.xml
-    skins/default/xui/en-us/panel_audio_device.xml
-    skins/default/xui/en-us/panel_audio.xml
-    skins/default/xui/en-us/panel_avatar_classified.xml
-    skins/default/xui/en-us/panel_avatar_pick.xml
-    skins/default/xui/en-us/panel_avatar.xml
-    skins/default/xui/en-us/panel_bars.xml
-    skins/default/xui/en-us/panel_bg_tab.xml
-    skins/default/xui/en-us/panel_bg_toolbar.xml
-    skins/default/xui/en-us/panel_chat_bar.xml
-    skins/default/xui/en-us/panel_classified.xml
-    skins/default/xui/en-us/panel_event.xml
-    skins/default/xui/en-us/panel_friends.xml
-    skins/default/xui/en-us/panel_group_finder.xml
-    skins/default/xui/en-us/panel_group_general.xml
-    skins/default/xui/en-us/panel_group_invite.xml
-    skins/default/xui/en-us/panel_group_land_money.xml
-    skins/default/xui/en-us/panel_group_notices.xml
-    skins/default/xui/en-us/panel_group_roles.xml
-    skins/default/xui/en-us/panel_groups.xml
-    skins/default/xui/en-us/panel_group_voting.xml
-    skins/default/xui/en-us/panel_group.xml
-    skins/default/xui/en-us/panel_login.xml
-    skins/default/xui/en-us/panel_master_volume.xml
-    skins/default/xui/en-us/panel_media_controls.xml
-    skins/default/xui/en-us/panel_media_remote_expanded.xml
-    skins/default/xui/en-us/panel_media_remote.xml
-    skins/default/xui/en-us/panel_mini_map.xml
-    skins/default/xui/en-us/panel_notifications_channel.xml
-    skins/default/xui/en-us/panel_overlaybar.xml
-    skins/default/xui/en-us/panel_place_small.xml
-    skins/default/xui/en-us/panel_place.xml
-    skins/default/xui/en-us/panel_preferences_advanced.xml
-    skins/default/xui/en-us/panel_preferences_audio.xml
-    skins/default/xui/en-us/panel_preferences_chat.xml
-    skins/default/xui/en-us/panel_preferences_general.xml
-    skins/default/xui/en-us/panel_preferences_graphics1.xml
-    skins/default/xui/en-us/panel_preferences_im.xml
-    skins/default/xui/en-us/panel_preferences_input.xml
-    skins/default/xui/en-us/panel_preferences_network.xml
-    skins/default/xui/en-us/panel_preferences_popups.xml
-    skins/default/xui/en-us/panel_preferences_skins.xml
-    skins/default/xui/en-us/panel_preferences_voice.xml
-    skins/default/xui/en-us/panel_preferences_web.xml
-    skins/default/xui/en-us/panel_progress.xml
-    skins/default/xui/en-us/panel_radar.xml
-    skins/default/xui/en-us/panel_region_covenant.xml
-    skins/default/xui/en-us/panel_region_debug.xml
-    skins/default/xui/en-us/panel_region_estate.xml
-    skins/default/xui/en-us/panel_region_general.xml
-    skins/default/xui/en-us/panel_region_terrain.xml
-    skins/default/xui/en-us/panel_region_texture.xml
-    skins/default/xui/en-us/panel_scrolling_param.xml
-    skins/default/xui/en-us/panel_speaker_controls.xml
-    skins/default/xui/en-us/panel_status_bar.xml
-    skins/default/xui/en-us/panel_toolbar.xml
-    skins/default/xui/en-us/panel_top_pick.xml
-    skins/default/xui/en-us/panel_voice_controls.xml
-    skins/default/xui/en-us/panel_voice_enable.xml
-    skins/default/xui/en-us/panel_voice_options.xml
-    skins/default/xui/en-us/panel_voice_remote_expanded.xml
-    skins/default/xui/en-us/panel_voice_remote.xml
-    skins/default/xui/en-us/panel_windlight_controls.xml
-    skins/default/xui/en-us/panel_windlight_remote.xml
-    skins/default/xui/en-us/panel_windlight_remote_expanded.xml
-    skins/default/xui/en-us/role_actions.xml
-    skins/default/xui/en-us/strings.xml
-    skins/default/xui/en-us/teleport_strings.xml
-    skins/default/xui/en-us/xui_version.xml
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/skins/default/colors.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/skins/default/colors_base.xml
+
+
+
     )
+
+list(APPEND viewer_XUI_FILES ${viewer_XUI_FILE_GLOB_LIST})
+list(SORT viewer_XUI_FILES)
 
 source_group("XUI Files" FILES ${viewer_XUI_FILES})
 
@@ -1297,9 +1169,24 @@ set_source_files_properties(${viewer_XUI_FILES}
 
 list(APPEND viewer_SOURCE_FILES ${viewer_XUI_FILES})
 
+
+set(viewer_LIBRARY_INSTALL_FILES
+    ${CMAKE_SOURCE_DIR}/../install.xml
+    )
+
+source_group("Library Install File" FILES ${viewer_LIBRARY_INSTALL_FILES})
+
+set_source_files_properties(${viewer_LIBRARY_INSTALL_FILES}
+                            PROPERTIES HEADER_FILE_ONLY TRUE)
+                            
+list(APPEND viewer_SOURCE_FILES ${viewer_LIBRARY_INSTALL_FILES})
+
+
 set(viewer_APPSETTINGS_FILES
     app_settings/anim.ini
+    app_settings/ao_template.ini
     app_settings/cmd_line.xml
+    app_settings/default_grids.xml
     app_settings/grass.xml
     app_settings/high_graphics.xml
     app_settings/keys.ini
@@ -1406,9 +1293,9 @@ add_custom_target(
 
 if (WINDOWS)
     if(MSVC71)
-        set(release_flags "/MAP:Release/${VIEWER_BINARY_NAME}.map /MAPINFO:LINES")
+        set(release_flags "/MAP:Release/${VIEWER_BINARY_NAME}.map /MAPINFO:LINES /LARGEADDRESSAWARE")
     else(MSVC71)
-        set(release_flags "/MAP:Release/${VIEWER_BINARY_NAME}.map")
+        set(release_flags "/MAP:Release/${VIEWER_BINARY_NAME}.map /LARGEADDRESSAWARE")
     endif(MSVC71)
     
     set_target_properties(${VIEWER_BINARY_NAME}
@@ -1469,6 +1356,8 @@ if (WINDOWS)
           --configuration=${CMAKE_CFG_INTDIR}
           --channel=${VIEWER_CHANNEL}
           --login_channel=${VIEWER_LOGIN_CHANNEL}
+          --standalone=${STANDALONE}
+          --buildtype=${CMAKE_BUILD_TYPE}
           --grid=${GRID}
           --source=${CMAKE_CURRENT_SOURCE_DIR}
               --artwork=${ARTWORK_DIR}
@@ -1477,6 +1366,9 @@ if (WINDOWS)
               --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/touched.bat
         DEPENDS ${VIEWER_BINARY_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         )
+
+    add_dependencies(${VIEWER_BINARY_NAME} SLPlugin media_plugin_quicktime media_plugin_webkit) # Removed media_plugin_gstreamer010
+
     if (PACKAGE)
       add_custom_target(package ALL DEPENDS ${CMAKE_CFG_INTDIR}/touched.bat)
       add_dependencies(package windows-updater windows-crash-logger)
@@ -1489,8 +1381,8 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${LLIMAGE_LIBRARIES}
     ${LLIMAGEJ2COJ_LIBRARIES}
     ${LLINVENTORY_LIBRARIES}
-    ${LLMEDIA_LIBRARIES}
     ${LLMESSAGE_LIBRARIES}
+    ${LLPLUGIN_LIBRARIES}
     ${LLPRIMITIVE_LIBRARIES}
     ${LLRENDER_LIBRARIES}
     ${FREETYPE_LIBRARIES}
@@ -1503,20 +1395,23 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${LLCOMMON_LIBRARIES}
     ${NDOF_LIBRARY}
     ${viewer_LIBRARIES}
+    ${BOOST_FILESYSTEM_LIBRARY}
     ${BOOST_PROGRAM_OPTIONS_LIBRARY}
     ${BOOST_REGEX_LIBRARY}
     ${BOOST_SIGNALS_LIBRARY}
+    ${BOOST_SYSTEM_LIBRARY}
     ${DBUSGLIB_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${FMODWRAPPER_LIBRARY}
     ${OPENGL_LIBRARIES}
-    ${MOZLIB_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
     ${SDL_LIBRARY}
     ${SMARTHEAP_LIBRARY}
     ${UI_LIBRARIES}
     ${WINDOWS_LIBRARIES}
     ${XMLRPCEPI_LIBRARIES}
     ${ELFIO_LIBRARIES}
+    ${HUNSPELL_LIBRARY}
     )
 
 build_version(viewer)
@@ -1540,6 +1435,8 @@ if (LINUX)
       COMMAND ${PYTHON_EXECUTABLE}
       ARGS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
+        --standalone=${STANDALONE}
+        --buildtype=${CMAKE_BUILD_TYPE}
         --grid=${GRID}
         --channel=${VIEWER_CHANNEL}
         --login_channel=${VIEWER_LOGIN_CHANNEL}
@@ -1552,6 +1449,8 @@ if (LINUX)
         --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/.${product}.touched
       DEPENDS imprudence-stripped ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
       )
+      
+  add_dependencies(${VIEWER_BINARY_NAME} SLPlugin media_plugin_gstreamer010 media_plugin_webkit)
 
   if (NOT INSTALL)
     add_custom_target(package ALL DEPENDS ${product}.tar.bz2)
@@ -1589,6 +1488,8 @@ if (DARWIN)
       --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${product}.app
     DEPENDS ${VIEWER_BINARY_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
     )
+    
+  add_dependencies(${VIEWER_BINARY_NAME} SLPlugin media_plugin_quicktime media_plugin_webkit media_plugin_gstreamer010)
 
   if (PACKAGE)
       add_custom_target(package ALL DEPENDS ${VIEWER_BINARY_NAME}) 
@@ -1599,6 +1500,8 @@ if (DARWIN)
         COMMAND ${PYTHON_EXECUTABLE}
         ARGS
           ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
+          --standalone=${STANDALONE}
+          --buildtype=${CMAKE_BUILD_TYPE}
           --grid=${GRID}
           --configuration=${CMAKE_CFG_INTDIR}
           --channel=${VIEWER_CHANNEL}
@@ -1608,11 +1511,12 @@ if (DARWIN)
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${product}.app
           --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/.${product}.touched
+
         DEPENDS
           ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
       )
 
-
+      add_dependencies(${VIEWER_BINARY_NAME} SLPlugin media_plugin_quicktime media_plugin_webkit media_plugin_gstreamer010)
       add_custom_command(
         TARGET package POST_BUILD
         COMMAND ${PYTHON_EXECUTABLE}
@@ -1638,4 +1542,91 @@ if (INSTALL)
   include(${CMAKE_CURRENT_SOURCE_DIR}/ViewerInstall.cmake)
 endif (INSTALL)
 
-ADD_VIEWER_BUILD_TEST(llagentaccess viewer)
+#ADD_VIEWER_BUILD_TEST(llagentaccess viewer)
+
+# Don't do these for DARWIN or LINUX here -- they're taken care of by viewer_manifest.py
+if (WINDOWS)
+
+  get_target_property(BUILT_LLCOMMON llcommon LOCATION)
+  add_custom_command(
+      TARGET ${VIEWER_BINARY_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND}
+      ARGS
+      -E
+      copy_if_different
+      ${BUILT_LLCOMMON}
+      ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
+      COMMENT "Copying llcommon.dll to the runtime folder."
+      )
+
+  get_target_property(BUILT_SLPLUGIN SLPlugin LOCATION)
+  add_custom_command(
+      TARGET ${VIEWER_BINARY_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND}
+      ARGS
+        -E
+        copy_if_different
+        ${BUILT_SLPLUGIN}
+        ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
+      COMMENT "Copying SLPlugin executable to the runtime folder."
+      )
+
+  get_target_property(BUILT_WEBKIT_PLUGIN media_plugin_webkit LOCATION)
+    add_custom_command(
+        TARGET ${VIEWER_BINARY_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND}
+        ARGS
+          -E
+          copy_if_different
+          ${BUILT_WEBKIT_PLUGIN}
+          ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/llplugin
+        COMMENT "Copying WebKit Plugin to the runtime folder."
+        )
+        
+   #get_target_property(BUILT_GSTREAMER_PLUGIN media_plugin_gstreamer010 LOCATION)
+   # add_custom_command(
+   #     TARGET ${VIEWER_BINARY_NAME} POST_BUILD
+   #     COMMAND ${CMAKE_COMMAND}
+   #     ARGS
+   #       -E
+   #       copy_if_different
+   #       ${BUILT_GSTREAMER_PLUGIN}
+   #       ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/llplugin
+   #     COMMENT "Copying Gstreamer Plugin to the runtime folder."
+   #     )
+        
+  get_target_property(BUILT_QUICKTIME_PLUGIN media_plugin_quicktime LOCATION)
+    add_custom_command(
+        TARGET ${VIEWER_BINARY_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND}
+        ARGS
+          -E
+          copy_if_different
+          ${BUILT_QUICKTIME_PLUGIN}
+          ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/llplugin
+        COMMENT "Copying Quicktime Plugin to the runtime folder."
+        )
+
+  # Copying the mime_types.xml file to app_settings
+  set(mime_types_source "${CMAKE_SOURCE_DIR}/newview/skins/default/xui/en-us")
+  set(mime_types_dest "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/app_settings")
+  add_custom_command(
+      TARGET ${VIEWER_BINARY_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND}
+      ARGS 
+	 -E
+	 copy_if_different
+	 ${mime_types_source}/mime_types_windows.xml 
+	 ${mime_types_dest}/mime_types_windows.xml
+      COMMENT "Copying mime_types_windows.xml to the runtime app_settings folder."
+      )
+  
+endif (WINDOWS)
+
+if (DARWIN)
+# Don't do this here -- it's taken care of by viewer_manifest.py
+#  add_custom_command(TARGET ${VIEWER_BINARY_NAME} POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/../libraries/universal-darwin/lib_release/libllqtwebkit.dylib ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/llplugin/
+#    DEPENDS ${CMAKE_SOURCE_DIR}/../libraries/universal-darwin/lib_release/libllqtwebkit.dylib
+#  )
+endif (DARWIN)

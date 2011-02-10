@@ -54,6 +54,7 @@ BOOL LLPanelAudioVolume::postBuild()
 	childSetCommitCallback("SFX Volume", onCommitVolumeChange);
 	childSetCommitCallback("UI Volume", onCommitVolumeChange);
 	childSetCommitCallback("Wind Volume", onCommitVolumeChange);
+	childSetCommitCallback("Gestures Volume", onCommitVolumeChange);
 	return TRUE;
 }
 
@@ -66,14 +67,16 @@ LLPanelAudioVolume::~LLPanelAudioVolume ()
 //
 void LLPanelAudioVolume::draw()
 {
-	BOOL mute = gSavedSettings.getBOOL("MuteAudio");
-	bool enable = mute ? false : true;
+
+	static BOOL* sMuteAudio = rebind_llcontrol<BOOL>("MuteAudio", &gSavedSettings, true);
+	bool enable = (*sMuteAudio) ? false : true;
 	childSetEnabled("Music Volume", enable);
 	childSetEnabled("Media Volume", enable);
 	childSetEnabled("Voice Volume", enable);
 	childSetEnabled("SFX Volume", enable);
 	childSetEnabled("UI Volume", enable);
 	childSetEnabled("Wind Volume", enable);
+	childSetEnabled("Gestures Volume", enable);
 
 	childSetEnabled("mute_music", enable);
 	childSetEnabled("mute_media", enable);
@@ -81,6 +84,7 @@ void LLPanelAudioVolume::draw()
 	childSetEnabled("mute_sfx", enable);
 	childSetEnabled("mute_wind", enable);
 	childSetEnabled("mute_ui", enable);
+	childSetEnabled("mute_gestures", enable);
 
 	LLPanel::draw();
 }
@@ -117,6 +121,10 @@ void LLPanelAudioVolume::onCommitVolumeChange(LLUICtrl* ctrl, void* user_data)
 	else if (control_name == "AudioLevelVoice")
 	{
 		gSavedSettings.setBOOL("MuteVoice", FALSE);
+	}
+	else if (control_name == "AudioLevelGestures")
+	{
+		gSavedSettings.setBOOL("MuteGestures", FALSE);
 	}
 }
 

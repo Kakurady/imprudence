@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel border="true" bottom="-409" enabled="true" follows="left|top|right|bottom"
-     height="408" label="Voice Chat" left="102" mouse_opaque="true" name="chat"
+     height="408" label="Voice" left="102" mouse_opaque="true" name="chat"
      width="517">
 	<text_editor type="string" length="1" allow_html="false" bg_readonly_color="0 0 0 0" bottom_delta="-26"
 	     embedded_items="false" enabled="false" follows="left|top"
@@ -27,7 +27,7 @@
 	     font="SansSerifSmall" height="16" hide_border="true" hide_scrollbar="true"
 	     left_delta="0" max_length="65535" mouse_opaque="true"
 	     name="push_to_talk_heading" width="445" word_wrap="true">
-		Push To Talk
+		Push To Talk:
 	</text>
 	<text_editor type="string" length="1" allow_html="false" bg_readonly_color="0 0 0 0" bottom_delta="-60"
 	     embedded_items="false" enabled="false" follows="left|top"
@@ -55,13 +55,13 @@
 	<button bottom_delta="-25" follows="left|top" font="SansSerif" halign="center"
 	     height="20" label="Set Key" left_delta="0" mouse_opaque="true"
 	     name="set_voice_hotkey_button" width="115" />
-	<button bottom_delta="0" follows="left" font="SansSerif" halign="center" height="20"
+	<button bottom_delta="0" follows="left|top" font="SansSerif" halign="center" height="20"
 	     label="Middle Mouse Button" left_delta="120" mouse_opaque="true"
 	     name="set_voice_middlemouse_button" width="160" />
 	<text allow_html="false" bg_readonly_color="0 0 0 0" bottom_delta="-25"
 	     embedded_items="false" enabled="true" follows="left|top" height="16"
 	     left="28" name="privacy_heading" width="445">
-		Privacy Options
+		Privacy:
 	</text>
 	<check_box bottom_delta="-20" enabled="true"
 	     follows="left|top" font="SansSerifSmall" height="16" initial_value="false"
@@ -76,6 +76,9 @@
 	<button bottom_delta="-40" follows="left|top" font="SansSerif" height="20"
 	     label="Device Settings" left="28" mouse_opaque="true"
 	     name="device_settings_btn" width="155" />
+  	<button bottom_delta="0" follows="left|top" font="SansSerif" halign="center" height="20"
+         	label="Reconnect to Voice" left_delta="160" mouse_opaque="true"
+         	name="reset_voice" width="160" />
 	<text_editor type="string" length="1" allow_html="false" bg_readonly_color="0 0 0 0" bottom_delta="-32"
 	     embedded_items="false" enabled="false" follows="left|top"
 	     font="SansSerifSmall" height="35" hide_border="true" hide_scrollbar="true"

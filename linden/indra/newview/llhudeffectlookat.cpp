@@ -33,6 +33,7 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llhudeffectlookat.h"
+#include "llhudrender.h"
 
 #include "llrender.h"
 
@@ -40,13 +41,19 @@
 #include "llagent.h"
 #include "llvoavatar.h"
 #include "lldrawable.h"
+#include "llviewercontrol.h"
 #include "llviewerobjectlist.h"
+#include "llviewerwindow.h"
 #include "llrendersphere.h"
 #include "llselectmgr.h"
 #include "llglheaders.h"
-
+#include "llresmgr.h"
+// [RLVa:KB] - Imprudence-1.3.0
+#include "rlvhandler.h"
+// [/RLVa:KB]
 
 #include "llxmltree.h"
+#include "hippolimits.h"
 
 
 BOOL LLHUDEffectLookAt::sDebugLookAt = FALSE;
@@ -267,6 +274,51 @@ LLHUDEffectLookAt::~LLHUDEffectLookAt()
 //-----------------------------------------------------------------------------
 void LLHUDEffectLookAt::packData(LLMessageSystem *mesgsys)
 {
+	// pack both target object and position
+	// position interpreted as offset if target object is non-null
+	ELookAtType	target_type 		= mTargetType;
+	LLVector3d	target_offset_global 	= mTargetOffsetGlobal;
+	LLViewerObject* target_object		= (LLViewerObject*)mTargetObject;
+
+
+	LLViewerObject* source_object = (LLViewerObject*)mSourceObject;
+	LLVOAvatar* source_avatar = NULL;
+
+	if (!source_object)//imprudence TODO: find out why this happens at all and fix there
+	{
+		LL_DEBUGS("HUDEffect")<<"NULL-Object HUDEffectLookAt message" <<  LL_ENDL;
+		markDead();
+		return;
+	}
+	if (source_object->isAvatar())
+	{
+		source_avatar = (LLVOAvatar*)source_object;
+	}
+	else //imprudence TODO: find out why this happens at all and fix there
+	{
+		LL_DEBUGS("HUDEffect")<<"Non-Avatar HUDEffectLookAt message for ID: " <<  source_object->getID().asString()<< LL_ENDL;
+		markDead();
+		return;
+	}
+
+
+	bool is_self = source_avatar->isSelf();
+	static BOOL *sPrivateLookAtTarget = rebind_llcontrol<BOOL>("PrivateLookAtTarget", &gSavedSettings, true);
+	if (!is_self) //imprudence TODO: find out why this happens at all and fix there
+	{
+		LL_DEBUGS("HUDEffect")<< "Non-self Avatar HUDEffectLookAt message for ID: " << source_avatar->getID().asString() << LL_ENDL;
+		markDead();
+		return;
+	}
+	else if (*sPrivateLookAtTarget && target_type != LOOKAT_TARGET_AUTO_LISTEN)
+	{
+		//this mimicks "do nothing"
+		target_type = LOOKAT_TARGET_AUTO_LISTEN;
+		target_offset_global.setVec(2.5, 0.0, 0.0);
+		target_object = mSourceObject;
+	}
+
+
 	// Pack the default data
 	LLHUDEffect::packData(mesgsys);
 
@@ -278,30 +330,10 @@ void LLHUDEffectLookAt::packData(LLMessageSystem *mesgsys)
 	{
 		htonmemcpy(&(packed_data[SOURCE_AVATAR]), mSourceObject->mID.mData, MVT_LLUUID, 16);
 	}
-	else
+	else //um ... we already returned ... how's that the case?
 	{
 		htonmemcpy(&(packed_data[SOURCE_AVATAR]), LLUUID::null.mData, MVT_LLUUID, 16);
 	}
-
-	// pack both target object and position
-	// position interpreted as offset if target object is non-null
-	ELookAtType	target_type 		= mTargetType;
-	LLVector3d	target_offset_global 	= mTargetOffsetGlobal;
-	LLViewerObject* target_object		= (LLViewerObject*) mTargetObject;
-
-	LLVOAvatar* source_avatar = (LLVOAvatar*)(LLViewerObject*)mSourceObject;
-	bool is_self = source_avatar-> isSelf();
-	bool is_private = gSavedSettings.getBOOL("PrivateLookAtTarget"); 
-
-	if (is_private && is_self)
-	{
-		//this mimicks own avatar selected, consider not to change this
-		//because bots could profile other settings for evil client detection
-		target_type = LOOKAT_TARGET_SELECT;
-		target_offset_global.setVec(5.0, 0.0, 0.0);
-		target_object = mSourceObject;
-	}
-
 
 	if (mTargetObject)
 	{
@@ -386,7 +418,7 @@ void LLHUDEffectLookAt::unpackData(LLMessageSystem *mesgsys, S32 blocknum)
 	htonmemcpy(&lookAtTypeUnpacked, &(packed_data[LOOKAT_TYPE]), MVT_U8, 1);
 	if (lookAtTypeUnpacked > 10)
 	{
-		LL_DEBUGS("LookAt")<< "wrong lookAtTypeUnpacked: " << lookAtTypeUnpacked << LL_ENDL;
+		LL_DEBUGS("HUDEffect")<< "wrong lookAtTypeUnpacked: " << lookAtTypeUnpacked << LL_ENDL;
 		lookAtTypeUnpacked = 0;
 	}
 
@@ -522,7 +554,7 @@ void LLHUDEffectLookAt::setSourceObject(LLViewerObject* objectp)
 //-----------------------------------------------------------------------------
 void LLHUDEffectLookAt::render()
 {
-	if (sDebugLookAt && mSourceObject.notNull())
+	if (sDebugLookAt && mSourceObject.notNull() && gHippoLimits->mAllowMinimap) //Has to have allow minimap as well, otherwise it defeats the purpose of no minimap
 	{
 		gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 
@@ -545,6 +577,41 @@ void LLHUDEffectLookAt::render()
 			gGL.vertex3f(0.f, 0.f, 1.f);
 		} gGL.end();
 		gGL.popMatrix();
+
+		static BOOL *sEmeraldShowLookAtNames = rebind_llcontrol<BOOL>("ShowLookAtNames", &gSavedSettings, true);
+		if (*sEmeraldShowLookAtNames)
+		{
+			const LLFontGL* fontp = LLResMgr::getInstance()->getRes( LLFONT_SANSSERIF_SMALL );
+			LLGLEnable color_mat(GL_COLOR_MATERIAL);
+			LLGLDepthTest gls_depth(GL_TRUE, GL_FALSE);
+			LLGLState gls_blend(GL_BLEND, TRUE);
+			LLGLState gls_alpha(GL_ALPHA_TEST, TRUE);
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			gGL.getTexUnit(0)->setTextureBlendType(LLTexUnit::TB_MULT);
+			gGL.getTexUnit(0)->enable(LLTexUnit::TT_TEXTURE);
+
+			// Well.. after that nasty complex try at somehow getting it to work initialising all sorts of stuff
+			// It seems to work and fix the previous bug of merely displaying untextured cubes, 
+			// probably due to the helpful getTexUnit->enable. - Nexii
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			LLVector3 render_pos = target + LLVector3( 0.f, 0.f, 0.25f );
+			LLColor4 Color = LLColor4( (*mAttentions)[mTargetType].mColor, 1.0f ); 
+			std::string text = ((LLVOAvatar*)(LLViewerObject*)mSourceObject)->getFullname();
+			
+// [RLVa:KB] - Imprudence-1.3.0
+			// Show anonyms in place of actual names when @shownames=n restricted
+			if (gRlvHandler.hasBehaviour(RLV_BHVR_SHOWNAMES))
+			{
+				text = RlvStrings::getAnonym(text);
+			}
+// [/RLVa:KB]
+
+			gViewerWindow->setupViewport();
+			hud_render_utf8text(text, render_pos, *fontp, LLFontGL::NORMAL, -0.5f * fontp->getWidthF32(text), 3.f, Color, FALSE );
+			
+			glPopMatrix();
+		}
 	}
 }
 

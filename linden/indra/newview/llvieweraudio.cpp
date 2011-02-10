@@ -32,7 +32,7 @@
 
 #include "llviewerprecompiledheaders.h"
 
-#include "audioengine.h"
+#include "llaudioengine.h"
 #include "llagent.h"
 #include "llappviewer.h"
 #include "llvieweraudio.h"
@@ -114,10 +114,14 @@ void init_audio()
 
 void audio_update_volume(bool force_update)
 {
-	F32 master_volume = gSavedSettings.getF32("AudioLevelMaster");
-	bool wind_muted = gSavedSettings.getBOOL("MuteWind");
-	bool mute_audio = gSavedSettings.getBOOL("MuteAudio");
 
+	static BOOL* sMuteAudio = rebind_llcontrol<BOOL>("MuteAudio", &gSavedSettings, true);
+	static BOOL* sMuteWind = rebind_llcontrol<BOOL>("MuteWind", &gSavedSettings, true);
+	static F32 *sAudioLevelMaster = rebind_llcontrol<F32>("AudioLevelMaster", &gSavedSettings, true);
+
+	F32 master_volume = (*sAudioLevelMaster);
+	bool wind_muted = (*sMuteWind);
+	BOOL mute_audio = (*sMuteAudio);
 	if (!gViewerWindow->getActive() && (gSavedSettings.getBOOL("MuteWhenMinimized")))
 	{
 		mute_audio = TRUE;
@@ -130,7 +134,6 @@ void audio_update_volume(bool force_update)
 		gAudiop->setMasterGain ( master_volume );
 
 		gAudiop->setDopplerFactor(gSavedSettings.getF32("AudioLevelDoppler"));
-		gAudiop->setDistanceFactor(gSavedSettings.getF32("AudioLevelDistance")); 
 		gAudiop->setRolloffFactor(gSavedSettings.getF32("AudioLevelRolloff"));
 
 		if(wind_muted == false)
@@ -150,6 +153,8 @@ void audio_update_volume(bool force_update)
 								  gSavedSettings.getBOOL("MuteUI") ? 0.f : gSavedSettings.getF32("AudioLevelUI"));
 		gAudiop->setSecondaryGain(LLAudioEngine::AUDIO_TYPE_AMBIENT,
 								  gSavedSettings.getBOOL("MuteAmbient") ? 0.f : gSavedSettings.getF32("AudioLevelAmbient"));
+		gAudiop->setSecondaryGain(LLAudioEngine::AUDIO_TYPE_GESTURE,
+								  gSavedSettings.getBOOL("MuteGestures") ? 0.f : gSavedSettings.getF32("AudioLevelGestures"));
 	}
 
 	// Streaming Music

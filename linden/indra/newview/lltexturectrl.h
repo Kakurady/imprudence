@@ -110,6 +110,9 @@ public:
 	void			setAllowNoTexture( BOOL b )					{ mAllowNoTexture = b; }
 	bool			getAllowNoTexture() const					{ return mAllowNoTexture; }
 
+	void			setAllowInvisibleTexture(BOOL b)			{ mAllowInvisibleTexture = b; }
+	bool			getAllowInvisibleTexture() const			{ return mAllowInvisibleTexture; }
+
 	const LLUUID&	getImageItemID() { return mImageItemID; }
 
 	void			setImageAssetID(const LLUUID &image_asset_id);
@@ -137,6 +140,7 @@ public:
 
 	void			onFloaterClose();
 	void			onFloaterCommit(ETexturePickOp op);
+	void			onFloaterCommit(ETexturePickOp op, LLUUID id); // tag: vaa emerald local_asset_browser
 
 	// This call is returned when a drag is detected. Your callback
 	// should return TRUE if the drag is acceptable.
@@ -174,6 +178,7 @@ private:
 	LLTextBox*				 mCaption;
 	std::string				 mLabel;
 	BOOL					 mAllowNoTexture; // If true, the user can select "none" as an option
+	BOOL					 mAllowInvisibleTexture; // If true, the user can select "Invisible" as an option
 	LLCoordGL				 mLastFloaterLeftTop;
 	PermissionMask			 mImmediateFilterPermMask;
 	PermissionMask			 mNonImmediateFilterPermMask;

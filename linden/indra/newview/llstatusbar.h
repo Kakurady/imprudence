@@ -47,6 +47,7 @@ class LLUICtrl;
 class LLUUID;
 class LLFrameTimer;
 class LLStatGraph;
+class ViewerTime;
 
 // used by LCD screen
 class LLRegionDetails
@@ -105,8 +106,11 @@ public:
 	void setLandCommitted(S32 committed);
 
 	void		refresh();
+	// some elements should hide in mouselook
 	void setVisibleForMouselook(bool visible);
-		// some elements should hide in mouselook
+
+	// Update elements that might have changed after login screen
+	void updateElements();
 
 	// ACCESSORS
 	S32			getBalance() const;
@@ -117,11 +121,9 @@ public:
 	S32 getSquareMetersCommitted() const;
 	S32 getSquareMetersLeft() const;
 	LLRegionDetails mRegionDetails;
-
+	
+	void clearBalance() { mBalance = 0; }
 private:
-	// simple method to setup the part that holds the date
-	void setupDate();
-
 	static void onCommitSearch(LLUICtrl*, void* data);
 	static void onClickSearch(void* data);
 	static void onClickStatGraph(void* data);
@@ -144,10 +146,7 @@ private:
 	S32				mSquareMetersCommitted;
 	LLFrameTimer*	mBalanceTimer;
 	LLFrameTimer*	mHealthTimer;
-	
-	static std::vector<std::string> sDays;
-	static std::vector<std::string> sMonths;
-	static const U32 MAX_DATE_STRING_LENGTH;
+	ViewerTime*		mViewerTime;
 };
 
 // *HACK: Status bar owns your cached money balance. JC

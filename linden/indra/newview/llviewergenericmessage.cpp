@@ -32,14 +32,14 @@
  */
 
 #include "llviewerprecompiledheaders.h"
-
 #include "llviewergenericmessage.h"
 
 #include "lldispatcher.h"
 #include "lluuid.h"
 #include "message.h"
-
 #include "llagent.h"
+#include "lluuid.h"
+#include "lightshare.h"
 
 
 LLDispatcher gGenericDispatcher;
@@ -82,20 +82,32 @@ void process_generic_message(LLMessageSystem* msg, void**)
 {
 	LLUUID agent_id;
 	msg->getUUID("AgentData", "AgentID", agent_id);
-	if (agent_id != gAgent.getID())
+	std::string method;
+	msg->getStringFast(_PREHASH_MethodData, _PREHASH_Method, method);
+	
+	// TODO: Use a proper dispatcher.
+	if(method == "Windlight")
+	{	
+		WindlightMessage::processWindlight(msg, NULL);
+		return;
+	}
+
+	if( agent_id != gAgent.getID() )
 	{
 		llwarns << "GenericMessage for wrong agent" << llendl;
 		return;
 	}
-
-	std::string request;
-	LLUUID invoice;
-	LLDispatcher::sparam_t strings;
-	LLDispatcher::unpackMessage(msg, request, invoice, strings);
-
-	if(!gGenericDispatcher.dispatch(request, invoice, strings))
+	else
 	{
-		llwarns << "GenericMessage " << request << " failed to dispatch" 
-			<< llendl;
+		std::string request;
+		LLUUID invoice;
+		LLDispatcher::sparam_t strings;
+		LLDispatcher::unpackMessage(msg, request, invoice, strings);
+
+		if(!gGenericDispatcher.dispatch(request, invoice, strings))
+		{
+			llwarns << "GenericMessage " << request << " failed to dispatch" 
+				<< llendl;
+		}
 	}
 }

@@ -48,8 +48,8 @@
 #include "llspinctrl.h"
 #include "message.h"
 
+#include "impprefsfonts.h"
 #include "llcommandhandler.h"
-#include "llfloaterabout.h"
 #include "llfloaterpreference.h"
 #include "llpanelnetwork.h"
 #include "llpanelaudioprefs.h"
@@ -64,6 +64,7 @@
 #include "llpanelskins.h"
 #include "llprefsadvanced.h"
 #include "llprefschat.h"
+#include "llprefscolors.h"
 #include "llprefsvoice.h"
 #include "llprefsim.h"
 #include "llresizehandle.h"
@@ -94,7 +95,7 @@ public:
 	// requires trusted browser
 	LLPreferencesHandler() : LLCommandHandler("preferences", true) { }
 	bool handle(const LLSD& tokens, const LLSD& query_map,
-				LLWebBrowserCtrl* web)
+				LLMediaCtrl* web)
 	{
 		LLFloaterPreference::show(NULL);
 		return true;
@@ -133,7 +134,9 @@ LLPreferenceCore::LLPreferenceCore(LLTabContainer* tab_container, LLButton * def
 	mAudioPanel(NULL),
 	mMsgPanel(NULL),
 	mSkinsPanel(NULL),
+	mPrefsColors(NULL),
 	mLCDPanel(NULL),
+	mPrefsFonts(NULL),
 	mPrefsAdvanced(NULL)
 {
 	mGeneralPanel = new LLPanelGeneral();
@@ -164,13 +167,18 @@ LLPreferenceCore::LLPreferenceCore(LLTabContainer* tab_container, LLButton * def
 	mTabContainer->addTabPanel(mPrefsChat->getPanel(), mPrefsChat->getPanel()->getLabel(), FALSE, onTabChanged, mTabContainer);
 	mPrefsChat->getPanel()->setDefaultBtn(default_btn);
 
-	mPrefsVoice = new LLPrefsVoice();
-	mTabContainer->addTabPanel(mPrefsVoice, mPrefsVoice->getLabel(), FALSE, onTabChanged, mTabContainer);
-	mPrefsVoice->setDefaultBtn(default_btn);
+	mPrefsColors = new LLPrefsColors();
+	mTabContainer->addTabPanel(mPrefsColors, mPrefsColors->getLabel(), FALSE, onTabChanged, mTabContainer);
+	mPrefsColors->setDefaultBtn(default_btn);
 
 	mPrefsIM = new LLPrefsIM();
 	mTabContainer->addTabPanel(mPrefsIM->getPanel(), mPrefsIM->getPanel()->getLabel(), FALSE, onTabChanged, mTabContainer);
 	mPrefsIM->getPanel()->setDefaultBtn(default_btn);
+	
+	mPrefsVoice = new LLPrefsVoice();
+	mTabContainer->addTabPanel(mPrefsVoice, mPrefsVoice->getLabel(), FALSE, onTabChanged, mTabContainer);
+	mPrefsVoice->setDefaultBtn(default_btn);
+
 
 #if LL_LCD_COMPILE
 
@@ -193,6 +201,10 @@ LLPreferenceCore::LLPreferenceCore(LLTabContainer* tab_container, LLButton * def
 	mSkinsPanel = new LLPanelSkins();
 	mTabContainer->addTabPanel(mSkinsPanel, mSkinsPanel->getLabel(), FALSE, onTabChanged, mTabContainer);
 	mSkinsPanel->setDefaultBtn(default_btn);
+
+	mPrefsFonts = new ImpPrefsFonts();
+	mTabContainer->addTabPanel(mPrefsFonts, mPrefsFonts->getLabel(), FALSE, onTabChanged, mTabContainer);
+	mPrefsFonts->setDefaultBtn(default_btn);
 
 	mPrefsAdvanced = new LLPrefsAdvanced();
 	mTabContainer->addTabPanel(mPrefsAdvanced, mPrefsAdvanced->getLabel(), FALSE, onTabChanged, mTabContainer);
@@ -262,7 +274,16 @@ LLPreferenceCore::~LLPreferenceCore()
 		delete mPrefsAdvanced;
 		mPrefsAdvanced = NULL;
 	}
-
+	if (mPrefsFonts)
+	{
+		delete mPrefsFonts;
+		mPrefsFonts = NULL;
+	}
+	if (mPrefsColors)
+	{
+		delete mPrefsColors;
+		mPrefsColors = NULL;
+	}
 }
 
 
@@ -279,6 +300,8 @@ void LLPreferenceCore::apply()
 	mMsgPanel->apply();
 	mSkinsPanel->apply();
 	mPrefsAdvanced->apply();
+	mPrefsFonts->apply();
+	mPrefsColors->apply();
 
 	// hardware menu apply
 	LLFloaterHardwareSettings::instance()->apply();
@@ -308,6 +331,8 @@ void LLPreferenceCore::cancel()
 	mMsgPanel->cancel();
 	mSkinsPanel->cancel();
 	mPrefsAdvanced->cancel();
+	mPrefsFonts->cancel();
+	mPrefsColors->cancel();
 
 	// cancel hardware menu
 	LLFloaterHardwareSettings::instance()->cancel();
@@ -353,7 +378,6 @@ LLFloaterPreference::LLFloaterPreference()
 
 BOOL LLFloaterPreference::postBuild()
 {
-	requires<LLButton>("About...");
 	requires<LLButton>("OK");
 	requires<LLButton>("Cancel");
 	requires<LLButton>("Apply");
@@ -363,9 +387,6 @@ BOOL LLFloaterPreference::postBuild()
 	{
 		return FALSE;
 	}
-
-	mAboutBtn = getChild<LLButton>("About...");
-	mAboutBtn->setClickedCallback(onClickAbout, this);
 	
 	mApplyBtn = getChild<LLButton>("Apply");
 	mApplyBtn->setClickedCallback(onBtnApply, this);
@@ -430,13 +451,6 @@ void LLFloaterPreference::show(void*)
 }
 
 
-// static
-void LLFloaterPreference::onClickAbout(void*)
-{
-	LLFloaterAbout::show(NULL);
-}
-
-
 // static 
 void LLFloaterPreference::onBtnOK( void* userdata )
 {
@@ -444,7 +458,7 @@ void LLFloaterPreference::onBtnOK( void* userdata )
 	// commit any outstanding text entry
 	if (fp->hasFocus())
 	{
-		LLUICtrl* cur_focus = gFocusMgr.getKeyboardFocus();
+		LLUICtrl* cur_focus = dynamic_cast<LLUICtrl*>(gFocusMgr.getKeyboardFocus());
 		if (cur_focus->acceptsTextInput())
 		{
 			cur_focus->onCommit();
@@ -478,7 +492,7 @@ void LLFloaterPreference::onBtnApply( void* userdata )
 	LLFloaterPreference *fp =(LLFloaterPreference *)userdata;
 	if (fp->hasFocus())
 	{
-		LLUICtrl* cur_focus = gFocusMgr.getKeyboardFocus();
+		LLUICtrl* cur_focus = dynamic_cast<LLUICtrl*>(gFocusMgr.getKeyboardFocus());
 		if (cur_focus->acceptsTextInput())
 		{
 			cur_focus->onCommit();
@@ -504,7 +518,7 @@ void LLFloaterPreference::onBtnCancel( void* userdata )
 	LLFloaterPreference *fp =(LLFloaterPreference *)userdata;
 	if (fp->hasFocus())
 	{
-		LLUICtrl* cur_focus = gFocusMgr.getKeyboardFocus();
+		LLUICtrl* cur_focus = dynamic_cast<LLUICtrl*>(gFocusMgr.getKeyboardFocus());
 		if (cur_focus->acceptsTextInput())
 		{
 			cur_focus->onCommit();

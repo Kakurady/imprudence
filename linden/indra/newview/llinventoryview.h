@@ -70,6 +70,7 @@ class LLInventoryPanel : public LLPanel
 public:
 	static const std::string DEFAULT_SORT_ORDER;
 	static const std::string RECENTITEMS_SORT_ORDER;
+	static const std::string WORNITEMS_SORT_ORDER;
 	static const std::string INHERIT_SORT_ORDER;
 
 	LLInventoryPanel(const std::string& name,
@@ -95,6 +96,10 @@ public:
 								   void* cargo_data,
 								   EAcceptance* accept,
 								   std::string& tooltip_msg);
+
+	//fix to get rid of gSavedSettings use - rkeast
+	void setSearchType(U32 type);
+	U32 getSearchType();
 
 	// Call this method to set the selection.
 	void openAllFolders();
@@ -307,9 +312,10 @@ protected:
 	LLSaveFolderState*			mSavedFolderState;
 
 	std::string					mFilterText;
+	std::string					mOldFilterText;
 
 	S32							mItemCount;
-
+	S32 							mOldItemCount;
 
 	// This container is used to hold all active inventory views. This
 	// is here to support the inventory toggle show button.
@@ -390,6 +396,13 @@ std::string get_item_icon_name(LLAssetType::EType asset_type,
 
 std::string get_item_icon_name(LLInventoryType::NType inv_ntype,
 							 BOOL item_is_multi );
+
+// Uses NType only. For when we don't know an asset's inventory type or have no way of finding that information. 
+// Sends a default inv_ntype to use if there are multiple NTypes for an asset type.
+std::string get_item_icon_name(LLAssetType::EType asset_type,
+							   LLInventoryType::NType inv_ntype,
+							   U32 flags,
+							   BOOL item_is_multi);
 
 LLUIImagePtr get_item_icon(LLAssetType::EType asset_type,
 							 LLInventoryType::EType inventory_type,

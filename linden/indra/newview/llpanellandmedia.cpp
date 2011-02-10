@@ -55,6 +55,8 @@
 #include "lltexturectrl.h"
 #include "roles_constants.h"
 
+#include "hippogridmanager.h"
+
 //---------------------------------------------------------------------------
 // LLPanelLandMedia
 //---------------------------------------------------------------------------
@@ -185,26 +187,40 @@ void LLPanelLandMedia::refresh()
 			llwarns << "Couldn't get selected region." << llendl;
 		}
 
-		if (region && region->isVoiceEnabled()) // estate-wide voice-disable overrides all
+		// We need to do this differently for OpenSim because it doesn't include
+		// REGION_FLAGS_ALLOW_VOICE in the "RegionInfo" message as of 0.6.9 PF -- MC
+		bool allow_voice = parcel->getParcelFlagAllowVoice();
+		if (gHippoGridManager->getConnectedGrid()->isSecondLife())
 		{
-			bool allow_voice = parcel->getParcelFlagAllowVoice();
+			if (region && region->isVoiceEnabled()) // estate-wide voice-disable overrides all
+			{
+				mCheckEnableVoiceChatIsEstateDisabled->setVisible(false);
 
-			mCheckEnableVoiceChatIsEstateDisabled->setVisible(false);
+				mCheckEnableVoiceChat->setVisible(true);
+				mCheckEnableVoiceChat->setEnabled( can_change_media );
+				mCheckEnableVoiceChat->set(allow_voice);
+
+				mCheckEnableVoiceChatParcel->setEnabled( can_change_media && allow_voice );
+			}
+			else // disabled at region level
+			{
+				mCheckEnableVoiceChatIsEstateDisabled->setVisible(true); // always disabled
+				mCheckEnableVoiceChat->setVisible(false);
+				mCheckEnableVoiceChat->setEnabled(false);
+				mCheckEnableVoiceChat->set(false);
+
+				mCheckEnableVoiceChatParcel->setEnabled(false);
+			}
+		}
+		else
+		{
+			mCheckEnableVoiceChatIsEstateDisabled->setVisible(true);
 
 			mCheckEnableVoiceChat->setVisible(true);
 			mCheckEnableVoiceChat->setEnabled( can_change_media );
 			mCheckEnableVoiceChat->set(allow_voice);
 
 			mCheckEnableVoiceChatParcel->setEnabled( can_change_media && allow_voice );
-		}
-		else // disabled at region level
-		{
-			mCheckEnableVoiceChatIsEstateDisabled->setVisible(true); // always disabled
-			mCheckEnableVoiceChat->setVisible(false);
-			mCheckEnableVoiceChat->setEnabled(false);
-			mCheckEnableVoiceChat->set(false);
-
-			mCheckEnableVoiceChatParcel->setEnabled(false);
 		}
 
 		mCheckEnableVoiceChatParcel->set(!parcel->getParcelFlagUseEstateVoiceChannel());
@@ -342,13 +358,21 @@ void LLPanelLandMedia::setMediaType(const std::string& mime_type)
 
 	std::string media_key = LLMIMETypes::widgetType(mime_type);
 	mMediaTypeCombo->setValue(media_key);
+
 	childSetText("mime_type", mime_type);
 }
 
 void LLPanelLandMedia::setMediaURL(const std::string& media_url)
 {
 	mMediaURLEdit->setText(media_url);
+	LLParcel *parcel = mParcel->getParcel();
+	if(parcel)
+		parcel->setMediaCurrentURL(media_url);
+	// LLViewerMedia::navigateHome();
+
 	mMediaURLEdit->onCommit();
+// 	// LLViewerParcelMedia::sendMediaNavigateMessage(media_url);
+// 	childSetText("current_url", media_url);
 }
 
 std::string LLPanelLandMedia::getMediaURL()

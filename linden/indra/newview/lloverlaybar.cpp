@@ -37,12 +37,13 @@
 
 #include "lloverlaybar.h"
 
-#include "audioengine.h"
+#include "aoremotectrl.h"
+#include "llaudioengine.h"
 #include "llrender.h"
 #include "llagent.h"
 #include "llbutton.h"
 #include "llchatbar.h"
-#include "llfloaterchat.h"
+//#include "llfloaterchat.h"
 #include "llfocusmgr.h"
 #include "llimview.h"
 #include "llmediaremotectrl.h"
@@ -62,9 +63,13 @@
 #include "llvoiceclient.h"
 #include "llvoavatar.h"
 #include "llvoiceremotectrl.h"
-#include "llwebbrowserctrl.h"
+#include "llmediactrl.h"
 #include "llwindlightremotectrl.h"
 #include "llselectmgr.h"
+
+// [RLVa:KB]
+#include "rlvhandler.h"
+// [/RLVa:KB]
 
 //
 // Globals
@@ -74,58 +79,9 @@ LLOverlayBar *gOverlayBar = NULL;
 
 extern S32 MENU_BAR_HEIGHT;
 
-
-class LLTitleObserver
-	:	public LLMediaObserver
-{
-public:
-	void init(std::string url);
-	/*virtual*/ void onMediaTitleChange(const EventType& event_in);
-private:
-	LLMediaBase* mMediaSource;
-};
-
-static LLTitleObserver sTitleObserver;
-
-static LLRegisterWidget<LLMediaRemoteCtrl> r("media_remote");
-
-void LLTitleObserver::init(std::string url)
-{
-
-	if (!gAudiop)
-	{
-		return;
-	}
-
-	mMediaSource = gAudiop->getStreamMedia(); // LLViewerMedia::getSource();
-
-	if ( mMediaSource )
-	{
-		mMediaSource->addObserver(this);
-	}
-}
-
-//virtual
-void LLTitleObserver::onMediaTitleChange(const EventType& event_in)
-{
-	if ( !gSavedSettings.getBOOL("ShowStreamTitle") )
-	{
-		return;
-	}
-
-	LLChat chat;
-	//TODO: set this in XUI
-	std::string playing_msg = "Playing: " + event_in.getStringValue();
-	chat.mText = playing_msg;
-	LLFloaterChat::addChat(chat, FALSE, FALSE);
-}
-
-
 //
 // Functions
 //
-
-
 
 void* LLOverlayBar::createMediaRemote(void* userdata)
 {
@@ -148,6 +104,13 @@ void* LLOverlayBar::createWindlightRemote(void* userdata)
 	return self->mWindlightRemote;
 }
 
+void* LLOverlayBar::createAORemote(void* userdata)
+{
+	LLOverlayBar *self = (LLOverlayBar*)userdata;	
+	self->mAORemote = new AORemoteCtrl();
+	return self->mAORemote;
+}
+
 void* LLOverlayBar::createChatBar(void* userdata)
 {
 	gChatBar = new LLChatBar();
@@ -159,6 +122,7 @@ LLOverlayBar::LLOverlayBar()
 		mMediaRemote(NULL),
 		mVoiceRemote(NULL),
 		mWindlightRemote(NULL),
+		mAORemote(NULL),
 		mMusicState(STOPPED),
 		mOriginalIMLabel("")
 {
@@ -171,6 +135,7 @@ LLOverlayBar::LLOverlayBar()
 	factory_map["media_remote"] = LLCallbackMap(LLOverlayBar::createMediaRemote, this);
 	factory_map["voice_remote"] = LLCallbackMap(LLOverlayBar::createVoiceRemote, this);
 	factory_map["windlight_remote"] = LLCallbackMap(LLOverlayBar::createWindlightRemote, this);
+	factory_map["ao_remote"] = LLCallbackMap(LLOverlayBar::createAORemote, this);
 	factory_map["chat_bar"] = LLCallbackMap(LLOverlayBar::createChatBar, this);
 	
 	LLUICtrlFactory::getInstance()->buildPanel(this, "panel_overlaybar.xml", &factory_map);
@@ -330,7 +295,7 @@ void LLOverlayBar::refresh()
 		buttons_changed = TRUE;
 	}
 
-
+	moveChildToBackOfTabGroup(mAORemote);
 	moveChildToBackOfTabGroup(mWindlightRemote);
 	moveChildToBackOfTabGroup(mMediaRemote);
 	moveChildToBackOfTabGroup(mVoiceRemote);
@@ -341,6 +306,7 @@ void LLOverlayBar::refresh()
 		childSetVisible("media_remote_container", FALSE);
 		childSetVisible("voice_remote_container", FALSE);
 		childSetVisible("windlight_remote_container", FALSE);
+		childSetVisible("ao_remote_container", FALSE);
 		childSetVisible("state_buttons", FALSE);
 	}
 	else
@@ -348,18 +314,22 @@ void LLOverlayBar::refresh()
 		// update "remotes"
 		childSetVisible("media_remote_container", TRUE);
 		childSetVisible("voice_remote_container", LLVoiceClient::voiceEnabled());
-		childSetVisible("windlight_remote_container", gSavedSettings.getBOOL("EnableWindlightRemote"));
+		static BOOL *sEnableWindlightRemote = rebind_llcontrol<BOOL>("EnableWindlightRemote", &gSavedSettings, true);
+		childSetVisible("windlight_remote_container", (*sEnableWindlightRemote));
+		static BOOL *sEnableAORemote = rebind_llcontrol<BOOL>("EnableAORemote", &gSavedSettings, true);
+		childSetVisible("ao_remote_container", (*sEnableAORemote));
 		childSetVisible("state_buttons", TRUE);
 	}
 
+	static BOOL *sChatVisible = rebind_llcontrol<BOOL>("ChatVisible", &gSavedSettings, true);
 	// always let user toggle into and out of chatbar
-	childSetVisible("chat_bar", gSavedSettings.getBOOL("ChatVisible"));
+	childSetVisible("chat_bar", *sChatVisible);//gSavedSettings.getBOOL("ChatVisible"));
+
 
 	if (buttons_changed)
 	{
 		layoutButtons();
 	}
-
 }
 
 //-----------------------------------------------------------------------
@@ -433,11 +403,11 @@ void LLOverlayBar::toggleMediaPlay(void*)
 	}
 
 	
-	if (LLViewerMedia::isMediaPaused())
+	if (LLViewerParcelMedia::getStatus() == LLViewerMediaImpl::MEDIA_PAUSED)
 	{
 		LLViewerParcelMedia::start();
 	}
-	else if(LLViewerMedia::isMediaPlaying())
+	else if(LLViewerParcelMedia::getStatus() == LLViewerMediaImpl::MEDIA_PLAYING)
 	{
 		LLViewerParcelMedia::pause();
 	}
@@ -478,7 +448,7 @@ void LLOverlayBar::toggleMusicPlay(void*)
 	// 			if ( gAudiop->isInternetStreamPlaying() == 0 )
 				{
 					gAudiop->startInternetStream(parcel->getMusicURL());
-					sTitleObserver.init(parcel->getMusicURL());
+//awfixme					sTitleObserver.init(parcel->getMusicURL());
 				}
 			}
 		}

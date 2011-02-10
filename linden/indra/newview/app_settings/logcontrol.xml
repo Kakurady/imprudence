@@ -20,6 +20,7 @@
 					<key>tags</key>
 						<array>
 							<string>AppInit</string>
+              <string>LLKDU</string>
 							<string>SystemInfo</string>
 							<string>TextureCache</string>
 							<string>AppCache</string>
@@ -42,13 +43,19 @@
 						<array>
 
 <!--Unused debug messages below-->
-              
-							<!--<string>DBUS</string>-->
+
+              <!--<string>AppInit</string>-->
+              <!--<string>AppInitStartupState</string>-->
+              <!--<string>DBUS</string>-->
 							<!--<string>OpenAL</string>-->
               <!--<string>AppCache</string>-->
 							<!--<string>APR</string>-->
 							<!--<string>AudioEngine</string>-->
+							<!--<string>BodyPhysics</string>-->
               <!--<string>InitInfo</string>-->
+              <!--<string>isOwnedSelf</string>-->
+              <!--<string>Inventory</string>-->
+							<!--<string>HUDEffect</string>-->
               <!--<string>MarkerFile</string>-->
 							<!--<string>MediaImpl</string>-->
 							<!--<string>MediaInfo</string>-->
@@ -58,17 +65,22 @@
 							<!--<string>MediaState</string>-->
 
 							<!--<string>Messaging</string>-->
+							<!--<string>Notifications</string>-->
+              <!--<string>Plugin</string>-->
+              <!--<string>Radar</string>-->
 							<!--<string>ShaderLoading</string>-->
 
 							<!--<string>Openjpeg</string>-->
 							<!--<string>RLV</string>-->
 							<!--<string>VOAvatar</string>-->
-
+							<!--<string>View</string>-->
 							<!--<string>ViewerImages</string>-->
-							<!--<string>Throttle</string>-->
+              <!--<string>TextureCache</string>-->
+              <!--<string>Throttle</string>-->
 							<!--<string>Voice</string>-->
 							<!--<string>VivoxProtocolParser</string>-->
 							<!--<string>Wearable</string>-->
+              <!--<string>WindLight</string>-->
 
 							<!--<string>XMLNode</string>-->
 

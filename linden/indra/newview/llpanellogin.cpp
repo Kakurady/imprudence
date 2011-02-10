@@ -36,10 +36,9 @@
 
 #include "llpanelgeneral.h"
 
-#include "hippoGridManager.h"
-#include "hippoLimits.h"
-
-#include "floaterlogin.h"
+#include "hippogridmanager.h"
+#include "hippolimits.h"
+#include "floatergridmanager.h"
 
 #include "indra_constants.h"		// for key and mask constants
 #include "llfontgl.h"
@@ -53,6 +52,7 @@
 #include "llcombobox.h"
 #include "llcurl.h"
 #include "llviewercontrol.h"
+#include "llfirstuse.h"
 #include "llfloaterabout.h"
 #include "llfloatertest.h"
 #include "llfloaterpreference.h"
@@ -73,17 +73,15 @@
 #include "lluictrlfactory.h"
 #include "llhttpclient.h"
 #include "llweb.h"
-#include "llwebbrowserctrl.h"
 #include "viewerversion.h"
+#include "llmediactrl.h"
 
-#include "llfloaterhtml.h"
-
-#include "llfloaterhtmlhelp.h"
+#include "llfloatermediabrowser.h"
 #include "llfloatertos.h"
 
 #include "llglheaders.h"
 
-// [RLVa:KB] - Version: 1.22.11 | Checked: 2009-07-08 (RLVa-1.0.0e)
+// [RLVa:KB]
 #include "rlvhandler.h"
 // [/RLVa:KB]
 
@@ -101,7 +99,7 @@ class LLLoginRefreshHandler : public LLCommandHandler
 public:
 	// don't allow from external browsers
 	LLLoginRefreshHandler() : LLCommandHandler("login_refresh", true) { }
-	bool handle(const LLSD& tokens, const LLSD& query_map, LLWebBrowserCtrl* web)
+	bool handle(const LLSD& tokens, const LLSD& query_map, LLMediaCtrl* web)
 	{	
 		if (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)
 		{
@@ -291,16 +289,15 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 #endif    
 	
 	// get the web browser control
-	LLWebBrowserCtrl* web_browser = getChild<LLWebBrowserCtrl>("login_html");
+	LLMediaCtrl* web_browser = getChild<LLMediaCtrl>("login_html");
+	web_browser->addObserver(this);
+
 	// Need to handle login secondlife:///app/ URLs
 	web_browser->setTrusted( true );
 
-	// observe browser events
-	web_browser->addObserver( this );
-
 	// don't make it a tab stop until SL-27594 is fixed
 	web_browser->setTabStop(FALSE);
-	web_browser->navigateToLocalPage( "loading", "loading.html" );
+	// web_browser->navigateToLocalPage( "loading", "loading.html" );
 
 	// make links open in external browser
 	web_browser->setOpenInExternalBrowser( true );
@@ -330,11 +327,12 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	refreshLocation( false );
 #endif
 
+	LLFirstUse::useLoginScreen();
 }
 
 void LLPanelLogin::setSiteIsAlive( bool alive )
 {
-	LLWebBrowserCtrl* web_browser = getChild<LLWebBrowserCtrl>("login_html");
+	LLMediaCtrl* web_browser = getChild<LLMediaCtrl>("login_html");
 	// if the contents of the site was retrieved
 	if ( alive )
 	{
@@ -397,6 +395,11 @@ LLPanelLogin::~LLPanelLogin()
 
 	//// We know we're done with the image, so be rid of it.
 	//gImageList.deleteImage( mLogoImage );
+	
+	if ( gFocusMgr.getDefaultKeyboardFocus() == this )
+	{
+		gFocusMgr.setDefaultKeyboardFocus(NULL);
+	}
 }
 
 // virtual
@@ -722,7 +725,7 @@ void LLPanelLogin::refreshLocation( bool force_visible )
 
 	if (LLURLSimString::parse())
 	{
-		combo->setCurrentByIndex( 3 );		// BUG?  Maybe 2?
+		combo->setCurrentByIndex( 2 );
 		combo->setTextEntry(LLURLSimString::sInstance.mSimString);
 	}
 	else
@@ -736,17 +739,15 @@ void LLPanelLogin::refreshLocation( bool force_visible )
 	if ( ! force_visible )
 		show_start = gSavedSettings.getBOOL("ShowStartLocation");
 
-
-// [RLVa:KB] - Checked: 2009-07-08 (RLVa-1.0.0e)
-// TODO-RLVa: figure out some way to make this work with RLV_EXTENSION_STARTLOCATION
-#ifndef RLV_EXTENSION_STARTLOCATION
+// [RLVa:KB] - Alternate: Snowglobe-1.2.4 | Checked: 2009-07-08 (RLVa-1.0.0e)
+	// TODO-RLVa: figure out some way to make this work with RLV_EXTENSION_STARTLOCATION
+	#ifndef RLV_EXTENSION_STARTLOCATION
 		if (rlv_handler_t::isEnabled())
 		{
 			show_start = FALSE;
 		}
-#endif // RLV_EXTENSION_STARTLOCATION
+	#endif // RLV_EXTENSION_STARTLOCATION
 // [/RLVa:KB]
-
 
 	sInstance->childSetVisible("start_location_combo", show_start);
 	sInstance->childSetVisible("start_location_text", show_start);
@@ -780,7 +781,7 @@ void LLPanelLogin::setAlwaysRefresh(bool refresh)
 {
 	if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP) return;
 
-	LLWebBrowserCtrl* web_browser = sInstance->getChild<LLWebBrowserCtrl>("login_html");
+	LLMediaCtrl* web_browser = sInstance->getChild<LLMediaCtrl>("login_html");
 
 	if (web_browser)
 	{
@@ -802,9 +803,12 @@ void LLPanelLogin::refreshLoginPage()
     // kick off a request to grab the url manually
 	gResponsePtr = LLIamHereLogin::build(sInstance);
 	std::string login_page = gHippoGridManager->getCurrentGrid()->getLoginPage();
-	if (!login_page.empty()) {
+	if (!login_page.empty()) 
+	{
 		LLHTTPClient::head(login_page, gResponsePtr);
-	} else {
+	} 
+	else 
+	{
 		sInstance->setSiteIsAlive(false);
 	}
 }
@@ -816,7 +820,8 @@ void LLPanelLogin::loadLoginPage()
 	
 
 	std::string login_page = gHippoGridManager->getCurrentGrid()->getLoginPage();
-	if (login_page.empty()) {
+	if (login_page.empty()) 
+	{
 		sInstance->setSiteIsAlive(false);
 		return;
 	}
@@ -949,25 +954,28 @@ void LLPanelLogin::loadLoginPage()
 #endif
 #endif
 	
-	LLWebBrowserCtrl* web_browser = sInstance->getChild<LLWebBrowserCtrl>("login_html");
+	LLMediaCtrl* web_browser = sInstance->getChild<LLMediaCtrl>("login_html");
 	
 	// navigate to the "real" page 
-	web_browser->navigateTo( oStr.str() );
+	web_browser->navigateTo( oStr.str(), "text/html" );
 }
 
-void LLPanelLogin::onNavigateComplete( const EventType& eventIn )
+void LLPanelLogin::handleMediaEvent(LLPluginClassMedia* /*self*/, EMediaEvent event)
 {
-	LLWebBrowserCtrl* web_browser = sInstance->getChild<LLWebBrowserCtrl>("login_html");
-	if (web_browser)
+	if(event == MEDIA_EVENT_NAVIGATE_COMPLETE)
 	{
-		// *HACK HACK HACK HACK!
-		/* Stuff a Tab key into the browser now so that the first field will
-		** get the focus!  The embedded javascript on the page that properly
-		** sets the initial focus in a real web browser is not working inside
-		** the viewer, so this is an UGLY HACK WORKAROUND for now.
-		*/
-		// Commented out as it's not reliable
-		//web_browser->handleKey(KEY_TAB, MASK_NONE, false);
+		LLMediaCtrl* web_browser = sInstance->getChild<LLMediaCtrl>("login_html");
+		if (web_browser)
+		{
+			// *HACK HACK HACK HACK!
+			/* Stuff a Tab key into the browser now so that the first field will
+			** get the focus!  The embedded javascript on the page that properly
+			** sets the initial focus in a real web browser is not working inside
+			** the viewer, so this is an UGLY HACK WORKAROUND for now.
+			*/
+			// Commented out as it's not reliable
+			//web_browser->handleKey(KEY_TAB, MASK_NONE, false);
+		}
 	}
 }
 
@@ -1006,7 +1014,8 @@ void LLPanelLogin::onClickGrid(void *)
 {
 	if (sInstance && sInstance->mCallback)
 	{
-		LoginFloater::newShow(std::string("Test"), false);
+		FloaterGridManager::getInstance()->open();
+		FloaterGridManager::getInstance()->center();
 	}
 }
 
@@ -1092,35 +1101,45 @@ void LLPanelLogin::onSelectServer(LLUICtrl* ctrl, void*)
 	// *NOTE: The paramters for this method are ignored. 
 	// LLPanelLogin::onServerComboLostFocus(LLFocusableElement* fe, void*)
 	// calls this method.
+	updateGridCombo(LLStringUtil::null);
+}
 
-	// The user twiddled with the grid choice ui.
-	// apply the selection to the grid setting.
-	std::string grid_label;
-	//S32 grid_index;
-
+// static
+void LLPanelLogin::updateGridCombo(std::string grid_nick)
+{
 	LLComboBox* combo = sInstance->getChild<LLComboBox>("server_combo");
-	LLSD combo_val = combo->getValue();
 
-	std::string mCurGrid = ctrl->getValue().asString();
-	//KOW
-	gHippoGridManager->setCurrentGrid(mCurGrid);
-	// HippoGridInfo *gridInfo = gHippoGridManager->getGrid(mCurGrid);
-	// if (gridInfo) {
-	// 	//childSetText("gridnick", gridInfo->getGridNick());
-	// 	//platform->setCurrentByIndex(gridInfo->getPlatform());
-	// 	//childSetText("gridname", gridInfo->getGridName());
-	// 	LLPanelLogin::setFields( gridInfo->getFirstName(), gridInfo->getLastName(), gridInfo->getAvatarPassword(), 1 );
-	// }
-	if (mCurGrid == gHippoGridManager->getConnectedGrid()->getGridNick())
-		gHippoLimits->setLimits();
+	if (grid_nick.empty())
+	{
+		// The user twiddled with the grid choice ui.
+		// apply the selection to the grid setting.
+		//std::string grid_label;
+		//S32 grid_index;
+		
+		grid_nick = combo->getValue().asString();
+		
+		// HippoGridInfo *gridInfo = gHippoGridManager->getGrid(mCurGrid);
+		// if (gridInfo) {
+		// 	//childSetText("gridnick", gridInfo->getGridNick());
+		// 	//platform->setCurrentByIndex(gridInfo->getPlatform());
+		// 	//childSetText("gridname", gridInfo->getGridName());
+		// 	LLPanelLogin::setFields( gridInfo->getFirstName(), gridInfo->getLastName(), gridInfo->getAvatarPassword(), 1 );
+		// }
+	}
+	else
+	{
+		combo->setSimple(grid_nick);
+	}
 	
-	llwarns << "current grid = " << mCurGrid << llendl;
+	gHippoGridManager->setCurrentGrid(grid_nick);
+
+	llinfos << "current grid set to " << grid_nick << llendl;
 
 	// grid changed so show new splash screen (possibly)
 	loadLoginPage();
 
 	// save grid choice to settings
-	gSavedSettings.setString("LastSelectedGrid", mCurGrid);
+	gSavedSettings.setString("LastSelectedGrid", grid_nick);
 }
 /*
 void LLPanelLogin::onServerComboLostFocus(LLFocusableElement* fe, void*)

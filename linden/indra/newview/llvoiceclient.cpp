@@ -1121,6 +1121,7 @@ LLVoiceClient::LLVoiceClient()
 	mMicVolume = 0;
 
 	mAudioSession = NULL;
+	mNextAudioSession = NULL;
 	mAudioSessionChanged = false;
 
 	// Initial dirty state
@@ -1215,7 +1216,7 @@ void LLVoiceClient::terminate()
 
 void LLVoiceClient::updateSettings()
 {
-	setVoiceEnabled(gSavedSettings.getBOOL("EnableVoiceChat"));
+	setVoiceEnabled(gSavedSettings.getBOOL("EnableVoiceChat") && !gSavedSettings.getBOOL("CmdLineDisableVoice"));
 	setUsePTT(gSavedSettings.getBOOL("PTTCurrentlyEnabled"));
 	std::string keyString = gSavedSettings.getString("PushToTalkButton");
 	setPTTKey(keyString);
@@ -1794,7 +1795,7 @@ void LLVoiceClient::stateMachine()
 
 				if(!mSocket)
 				{
-					mSocket = LLSocket::create(gAPRPoolp, LLSocket::STREAM_TCP);	
+					mSocket = LLSocket::create(LLSocket::STREAM_TCP);
 				}
 				
 				mConnected = mSocket->blockingConnect(mDaemonHost);
@@ -4979,7 +4980,7 @@ void LLVoiceClient::sessionState::removeAllParticipants()
 	
 	if(!mParticipantsByUUID.empty())
 	{
-		LL_ERRS("Voice") << "Internal error: empty URI map, non-empty UUID map" << LL_ENDL
+		LL_ERRS("Voice") << "Internal error: empty URI map, non-empty UUID map" << LL_ENDL;
 	}
 }
 
@@ -5821,7 +5822,7 @@ void LLVoiceClient::setVoiceEnabled(bool enabled)
 
 bool LLVoiceClient::voiceEnabled()
 {
-	return gSavedSettings.getBOOL("EnableVoiceChat") && !gSavedSettings.getBOOL("CmdLineDisableVoice");
+	return LLVoiceClient::getInstance()->mVoiceEnabled;//gSavedSettings.getBOOL("EnableVoiceChat") && !gSavedSettings.getBOOL("CmdLineDisableVoice");
 }
 
 void LLVoiceClient::setLipSyncEnabled(BOOL enabled)
@@ -6482,7 +6483,7 @@ void LLVoiceClient::deleteSession(sessionState *session)
 		{
 			if(iter->second != session)
 			{
-				LL_ERRS("Voice") << "Internal error: session mismatch" << LL_ENDL
+				LL_ERRS("Voice") << "Internal error: session mismatch" << LL_ENDL;
 			}
 			mSessionsByHandle.erase(iter);
 		}
@@ -6522,7 +6523,7 @@ void LLVoiceClient::deleteAllSessions()
 	
 	if(!mSessionsByHandle.empty())
 	{
-		LL_ERRS("Voice") << "Internal error: empty session map, non-empty handle map" << LL_ENDL
+		LL_ERRS("Voice") << "Internal error: empty session map, non-empty handle map" << LL_ENDL;
 	}
 }
 

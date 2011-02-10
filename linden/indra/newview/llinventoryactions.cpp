@@ -89,6 +89,9 @@
 // Defined in llinventorybridge.cpp
 void wear_attachments_on_avatar(const std::set<LLUUID>& item_ids, BOOL remove);
 
+// Defined in llinventorybridge.cpp
+void wear_attachments_on_avatar(const std::set<LLUUID>& item_ids, BOOL remove);
+
 const std::string NEW_LSL_NAME = "New Script"; // *TODO:Translate? (probably not)
 const std::string NEW_NOTECARD_NAME = "New Note"; // *TODO:Translate? (probably not)
 const std::string NEW_GESTURE_NAME = "New Gesture"; // *TODO:Translate? (probably not)
@@ -116,8 +119,19 @@ bool doToSelected(LLFolderView* folder, std::string action)
 		LLInventoryClipboard::instance().reset();
 	}
 
+	if ("cut" == action)
+	{	
+		LLInventoryClipboard::instance().reset();
+	}
+
 	std::set<LLUUID> selected_items;
 	folder->getSelectionList(selected_items);
+
+	if ( ("attach" == action) && (selected_items.size() > 1) )
+	{
+		wear_attachments_on_avatar(selected_items, FALSE);
+		return true;
+	}
 
 	if ( ("attach" == action) && (selected_items.size() > 1) )
 	{
@@ -428,6 +442,16 @@ void do_create(LLInventoryModel *model, LLInventoryPanel *ptr, std::string type,
 		LLUUID parent_id = self ? self->getUUID() : gInventory.findCategoryUUIDForType(LLAssetType::AT_CLOTHING);
 		LLFolderBridge::createWearable(parent_id, WT_UNDERPANTS);
 	}
+	else if ("alpha" == type)
+	{
+		LLUUID parent_id = self ? self->getUUID() : gInventory.findCategoryUUIDForType(LLAssetType::AT_CLOTHING);
+		LLFolderBridge::createWearable(parent_id, WT_ALPHA);
+	}
+	else if ("tattoo" == type)
+	{
+		LLUUID parent_id = self ? self->getUUID() : gInventory.findCategoryUUIDForType(LLAssetType::AT_CLOTHING);
+		LLFolderBridge::createWearable(parent_id, WT_TATTOO);
+	}
 	else if ("shape" == type)
 	{
 		LLUUID parent_id = self ? self->getUUID() : gInventory.findCategoryUUIDForType(LLAssetType::AT_BODYPART);
@@ -476,7 +500,7 @@ class LLDoCreateFloater : public inventory_listener_t
 	}
 };
 
-//Handles the search type buttons
+//Handles the search type buttons - RKeast
 class SetSearchType : public inventory_listener_t
 {
 	bool handleEvent(LLPointer<LLEvent> event, const LLSD& userdata)
@@ -484,8 +508,10 @@ class SetSearchType : public inventory_listener_t
 		std::string search_type = userdata.asString();
 		if(search_type == "name")
 		{
-			gSavedSettings.setU32("InventorySearchType", 0);
+			mPtr->getActivePanel()->setSearchType(0);
 
+			gSavedPerAccountSettings.setU32("InventorySearchType",0);
+			
 			mPtr->getControl("Inventory.SearchByName")->setValue(TRUE);
 			mPtr->getControl("Inventory.SearchByCreator")->setValue(FALSE);	
 			mPtr->getControl("Inventory.SearchByDesc")->setValue(FALSE);
@@ -493,7 +519,9 @@ class SetSearchType : public inventory_listener_t
 		}
 		else if(search_type == "creator")
 		{
-			gSavedSettings.setU32("InventorySearchType", 1);
+			mPtr->getActivePanel()->setSearchType(1);
+
+			gSavedPerAccountSettings.setU32("InventorySearchType",1);
 
 			mPtr->getControl("Inventory.SearchByName")->setValue(FALSE);
 			mPtr->getControl("Inventory.SearchByCreator")->setValue(TRUE);
@@ -502,7 +530,9 @@ class SetSearchType : public inventory_listener_t
 		}
 		else if(search_type == "desc")
 		{
-			gSavedSettings.setU32("InventorySearchType", 2);
+			mPtr->getActivePanel()->setSearchType(2);
+
+			gSavedPerAccountSettings.setU32("InventorySearchType",2);
 
 			mPtr->getControl("Inventory.SearchByName")->setValue(FALSE);
 			mPtr->getControl("Inventory.SearchByCreator")->setValue(FALSE);
@@ -511,7 +541,9 @@ class SetSearchType : public inventory_listener_t
 		}
 		else if(search_type == "all")
 		{
-			gSavedSettings.setU32("InventorySearchType", 3);
+			mPtr->getActivePanel()->setSearchType(3);
+
+			gSavedPerAccountSettings.setU32("InventorySearchType",3);
 
 			mPtr->getControl("Inventory.SearchByName")->setValue(FALSE);
 			mPtr->getControl("Inventory.SearchByCreator")->setValue(FALSE);

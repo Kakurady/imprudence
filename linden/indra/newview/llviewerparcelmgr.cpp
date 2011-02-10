@@ -35,7 +35,7 @@
 #include "llviewerparcelmgr.h"
 
 // Library includes
-#include "audioengine.h"
+#include "llaudioengine.h"
 #include "indra_constants.h"
 #include "llcachename.h"
 #include "llgl.h"
@@ -70,7 +70,7 @@
 #include "roles_constants.h"
 #include "llweb.h"
 
-#include "hippoGridManager.h"
+#include "hippogridmanager.h"
 
 const F32 PARCEL_COLLISION_DRAW_SECS = 1.f;
 
@@ -651,15 +651,21 @@ BOOL LLViewerParcelMgr::agentCanBuild() const
 {
 	if (mAgentParcel)
 	{
-		return (gAgent.isGodlike()
-				|| (mAgentParcel->allowModifyBy(
-						gAgent.getID(),
-						gAgent.getGroupID())));
+		const LLUUID parcel_group = mAgentParcel->getGroupID();
+		const LLUUID active_group = gAgent.getGroupID();
+
+		if (gAgent.isGodlike())
+			return true;
+
+		if (mAgentParcel->allowModifyBy(gAgent.getID(), active_group))
+			return true;
+
+		// Ele: enable build option if we are in the land group and we have create powers, even if the group tag is not active
+		if (gAgent.isInGroup(parcel_group) && gAgent.hasPowerInGroup(parcel_group, GP_LAND_ALLOW_CREATE))
+			return true;
 	}
-	else
-	{
-		return gAgent.isGodlike();
-	}
+
+	return gAgent.isGodlike();
 }
 
 BOOL LLViewerParcelMgr::agentCanTakeDamage() const
@@ -1071,7 +1077,19 @@ LLViewerParcelMgr::ParcelBuyInfo* LLViewerParcelMgr::setupParcelBuy(
 		LLNotifications::instance().add("CannotBuyLandNoRegion");
 		return NULL;
 	}
-	
+
+	/* Check for maturity  being not higher than the current users ability and preference. */
+	U8 sim_access = region->getSimAccess();
+	const LLAgentAccess& agent_access = gAgent.getAgentAccess();
+	// if the region is PG, we're happy already, so do nothing
+	// but if we're set to avoid either mature or adult, get us outta here
+	if (((sim_access == SIM_ACCESS_MATURE) && !agent_access.canAccessMature()) ||
+		((sim_access == SIM_ACCESS_ADULT) && !agent_access.canAccessAdult()))
+	{
+		LLNotifications::instance().add("CannotBuyLandMaturity");
+		return NULL;
+	}
+
 	if (is_claim)
 	{
 		llinfos << "Claiming " << mWestSouth << " to " << mEastNorth << llendl;
@@ -1587,6 +1605,9 @@ void LLViewerParcelMgr::processParcelProperties(LLMessageSystem *msg, void **use
 			// Request access list information for this land
 			LLViewerParcelMgr::getInstance()->sendParcelAccessListRequest(AL_ACCESS | AL_BAN);
 
+			// Request the media url filter list for this land
+			LLViewerParcelMgr::getInstance()->requestParcelMediaURLFilter();
+
 			// Request dwell for this land, if it's not public land.
 			LLViewerParcelMgr::getInstance()->mSelectedDwell = 0.f;
 			if (0 != local_id)
@@ -1712,21 +1733,6 @@ void optionally_start_music(const std::string& music_url)
 			gAudiop->startInternetStream(music_url);
 		}
 	}
-}
-
-
-void callback_start_music(S32 option, void* data)
-{
-	if (option == 0)
-	{
-		// Before the callback, we verified the url was good.
-		// We fetch again to avoid lag while loading.
-		LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();		
-		gAudiop->startInternetStream(parcel->getMusicURL());
-
-		LLOverlayBar::musicFirstRun();
-	}
-	gSavedSettings.setWarning("FirstStreamingMusic", FALSE);
 }
 
 // static
@@ -1921,6 +1927,66 @@ void LLViewerParcelMgr::sendParcelAccessListUpdate(U32 which)
 
 			start_message = TRUE;
 			msg->sendReliable( region->getHost() );
+		}
+	}
+}
+
+class LLParcelMediaURLFilterResponder : public LLHTTPClient::Responder
+{
+	virtual void result(const LLSD& content)
+	{
+		LLViewerParcelMgr::getInstance()->receiveParcelMediaURLFilter(content);
+	}
+};
+
+void LLViewerParcelMgr::requestParcelMediaURLFilter()
+{
+	if (!mSelected)
+	{
+		return;
+	}
+
+	LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal( mWestSouth );
+	if (!region)
+	{
+		return;
+	}
+
+	LLParcel* parcel = mCurrentParcel;
+	if (!parcel)
+	{
+		llwarns << "no parcel" << llendl;
+		return;
+	}
+
+	LLSD body;
+	body["local-id"] = parcel->getLocalID();
+	body["list"] = parcel->getMediaURLFilterList();
+
+	std::string url = region->getCapability("ParcelMediaURLFilterList");
+	if (!url.empty())
+	{
+		LLHTTPClient::post(url, body, new LLParcelMediaURLFilterResponder);
+	}
+	else
+	{
+		llwarns << "can't get ParcelMediaURLFilterList cap" << llendl;
+	}
+}
+
+
+void LLViewerParcelMgr::receiveParcelMediaURLFilter(const LLSD &content)
+{
+	if (content.has("list"))
+	{
+		LLParcel* parcel = LLViewerParcelMgr::getInstance()->mCurrentParcel;
+		if (!parcel) return;
+		
+		if (content["local-id"].asInteger() == parcel->getLocalID())
+		{
+			parcel->setMediaURLFilterList(content["list"]);
+			
+			LLViewerParcelMgr::getInstance()->notifyObservers();
 		}
 	}
 }

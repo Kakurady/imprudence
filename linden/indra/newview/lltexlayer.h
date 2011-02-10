@@ -41,6 +41,7 @@
 #include "lluuid.h"
 #include "llviewerimage.h"
 #include "llviewervisualparam.h"
+#include "llvoavatardefines.h"
 #include "llwearable.h"
 #include "v4color.h"
 #include "llfloater.h"
@@ -186,6 +187,7 @@ protected:
 	std::string				mStaticImageFileName;
 	BOOL					mStaticImageIsMask;
 	BOOL					mUseLocalTextureAlphaOnly;	// Ignore RGB channels from the input texture.  Use alpha as a mask
+	BOOL					mIsVisibilityMask;
 
 	typedef std::vector<std::pair<std::string,BOOL> > morph_name_list_t;
 	morph_name_list_t		mMorphNameList;
@@ -205,23 +207,22 @@ protected:
 class LLTexLayerSetBuffer : public LLDynamicTexture
 {
 public:
-	LLTexLayerSetBuffer( LLTexLayerSet*	owner, S32 width, S32 height, BOOL has_bump );
+	LLTexLayerSetBuffer(LLTexLayerSet*	owner, S32 width, S32 height);
 	virtual ~LLTexLayerSetBuffer();
 
 	virtual void			preRender(BOOL clear_depth);
 	virtual void			postRender(BOOL success);
 	virtual BOOL			render();
 	BOOL					updateImmediate();
-	void					bindBumpTexture( U32 stage );
 	bool					isInitialized(void) const;
 	BOOL					needsRender();
 	void					requestUpdate();
 	void					requestUpload();
+	void					requestDelayedUpload(U64 delay_usec);
 	void					cancelUpload();
 	BOOL					uploadPending() { return mUploadPending; }
 	BOOL					render( S32 x, S32 y, S32 width, S32 height );
-	void					readBackAndUpload(U8* baked_bump_data);
-	void                    createBumpTexture() ;
+	void					readBackAndUpload();
 
 	static void				onTextureUploadComplete( const LLUUID& uuid,
 													 void* userdata,
@@ -234,18 +235,18 @@ public:
 private:
 	void					pushProjection();
 	void					popProjection();
+	BOOL					needsUploadNow() const;
 
 private:
-	BOOL                    mHasBump ;
 	BOOL					mNeedsUpdate;
 	BOOL					mNeedsUpload;
 	BOOL					mUploadPending;
 	LLUUID					mUploadID;		// Identifys the current upload process (null if none).  Used to avoid overlaps (eg, when the user rapidly makes two changes outside of Face Edit)
+	S32						mUploadFailCount;
+	U64						mUploadAfter;	// delay upload until after this time (in microseconds)
 	LLTexLayerSet*			mTexLayerSet;
-	LLPointer<LLImageGL>	mBumpTex;	// zero if none
 
 	static S32				sGLByteCount;
-	static S32				sGLBumpByteCount;
 };
 
 //-----------------------------------------------------------------------------
@@ -254,6 +255,7 @@ private:
 //-----------------------------------------------------------------------------
 class LLTexLayerSet
 {
+	friend class LLTexLayerSetBuffer;
 public:
 	LLTexLayerSet( LLVOAvatar* avatar );
 	~LLTexLayerSet();
@@ -264,7 +266,7 @@ public:
 	BOOL					setInfo(LLTexLayerSetInfo *info);
 	
 	BOOL					render( S32 x, S32 y, S32 width, S32 height );
-	BOOL					renderBump( S32 x, S32 y, S32 width,S32 height );
+	void					renderAlphaMaskTextures(S32 x, S32 y, S32 width, S32 height, bool forceClear = false);
 	BOOL					isBodyRegion( const std::string& region ) { return mInfo->mBodyRegion == region; }
 	LLTexLayerSetBuffer*	getComposite();
 	void					requestUpdate();
@@ -283,8 +285,9 @@ public:
 	void					applyMorphMask(U8* tex_data, S32 width, S32 height, S32 num_components);
 	const std::string		getBodyRegion() 				{ return mInfo->mBodyRegion; }
 	BOOL					hasComposite()					{ return (mComposite != NULL); }
-	void					setBump( BOOL b )				{ mHasBump = b; }
-	BOOL					hasBump()						{ return mHasBump; }
+	LLVOAvatarDefines::EBakedTextureIndex getBakedTexIndex() { return mBakedTexIndex; }
+	void					setBakedTexIndex(LLVOAvatarDefines::EBakedTextureIndex index) { mBakedTexIndex = index; }
+	BOOL					isVisible() const 				{ return mIsVisible; }
 
 public:
 	static BOOL		sHasCaches;
@@ -292,11 +295,14 @@ public:
 protected:
 	typedef std::vector<LLTexLayer *> layer_list_t;
 	layer_list_t			mLayerList;
+	layer_list_t			mMaskLayerList;
 	LLTexLayerSetBuffer*	mComposite;
 	// Backlink only; don't make this an LLPointer.
 	LLVOAvatar*				mAvatar;
 	BOOL					mUpdatesEnabled;
-	BOOL					mHasBump;
+	BOOL					mIsVisible;
+
+	LLVOAvatarDefines::EBakedTextureIndex mBakedTexIndex;
 
 	LLTexLayerSetInfo 		*mInfo;
 };
@@ -348,6 +354,9 @@ public:
 	BOOL					renderImageRaw( U8* in_data, S32 in_width, S32 in_height, S32 in_components, S32 width, S32 height, BOOL is_mask );
 	BOOL					renderAlphaMasks(  S32 x, S32 y, S32 width, S32 height, LLColor4* colorp );
 	BOOL					hasAlphaParams() { return (!mParamAlphaList.empty());}
+	BOOL					blendAlphaTexture(S32 x, S32 y, S32 width, S32 height);
+	BOOL					isVisibilityMask() const;
+	BOOL					isInvisibleAlphaMask();
 
 protected:
 	LLTexLayerSet*			mTexLayerSet;

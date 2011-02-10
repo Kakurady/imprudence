@@ -215,6 +215,7 @@ LLViewerRegion::LLViewerRegion(const U64 &handle,
 	//MUST MATCH declaration of eObjectPartitions
 	mObjectPartition.push_back(new LLHUDPartition());		//PARTITION_HUD
 	mObjectPartition.push_back(new LLTerrainPartition());	//PARTITION_TERRAIN
+	mObjectPartition.push_back(new LLVoidWaterPartition());		//PARTITION_VOIDWATER
 	mObjectPartition.push_back(new LLWaterPartition());		//PARTITION_WATER
 	mObjectPartition.push_back(new LLTreePartition());		//PARTITION_TREE
 	mObjectPartition.push_back(new LLParticlePartition());	//PARTITION_PARTICLE
@@ -322,7 +323,7 @@ void LLViewerRegion::loadCache()
 
 	LLUUID cache_id;
 	nread = fread(&cache_id.mData, 1, UUID_BYTES, fp);
-	if (nread != UUID_BYTES || mCacheID != cache_id)
+	if (nread != (size_t)UUID_BYTES || mCacheID != cache_id)
 	{
 		llinfos << "Cache ID doesn't match for this region, discarding"
 			<< llendl;
@@ -374,7 +375,7 @@ void LLViewerRegion::saveCache()
 
 	std::string filename;
 	filename = gDirUtilp->getExpandedFilename(LL_PATH_CACHE,"") + gDirUtilp->getDirDelimiter() +
-		llformat("sobjects_%d_%d.slc", U32(mHandle>>32)/REGION_WIDTH_UNITS, U32(mHandle)/REGION_WIDTH_UNITS );
+		llformat("objects_%d_%d.slc", U32(mHandle>>32)/REGION_WIDTH_UNITS, U32(mHandle)/REGION_WIDTH_UNITS );
 
 	LLFILE* fp = LLFile::fopen(filename, "wb");		/* Flawfinder: ignore */
 	if (!fp)
@@ -398,7 +399,7 @@ void LLViewerRegion::saveCache()
 	}
 
 	// write the cache id for this sim
-	if (fwrite(&mCacheID.mData, 1, UUID_BYTES, fp) != UUID_BYTES)
+	if (fwrite(&mCacheID.mData, 1, UUID_BYTES, fp) != (size_t)UUID_BYTES)
 	{
 		llwarns << "Short write" << llendl;
 	}
@@ -449,6 +450,12 @@ void LLViewerRegion::setFlags(BOOL b, U32 flags)
 void LLViewerRegion::setWaterHeight(F32 water_level)
 {
 	mLandp->setWaterHeight(water_level);
+}
+
+
+void LLViewerRegion::rebuildWater()
+{
+	mLandp->rebuildWater();
 }
 
 F32 LLViewerRegion::getWaterHeight() const
@@ -1415,7 +1422,10 @@ void LLViewerRegion::setSeedCapability(const std::string& url)
 	LLSD capabilityNames = LLSD::emptyArray();
 	capabilityNames.append("ChatSessionRequest");
 	capabilityNames.append("CopyInventoryFromNotecard");
+	// Aurora settings -- MC
+	capabilityNames.append("DispatchOpenRegionSettings");
 	capabilityNames.append("DispatchRegionInfo");
+	capabilityNames.append("DispatchWindLightSettings");
 	capabilityNames.append("EstateChangeInfo");
 	capabilityNames.append("EventQueueGet");
 	capabilityNames.append("FetchInventory");
@@ -1428,11 +1438,14 @@ void LLViewerRegion::setSeedCapability(const std::string& url)
 	capabilityNames.append("MapLayerGod");
 	capabilityNames.append("NewFileAgentInventory");
 	capabilityNames.append("ParcelPropertiesUpdate");
+	capabilityNames.append("ParcelMediaURLFilterList");
+	capabilityNames.append("ParcelNavigateMedia");
 	capabilityNames.append("ParcelVoiceInfoRequest");
 	capabilityNames.append("ProductInfoRequest");
 	capabilityNames.append("ProvisionVoiceAccountRequest");
 	capabilityNames.append("RemoteParcelRequest");
 	capabilityNames.append("RequestTextureDownload");
+	capabilityNames.append("RetrieveWindLightSettings");
 	capabilityNames.append("SearchStatRequest");
 	capabilityNames.append("SearchStatTracking");
 	capabilityNames.append("SendPostcard");

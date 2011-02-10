@@ -329,6 +329,17 @@ BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
 			L"Targa, Bitmap Images (*.tga; *.bmp)\0*.tga;*.bmp\0" \
 			L"\0";
 		break;
+	case FFSAVE_LSL:
+		if (filename.empty())
+		{
+			wcsncpy( mFilesW,L"untitled.lsl", FILENAME_BUFFER_SIZE);	/*Flawfinder: ignore*/
+		}
+		mOFN.lpstrDefExt = L"lsl";
+		mOFN.lpstrFilter = 
+			L"LSL Files (*.lsl)\0*.lsl\0"
+			L"Text files (*.txt)\0*.txt\0"
+			L"\0";
+		break;
 	case FFSAVE_TEXT:
 		if (filename.empty())
 		{
@@ -338,7 +349,6 @@ BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
 		mOFN.lpstrFilter = 
 			L"Text files (*.txt)\0*.txt\0"
 			L"RTF Files (*.rtf)\0*.rtf\0"
-			L"LSL Files (*.lsl)\0*.lsl\0"
 			L"\0";
 		break;
 	case FFSAVE_WAV:
@@ -522,12 +532,16 @@ Boolean LLFilePicker::navOpenFilterProc(AEDesc *theItem, void *info, void *callB
 						{
 							if (fileInfo.filetype != 'JPEG' && fileInfo.filetype != 'JPG ' && 
 								fileInfo.filetype != 'BMP ' && fileInfo.filetype != 'TGA ' &&
+								fileInfo.filetype != 'TIFF' && fileInfo.filetype != 'PSD ' &&
 								fileInfo.filetype != 'BMPf' && fileInfo.filetype != 'TPIC' &&
 								fileInfo.filetype != 'PNG ' &&
 								(fileInfo.extension && (CFStringCompare(fileInfo.extension, CFSTR("jpeg"), kCFCompareCaseInsensitive) != kCFCompareEqualTo &&
 								CFStringCompare(fileInfo.extension, CFSTR("jpg"), kCFCompareCaseInsensitive) != kCFCompareEqualTo &&
 								CFStringCompare(fileInfo.extension, CFSTR("bmp"), kCFCompareCaseInsensitive) != kCFCompareEqualTo &&
 								CFStringCompare(fileInfo.extension, CFSTR("tga"), kCFCompareCaseInsensitive) != kCFCompareEqualTo &&
+								CFStringCompare(fileInfo.extension, CFSTR("psd"), kCFCompareCaseInsensitive) != kCFCompareEqualTo &&
+								CFStringCompare(fileInfo.extension, CFSTR("tiff"), kCFCompareCaseInsensitive) != kCFCompareEqualTo &&
+								CFStringCompare(fileInfo.extension, CFSTR("tif"), kCFCompareCaseInsensitive) != kCFCompareEqualTo &&
 								CFStringCompare(fileInfo.extension, CFSTR("png"), kCFCompareCaseInsensitive) != kCFCompareEqualTo))
 								)
 							{

@@ -68,6 +68,12 @@
 #include "lluictrlfactory.h"
 #include "lltrans.h"
 
+// tag: vaa emerald local_asset_browser [begin]
+#include "floaterlocalassetbrowse.h"
+#include "llscrolllistctrl.h"
+#include "llfilepicker.h"
+#define	LOCALLIST_COL_ID 1
+// tag: vaa emerald local_asset_browser [end]
 
 static const S32 CLOSE_BTN_WIDTH = 100;
 const S32 PIPETTE_BTN_WIDTH = 32;
@@ -154,6 +160,7 @@ public:
 	static void		onBtnPipette( void* userdata );
 	//static void		onBtnRevert( void* userdata );
 	static void		onBtnWhite( void* userdata );
+	static void		onBtnInvisible( void* userdata );
 	static void		onBtnNone( void* userdata );
 	static void		onBtnClear( void* userdata );
 	static void		onSelectionChange(const std::deque<LLFolderViewItem*> &items, BOOL user_action, void* data);
@@ -161,6 +168,18 @@ public:
 	static void		onApplyImmediateCheck(LLUICtrl* ctrl, void* userdata);
 	static void		onSearchEdit(const std::string& search_string, void* user_data );
 	static void		onTextureSelect( const LLTextureEntry& te, void *data );
+
+	// tag: vaa emerald local_asset_browser [begin]
+//	static void     onBtnLocal( void* userdata );
+//	static void     onBtnServer( void* userdata );
+//	static void     switchModes( bool localmode, void* userdata );
+
+	static void     onBtnAdd( void* userdata );
+	static void     onBtnRemove( void* userdata );
+	static void     onBtnBrowser( void* userdata );
+
+	static void     onLocalScrollCommit ( LLUICtrl* ctrl, void *userdata );
+	// tag: vaa emerald local_asset_browser [end]
 
 protected:
 	LLPointer<LLViewerImage> mTexturep;
@@ -170,6 +189,7 @@ protected:
 	std::string			mFallbackImageName; // What to show if currently selected texture is null.
 
 	LLUUID				mWhiteImageAssetID;
+	LLUUID				mInvisibleImageAssetID;
 	LLUUID				mSpecialCurrentImageAssetID;  // Used when the asset id has no corresponding texture in the user's inventory.
 	LLUUID				mOriginalImageAssetID;
 
@@ -190,6 +210,7 @@ protected:
 	BOOL				mNoCopyTextureSelected;
 	F32					mContextConeOpacity;
 	LLSaveFolderState	mSavedFolderState;
+	LLScrollListCtrl*   mLocalScrollCtrl; // tag: vaa emerald local_asset_browser
 };
 
 LLFloaterTexturePicker::LLFloaterTexturePicker(	
@@ -210,6 +231,7 @@ LLFloaterTexturePicker::LLFloaterTexturePicker(
 	mImageAssetID( owner->getImageAssetID() ),
 	mFallbackImageName( fallback_image_name ),
 	mWhiteImageAssetID( gSavedSettings.getString( "UIImgWhiteUUID" ) ),
+	mInvisibleImageAssetID(gSavedSettings.getString("UIImgInvisibleUUID")),
 	mOriginalImageAssetID(owner->getImageAssetID()),
 	mLabel(label),
 	mTentativeLabel(NULL),
@@ -231,7 +253,20 @@ LLFloaterTexturePicker::LLFloaterTexturePicker(
 	childSetAction("Default",LLFloaterTexturePicker::onBtnSetToDefault,this);
 	childSetAction("None", LLFloaterTexturePicker::onBtnNone,this);
 	childSetAction("Blank", LLFloaterTexturePicker::onBtnWhite,this);
+	childSetAction("Invisible", LLFloaterTexturePicker::onBtnInvisible,this);
 
+	// tag: vaa emerald local_asset_browser [begin]
+//	childSetAction("Local", LLFloaterTexturePicker::onBtnLocal, this);  
+//	childSetAction("Server", LLFloaterTexturePicker::onBtnServer, this);
+	childSetAction("Add", LLFloaterTexturePicker::onBtnAdd, this);
+	childSetAction("Remove", LLFloaterTexturePicker::onBtnRemove, this);
+	childSetAction("Browser", LLFloaterTexturePicker::onBtnBrowser, this);
+
+	mLocalScrollCtrl = getChild<LLScrollListCtrl>("local_name_list");
+	mLocalScrollCtrl->setCallbackUserData(this);                            
+	mLocalScrollCtrl->setCommitCallback(onLocalScrollCommit);
+	LocalAssetBrowser::UpdateTextureCtrlList( mLocalScrollCtrl );
+	// tag: vaa emerald local_asset_browser [end]	
 		
 	childSetCommitCallback("show_folders_check", onShowFolders, this);
 	childSetVisible("show_folders_check", FALSE);
@@ -571,6 +606,7 @@ void LLFloaterTexturePicker::draw()
 
 		childSetEnabled("Default",  mImageAssetID != mOwner->getDefaultImageAssetID());
 		childSetEnabled("Blank",   mImageAssetID != mWhiteImageAssetID );
+		childSetEnabled("Invisible", mOwner->getAllowInvisibleTexture() && mImageAssetID != mInvisibleImageAssetID );
 		childSetEnabled("None", mOwner->getAllowNoTexture() && !mImageAssetID.isNull() );
 
 		LLFloater::draw();
@@ -706,6 +742,15 @@ void LLFloaterTexturePicker::onBtnWhite(void* userdata)
 
 
 // static
+void LLFloaterTexturePicker::onBtnInvisible(void* userdata)
+{
+	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+	self->setImageID(self->mInvisibleImageAssetID);
+	self->commitIfImmediateSet();
+}
+
+
+// static
 void LLFloaterTexturePicker::onBtnNone(void* userdata)
 {
 	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
@@ -748,6 +793,70 @@ void LLFloaterTexturePicker::onBtnSelect(void* userdata)
 	}
 	self->close();
 }
+
+// tag: vaa emerald local_asset_browser [begin]
+
+// static, switches between showing inventory instance for global bitmaps
+// to showing the scroll list for local ones and back.
+/*
+void LLFloaterTexturePicker::onBtnLocal(void *userdata)
+{
+	switchModes( true, userdata );
+}
+
+void LLFloaterTexturePicker::onBtnServer(void *userdata)
+{
+	switchModes( false, userdata );
+}
+
+void LLFloaterTexturePicker::switchModes(bool localmode, void *userdata)
+{
+	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+
+	// servermode widgets
+	self->childSetVisible("Local", !localmode);
+	self->childSetVisible("Default", !localmode);
+	self->childSetVisible("None", !localmode);
+	self->childSetVisible("Blank", !localmode);
+	self->mSearchEdit->setVisible(!localmode);
+	self->mInventoryPanel->setVisible(!localmode);
+	
+	// localmode widgets
+	self->childSetVisible("Server", localmode);
+	self->childSetVisible("Add", localmode);
+	self->childSetVisible("Remove", localmode);
+	self->childSetVisible("Browser", localmode);
+	self->mLocalScrollCtrl->setVisible(localmode);
+}
+*/
+void LLFloaterTexturePicker::onBtnAdd(void *userdata)
+{
+	LocalAssetBrowser::AddBitmap();	
+}
+
+void LLFloaterTexturePicker::onBtnRemove(void *userdata)
+{
+	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+	LocalAssetBrowser::DelBitmap( self->mLocalScrollCtrl->getAllSelected(), LOCALLIST_COL_ID );
+}
+
+void LLFloaterTexturePicker::onBtnBrowser(void *userdata)
+{
+	FloaterLocalAssetBrowser::show(NULL);
+}
+
+// static, reacts to user clicking a valid field in the local scroll list.
+void LLFloaterTexturePicker::onLocalScrollCommit(LLUICtrl *ctrl, void *userdata)
+{
+	LLFloaterTexturePicker* self = (LLFloaterTexturePicker*) userdata;
+	LLUUID id = (LLUUID)self->mLocalScrollCtrl->getSelectedItemLabel( LOCALLIST_COL_ID ); 
+
+	self->mOwner->setImageAssetID( id );
+	if ( self->childGetValue("apply_immediate_check").asBoolean() )
+	{ self->mOwner->onFloaterCommit(LLTextureCtrl::TEXTURE_CHANGE, id); } // calls an overridden function.
+}
+
+// tag: vaa emerald local_asset_browser [end]
 
 // static
 void LLFloaterTexturePicker::onBtnPipette( void* userdata )
@@ -918,6 +1027,7 @@ LLTextureCtrl::LLTextureCtrl(
 	mDefaultImageName( default_image_name ),
 	mLabel( label ),
 	mAllowNoTexture( FALSE ),
+	mAllowInvisibleTexture(FALSE),
 	mImmediateFilterPermMask( PERM_NONE ),
 	mNonImmediateFilterPermMask( PERM_NONE ),
 	mCanApplyImmediately( FALSE ),
@@ -977,6 +1087,8 @@ LLXMLNodePtr LLTextureCtrl::getXML(bool save_children) const
 
 	node->createChild("allow_no_texture", TRUE)->setBoolValue(mAllowNoTexture);
 
+	node->createChild("allow_invisible_texture", TRUE)->setBoolValue(mAllowInvisibleTexture);
+
 	node->createChild("can_apply_immediately", TRUE)->setBoolValue(mCanApplyImmediately );
 
 	return node;
@@ -1005,6 +1117,9 @@ LLView* LLTextureCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactor
 	BOOL allow_no_texture = FALSE;
 	node->getAttributeBOOL("allow_no_texture", allow_no_texture);
 
+	BOOL allow_invisible_texture = FALSE;
+	node->getAttributeBOOL("allow_invisible_texture", allow_invisible_texture);
+
 	BOOL can_apply_immediately = FALSE;
 	node->getAttributeBOOL("can_apply_immediately", can_apply_immediately);
 
@@ -1021,6 +1136,7 @@ LLView* LLTextureCtrl::fromXML(LLXMLNodePtr node, LLView *parent, LLUICtrlFactor
 									LLUUID(default_image_id), 
 									default_image_name );
 	texture_picker->setAllowNoTexture(allow_no_texture);
+	texture_picker->setAllowInvisibleTexture(allow_invisible_texture);
 	texture_picker->setCanApplyImmediately(can_apply_immediately);
 
 	texture_picker->initFromXML(node, parent);
@@ -1251,6 +1367,40 @@ void LLTextureCtrl::onFloaterCommit(ETexturePickOp op)
 	}
 }
 
+// tag: vaa emerald local_asset_browser [begin]
+
+/*
+   overriding onFloaterCommit to forcefeed it a uuid.
+   also, i still don't get the difference beween mImageItemID and mImageAssetID,
+   they seem to affect the same thing? using mImageAssetID.
+*/
+void LLTextureCtrl::onFloaterCommit(ETexturePickOp op, LLUUID id)
+{
+	LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
+
+	if( floaterp && getEnabled())
+	{
+		mImageItemID = id;
+		mImageAssetID = id; //floaterp->getAssetID(); // using same as on above func. 
+												// seems to work anyway.
+
+		if (op == TEXTURE_SELECT && mOnSelectCallback)
+		{
+			mOnSelectCallback(this, mCallbackUserData);
+		}
+		else if (op == TEXTURE_CANCEL && mOnCancelCallback)
+		{
+			mOnCancelCallback(this, mCallbackUserData);
+		}
+		else
+		{
+			onCommit();
+		}
+	}
+}
+
+// tag: vaa emerald local_asset_browser [end]
+
 void LLTextureCtrl::setImageAssetID( const LLUUID& asset_id )
 {
 	if( mImageAssetID != asset_id )
@@ -1322,7 +1472,11 @@ void LLTextureCtrl::draw()
 		mTexturep = gImageList.getImageFromFile(mFallbackImageName);
 		mTexturep->setBoostLevel(LLViewerImageBoostLevel::BOOST_PREVIEW);
 	}
-	
+	else	// mImageAssetID == LLUUID::null
+	{
+		mTexturep = NULL;
+	}
+
 	// Border
 	LLRect border( 0, getRect().getHeight(), getRect().getWidth(), BTN_HEIGHT_SMALL );
 	gl_rect_2d( border, mBorderColor, FALSE );

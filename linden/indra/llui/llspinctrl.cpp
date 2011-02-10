@@ -45,7 +45,6 @@
 #include "lltextbox.h"
 #include "llkeyboard.h"
 #include "llmath.h"
-#include "audioengine.h"
 #include "llcontrol.h"
 #include "llfocusmgr.h"
 #include "llresmgr.h"
@@ -324,6 +323,11 @@ void LLSpinCtrl::onEditorCommit( LLUICtrl* caller, void *userdata )
 			self->onCommit();
 			success = TRUE;
 		}
+	}
+	else
+	{
+		// We want to update the editor in case it fails while blanking -- MC
+		success = TRUE;
 	}
 
 	if( success )

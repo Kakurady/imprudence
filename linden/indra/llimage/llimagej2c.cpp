@@ -46,7 +46,7 @@ typedef const char* (*EngineInfoLLImageJ2CFunction)();
 CreateLLImageJ2CFunction j2cimpl_create_func;
 DestroyLLImageJ2CFunction j2cimpl_destroy_func;
 EngineInfoLLImageJ2CFunction j2cimpl_engineinfo_func;
-apr_pool_t *j2cimpl_dso_memory_pool;
+AIAPRPool j2cimpl_dso_memory_pool;
 apr_dso_handle_t *j2cimpl_dso_handle;
 
 //Declare the prototype for theses functions here, their functionality
@@ -81,13 +81,12 @@ void LLImageJ2C::openDSO()
 				       gDirUtilp->getExecutableDir());
 
 	j2cimpl_dso_handle      = NULL;
-	j2cimpl_dso_memory_pool = NULL;
+	j2cimpl_dso_memory_pool.create();
 
 	//attempt to load the shared library
-	apr_pool_create(&j2cimpl_dso_memory_pool, NULL);
 	rv = apr_dso_load(&j2cimpl_dso_handle,
 					  dso_path.c_str(),
-					  j2cimpl_dso_memory_pool);
+					  j2cimpl_dso_memory_pool());
 
 	//now, check for success
 	if ( rv == APR_SUCCESS )
@@ -122,6 +121,7 @@ void LLImageJ2C::openDSO()
 					j2cimpl_destroy_func = dest_func;
 					j2cimpl_engineinfo_func = engineinfo_func;
 					all_functions_loaded = true;
+					LL_INFOS("LLKDU") << "Optional J2C renderer " << dso_name << " found at " << dso_path << LL_ENDL;
 				}
 			}
 		}
@@ -132,17 +132,17 @@ void LLImageJ2C::openDSO()
 		//something went wrong with the DSO or function loading..
 		//fall back onto our satefy impl creation function
 
-#if 0
 		// precious verbose debugging, sadly we can't use our
 		// 'llinfos' stream etc. this early in the initialisation seq.
+		// Want to bet? -- MC
+		if (dso_path.empty()) dso_path = "not found";
 		char errbuf[256];
-		fprintf(stderr, "failed to load syms from DSO %s (%s)\n",
-			dso_name.c_str(), dso_path.c_str());
+		LL_INFOS("LLKDU") << "failed to load syms from optional DSO " << dso_name 
+			<< " (" << dso_path << ")" << LL_ENDL;
 		apr_strerror(rv, errbuf, sizeof(errbuf));
-		fprintf(stderr, "error: %d, %s\n", rv, errbuf);
+		LL_INFOS("LLKDU") << "error: " << rv << ", " << errbuf << LL_ENDL;
 		apr_dso_error(j2cimpl_dso_handle, errbuf, sizeof(errbuf));
-		fprintf(stderr, "dso-error: %d, %s\n", rv, errbuf);
-#endif
+		LL_INFOS("LLKDU") << "dso-error: " << rv << ", " << errbuf << LL_ENDL;
 
 		if ( j2cimpl_dso_handle )
 		{
@@ -150,11 +150,7 @@ void LLImageJ2C::openDSO()
 			j2cimpl_dso_handle = NULL;
 		}
 
-		if ( j2cimpl_dso_memory_pool )
-		{
-			apr_pool_destroy(j2cimpl_dso_memory_pool);
-			j2cimpl_dso_memory_pool = NULL;
-		}
+		j2cimpl_dso_memory_pool.destroy();
 	}
 }
 
@@ -162,7 +158,7 @@ void LLImageJ2C::openDSO()
 void LLImageJ2C::closeDSO()
 {
 	if ( j2cimpl_dso_handle ) apr_dso_unload(j2cimpl_dso_handle);
-	if (j2cimpl_dso_memory_pool) apr_pool_destroy(j2cimpl_dso_memory_pool);
+	j2cimpl_dso_memory_pool.destroy();
 }
 
 //static

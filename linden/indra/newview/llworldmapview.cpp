@@ -50,7 +50,6 @@
 #include "llfloatermap.h"
 #include "llfloaterworldmap.h"
 #include "llfocusmgr.h"
-//#include "llmutelist.h" info not being sent
 #include "lltextbox.h"
 #include "lltextureview.h"
 #include "lltracker.h"
@@ -65,6 +64,9 @@
 #include "lltexturefetch.h"
 #include "llappviewer.h"				// Only for constants!
 #include "lltrans.h"
+// [RLVa:KB]
+#include "rlvhandler.h"
+// [/RLVa:KB]
 
 #include "llglheaders.h"
 
@@ -103,6 +105,7 @@ F32 LLWorldMapView::sTargetPanY = 0.f;
 S32 LLWorldMapView::sTrackingArrowX = 0;
 S32 LLWorldMapView::sTrackingArrowY = 0;
 F32 LLWorldMapView::sPixelsPerMeter = 1.f;
+F32 LLWorldMapView::sMapScale = 128.f;
 F32 CONE_SIZE = 0.6f;
 
 std::map<std::string,std::string> LLWorldMapView::sStringsMap;
@@ -179,7 +182,7 @@ LLWorldMapView::LLWorldMapView(const std::string& name, const LLRect& rect )
 	mMouseDownY( 0 ),
 	mSelectIDStart(0)
 {
-	sPixelsPerMeter = gMapScale / REGION_WIDTH_METERS;
+	sPixelsPerMeter = sMapScale / REGION_WIDTH_METERS;
 	clearLastClick();
 
 	const S32 DIR_WIDTH = 10;
@@ -240,14 +243,14 @@ void LLWorldMapView::cleanupTextures()
 // static
 void LLWorldMapView::setScale( F32 scale )
 {
-	if (scale != gMapScale)
+	if (scale != sMapScale)
 	{
-		F32 old_scale = gMapScale;
+		F32 old_scale = sMapScale;
 
-		gMapScale = scale;
-		if (gMapScale == 0.f)
+		sMapScale = scale;
+		if (sMapScale == 0.f)
 		{
-			gMapScale = 0.1f;
+			sMapScale = 0.1f;
 		}
 
 		F32 ratio = (scale / old_scale);
@@ -256,7 +259,7 @@ void LLWorldMapView::setScale( F32 scale )
 		sTargetPanX = sPanX;
 		sTargetPanY = sPanY;
 
-		sPixelsPerMeter = gMapScale / REGION_WIDTH_METERS;
+		sPixelsPerMeter = sMapScale / REGION_WIDTH_METERS;
 	}
 }
 
@@ -354,11 +357,11 @@ void LLWorldMapView::draw()
 
 		// Find x and y position relative to camera's center.
 		LLVector3d rel_region_pos = origin_global - camera_global;
-		F32 relative_x = (rel_region_pos.mdV[0] / REGION_WIDTH_METERS) * gMapScale;
-		F32 relative_y = (rel_region_pos.mdV[1] / REGION_WIDTH_METERS) * gMapScale;
+		F32 relative_x = (rel_region_pos.mdV[0] / REGION_WIDTH_METERS) * sMapScale;
+		F32 relative_y = (rel_region_pos.mdV[1] / REGION_WIDTH_METERS) * sMapScale;
 
-		F32 pix_width = gMapScale*(layer->LayerExtents.getWidth() + 1);
-		F32 pix_height = gMapScale*(layer->LayerExtents.getHeight() + 1);
+		F32 pix_width = sMapScale*(layer->LayerExtents.getWidth() + 1);
+		F32 pix_height = sMapScale*(layer->LayerExtents.getHeight() + 1);
 
 		// When the view isn't panned, 0,0 = center of rectangle
 		F32 bottom =	sPanY + half_height + relative_y;
@@ -439,6 +442,8 @@ void LLWorldMapView::draw()
 	const S32 MIN_REQUEST_PER_TICK = 1;
 	S32 textures_requested_this_tick = 0;
 
+	bool use_web_map_tiles = LLWorldMap::useWebMapTiles();
+
 	for (LLWorldMap::sim_info_map_t::iterator it = LLWorldMap::getInstance()->mSimInfoMap.begin();
 		 it != LLWorldMap::getInstance()->mSimInfoMap.end(); ++it)
 	{
@@ -448,7 +453,7 @@ void LLWorldMapView::draw()
 		LLViewerImage* simimage = info->mCurrentImage;
 		LLViewerImage* overlayimage = info->mOverlayImage;
 
-		if (gMapScale < SIM_MAP_SCALE)
+		if (sMapScale < SIM_MAP_SCALE)
 		{
 			if (simimage != NULL) simimage->setBoostLevel(0);
 			if (overlayimage != NULL) overlayimage->setBoostLevel(0);
@@ -460,14 +465,14 @@ void LLWorldMapView::draw()
 
 		// Find x and y position relative to camera's center.
 		LLVector3d rel_region_pos = origin_global - camera_global;
-		F32 relative_x = (rel_region_pos.mdV[0] / REGION_WIDTH_METERS) * gMapScale;
-		F32 relative_y = (rel_region_pos.mdV[1] / REGION_WIDTH_METERS) * gMapScale;
+		F32 relative_x = (rel_region_pos.mdV[0] / REGION_WIDTH_METERS) * sMapScale;
+		F32 relative_y = (rel_region_pos.mdV[1] / REGION_WIDTH_METERS) * sMapScale;
 
 		// When the view isn't panned, 0,0 = center of rectangle
 		F32 bottom =	sPanY + half_height + relative_y;
 		F32 left =		sPanX + half_width + relative_x;
-		F32 top =		bottom + gMapScale ;
-		F32 right =		left + gMapScale ;
+		F32 top =		bottom + sMapScale ;
+		F32 right =		left + sMapScale ;
 
 		// Switch to world map texture (if available for this region) if either:
 		// 1. Tiles are zoomed out small enough, or
@@ -478,10 +483,10 @@ void LLWorldMapView::draw()
 			map_scale_cutoff = SIM_NULL_MAP_SCALE;
 		}
 
-		info->mShowAgentLocations = (gMapScale >= SIM_MAP_AGENT_SCALE);
+		info->mShowAgentLocations = (sMapScale >= SIM_MAP_AGENT_SCALE);
 
 		bool sim_visible =
-			(gMapScale >= map_scale_cutoff) &&
+			(sMapScale >= map_scale_cutoff) &&
 			(simimage != NULL) &&
 			(simimage->getHasGLTexture());
 
@@ -521,7 +526,15 @@ void LLWorldMapView::draw()
 				 (textures_requested_this_tick < MAX_REQUEST_PER_TICK)))
 			{
 				textures_requested_this_tick++;
-				info->mCurrentImage = gImageList.getImage(info->mMapImageID[LLWorldMap::getInstance()->mCurrentMap], MIPMAP_TRUE, FALSE);
+				if (use_web_map_tiles)
+				{
+					LLVector3d region_pos = info->getGlobalOrigin();
+					info->mCurrentImage = LLWorldMap::loadObjectsTile((U32)(region_pos.mdV[VX] / REGION_WIDTH_UNITS), (U32)(region_pos.mdV[VY] / REGION_WIDTH_UNITS));
+				}
+				else
+				{
+					info->mCurrentImage = gImageList.getImage(info->mMapImageID[LLWorldMap::getInstance()->mCurrentMap], MIPMAP_TRUE, FALSE);
+				}
                 info->mCurrentImage->setAddressMode(LLTexUnit::TAM_CLAMP);
 				simimage = info->mCurrentImage;
 				gGL.getTexUnit(0)->bind(simimage);
@@ -554,7 +567,7 @@ void LLWorldMapView::draw()
 		center_global.mdV[VX] += 128.0;
 		center_global.mdV[VY] += 128.0;
 
-		S32 draw_size = llround(gMapScale);
+		S32 draw_size = llround(sMapScale);
 		if (simimage != NULL)
 		{
 			simimage->setBoostLevel(LLViewerImageBoostLevel::BOOST_MAP);
@@ -670,10 +683,10 @@ void LLWorldMapView::draw()
 		LLFontGL* font = LLFontGL::getFontSansSerifSmall();
 
 		std::string mesg;
-		if (gMapScale < sThresholdA)
+		if (sMapScale < sThresholdA)
 		{
 		}
-		else if (gMapScale < sThresholdB)
+		else if (sMapScale < sThresholdB)
 		{
 			//	mesg = llformat( info->mAgents);
 		}
@@ -686,7 +699,7 @@ void LLWorldMapView::draw()
 // [RLVa:KB] - Alternate: Snowglobe-1.0 | Checked: 2009-07-04 (RLVa-1.0.0a)
 			if (gRlvHandler.hasBehaviour(RLV_BHVR_SHOWLOC))
 			{
-				mesg = rlv_handler_t::cstrHidden;
+				mesg = RlvStrings::getString(RLV_STRING_HIDDEN);
 			}
 			else if (info->mAccess == SIM_ACCESS_DOWN)
 // [/RLVa:KB]
@@ -719,6 +732,28 @@ void LLWorldMapView::draw()
 						LLFontGL::DROP_SHADOW);
 				}
 				mesg = info->mName;
+
+				// Add access level to region name
+				U8 access = info->mAccess;
+				switch(access)
+				{
+				case SIM_ACCESS_MIN:
+					// Don't show this due to different use based on different grids -- MC
+					//mesg += " (" + LLTrans::getString("SIM_ACCESS_MIN") +")";
+					break;
+				case SIM_ACCESS_PG:
+					mesg += " (" + LLTrans::getString("SIM_ACCESS_PG") +")";
+					break;
+				case SIM_ACCESS_MATURE:
+					mesg += " (" + LLTrans::getString("SIM_ACCESS_MATURE") +")";
+					break;
+				case SIM_ACCESS_ADULT:
+					mesg += " (" + LLTrans::getString("SIM_ACCESS_ADULT") +")";
+					break;
+				default:
+					mesg += llformat(" (Access: %d)", access);
+					break;
+				}
 			}
 			else
 			{
@@ -772,13 +807,13 @@ void LLWorldMapView::draw()
 	gGL.setSceneBlendType(LLRender::BT_ALPHA);
 
 	// Infohubs
-	if (gSavedSettings.getBOOL("MapShowInfohubs"))   //(gMapScale >= sThresholdB)
+	if (gSavedSettings.getBOOL("MapShowInfohubs"))   //(sMapScale >= sThresholdB)
 	{
 		drawGenericItems(LLWorldMap::getInstance()->mInfohubs, sInfohubImage);
 	}
 
 	// Telehubs
-	if (gSavedSettings.getBOOL("MapShowTelehubs"))   //(gMapScale >= sThresholdB)
+	if (gSavedSettings.getBOOL("MapShowTelehubs"))   //(sMapScale >= sThresholdB)
 	{
 		drawGenericItems(LLWorldMap::getInstance()->mTelehubs, sTelehubImage);
 	}
@@ -950,7 +985,7 @@ void LLWorldMapView::drawImageStack(const LLVector3d& global_pos, LLUIImagePtr i
 
 void LLWorldMapView::drawAgents()
 {
-	F32 agents_scale = (gMapScale * 0.9f) / 256.f;
+	F32 agents_scale = (sMapScale * 0.9f) / 256.f;
 	
 	LLColor4 avatar_color = gColors.getColor( "MapAvatar" );
 	/*LLColor4 friend_color = gColors.getColor( "MapFriend" );
@@ -1090,7 +1125,7 @@ void LLWorldMapView::drawEvents()
 void LLWorldMapView::drawFrustum()
 {
 	// Draw frustum
-	F32 meters_to_pixels = gMapScale/ REGION_WIDTH_METERS;
+	F32 meters_to_pixels = sMapScale/ REGION_WIDTH_METERS;
 
 	F32 horiz_fov = LLViewerCamera::getInstance()->getView() * LLViewerCamera::getInstance()->getAspect();
 	F32 far_clip_meters = LLViewerCamera::getInstance()->getFar();
@@ -1219,7 +1254,7 @@ LLVector3d LLWorldMapView::viewPosToGlobal( S32 x, S32 y )
 
 	LLVector3 pos_local( (F32)x, (F32)y, 0.f );
 
-	pos_local *= ( REGION_WIDTH_METERS / gMapScale );
+	pos_local *= ( REGION_WIDTH_METERS / sMapScale );
 	
 	LLVector3d pos_global;
 	pos_global.setVec( pos_local );
@@ -1246,13 +1281,16 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, std::string& msg, LLRect* stic
 	{
 		LLViewerRegion *region = gAgent.getRegion();
 
+//		std::string message =
+//			llformat("%s (%s)",
+//					 info->mName.c_str(),
+//					 LLViewerRegion::accessToString(info->mAccess).c_str());
+// [RLVa:KB] - Alternate: Snowglobe-1.0 | Checked: 2009-07-04 (RLVa-1.0.0a)
 		std::string message = 
 			llformat("%s (%s)",
-					 //info->mName.c_str(),
-// [RLVa:KB] - Alternate: Snowglobe-1.0 | Checked: 2009-07-04 (RLVa-1.0.0a)
-					 (!gRlvHandler.hasBehaviour(RLV_BHVR_SHOWLOC)) ? info->mName.c_str() : rlv_handler_t::cstrHidden.c_str(),
-// [/RLVa:KB]
+					(!gRlvHandler.hasBehaviour(RLV_BHVR_SHOWLOC)) ? info->mName.c_str() : RlvStrings::getString(RLV_STRING_HIDDEN).c_str(),
 					 LLViewerRegion::accessToString(info->mAccess).c_str());
+// [/RLVa:KB]
 
 		if (info->mAccess != SIM_ACCESS_DOWN)
 		{
@@ -1850,7 +1888,7 @@ U32 LLWorldMapView::updateBlock(S32 block_x, S32 block_y)
 
 U32 LLWorldMapView::updateVisibleBlocks()
 {
-	if (gMapScale < SIM_MAP_SCALE)
+	if (sMapScale < SIM_MAP_SCALE)
 	{
 		// We don't care what is loaded if we're zoomed out
 		return 0;
@@ -1858,7 +1896,7 @@ U32 LLWorldMapView::updateVisibleBlocks()
 
 	LLVector3d camera_global = gAgent.getCameraPositionGlobal();
 	
-	F32 pixels_per_region = gMapScale;
+	F32 pixels_per_region = sMapScale;
 	const S32 width = getRect().getWidth();
 	const S32 height = getRect().getHeight();
 	// Convert pan to sim coordinates

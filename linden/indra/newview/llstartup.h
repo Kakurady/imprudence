@@ -50,6 +50,7 @@ typedef enum {
 	STATE_LOGIN_SHOW,				// Show login screen
 	STATE_LOGIN_WAIT,				// Wait for user input at login screen
 	STATE_LOGIN_CLEANUP,			// Get rid of login screen and start login
+	STATE_LOGIN_VOICE_LICENSE,		// Show license agreement for using voice
 	STATE_UPDATE_CHECK,				// Wait for user at a dialog box (updates, term-of-service, etc)
 	STATE_LOGIN_AUTH_INIT,			// Start login to SL servers
 	STATE_LOGIN_AUTHENTICATE,		// Do authentication voodoo
@@ -92,6 +93,9 @@ public:
 	static void setStartedOnce(bool started);
 	static bool getStartedOnce() { return mStartedOnce;     };
 
+	static void setLoginFailed(bool login_failed);
+	static bool getLoginFailed() { return sLoginFailed; };
+
 	static void multimediaInit();
 		// Initialize LLViewerMedia multimedia engine.
 
@@ -120,9 +124,14 @@ public:
 	static bool shouldAutoLogin() { return mShouldAutoLogin; };
 	static void setShouldAutoLogin(bool value) { mShouldAutoLogin = value; };
 
+	// Returns true if startup has been successfully completed
+	static bool isLoggedIn() { return gStartupState == STATE_STARTED; }
+
 private:
  	static bool mStartedOnce;
 	static bool mShouldAutoLogin;
+	// For failed logins before mStartedOnce can be changed -- MC
+	static bool sLoginFailed;
 	static std::string startupStateToString(EStartupState state);
 	static EStartupState gStartupState; // Do not set directly, use LLStartup::setStartupState
 };

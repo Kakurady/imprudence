@@ -44,7 +44,12 @@
 #include "lluictrlfactory.h"
 #include "llfirstuse.h"
 #include "panelradar.h"
+#include "hippolimits.h"
 
+
+// [RLVa:KB]
+#include "rlvhandler.h"
+// [/RLVa:KB]
 
 LLFloaterMap::LLFloaterMap(const LLSD& key)
 	:
@@ -140,8 +145,12 @@ void LLFloaterMap::draw()
 		getDragHandle()->setMouseOpaque(FALSE);
 
 		drawChild(mPanelMap);
+		if (gSavedSettings.getBOOL("ShowMiniMapRadar") && !LLFloaterMap::getInstance()->isMinimized())
+		{
+			drawChild(mPanelRadar);
+		}
 	}
-	else
+	else if (gHippoLimits->mAllowMinimap) //Check for if minimap is blocked
 	{
 		setMouseOpaque(TRUE);
 		getDragHandle()->setMouseOpaque(TRUE);
@@ -149,18 +158,6 @@ void LLFloaterMap::draw()
 		LLFloater::draw();
 	}
 }
-
-// [RLVa:KB] - Version: 1.22.11 | Checked: 2009-07-05 (RLVa-1.0.0c)
-void LLFloaterMap::open()
-{
-	if (!gRlvHandler.hasBehaviour(RLV_BHVR_SHOWMINIMAP))
-	{
-		LLFloater::open();
-		LLFirstUse::useMiniMap();
-	}
-}
-// [/RLVa:KB]
-
 
 PanelRadar* LLFloaterMap::getRadar()
 {
@@ -219,7 +216,6 @@ void LLFloaterMap::setRadarButtonState( bool showing_radar )
 	}
 }
 
-
 void LLFloaterMap::adjustLayout( bool expand )
 {
 	S32 radar_height = mPanelRadar->getRect().getHeight();
@@ -259,3 +255,13 @@ void LLFloaterMap::adjustLayout( bool expand )
 		toggle->setRect( temp_rect );
 	}
 }
+
+// [RLVa:KB] - Version: 1.23.4 | Checked: 2009-07-05 (RLVa-1.0.0c)
+void LLFloaterMap::open()
+{
+	if (!gRlvHandler.hasBehaviour(RLV_BHVR_SHOWMINIMAP))
+	{
+		LLFloater::open();
+	}
+}
+// [/RLVa:KB]

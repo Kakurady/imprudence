@@ -35,7 +35,7 @@
 
 #include "stdtypes.h"
 
-class LLMortician 
+class LL_COMMON_API LLMortician
 {
 public:
 	LLMortician() { mIsDead = FALSE; }
@@ -46,6 +46,7 @@ public:
 
 	// sets destroy immediate true
 	static void setZealous(BOOL b);
+	static BOOL getZealous();
 
 private:
 	static BOOL sDestroyImmediate;

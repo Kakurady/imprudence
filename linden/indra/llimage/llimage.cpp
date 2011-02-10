@@ -55,10 +55,13 @@ std::string LLImage::sLastErrorMessage;
 LLMutex* LLImage::sMutex = NULL;
 
 //static
-void LLImage::initClass()
+void LLImage::initClass(const bool& useDSO)
 {
-	sMutex = new LLMutex(NULL);
-	LLImageJ2C::openDSO();
+	sMutex = new LLMutex;
+	if (useDSO)
+	{
+		LLImageJ2C::openDSO();
+	}
 }
 
 //static
@@ -1544,6 +1547,7 @@ void LLImageFormatted::appendData(U8 *data, S32 size)
 			S32 newsize = cursize + size;
 			reallocateData(newsize);
 			memcpy(getData() + cursize, data, size);
+			delete[] data;
 		}
 	}
 }

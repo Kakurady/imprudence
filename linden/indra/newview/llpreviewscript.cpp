@@ -81,7 +81,7 @@
 #include "llviewertexteditor.h"
 #include "llviewerwindow.h"
 #include "lluictrlfactory.h"
-#include "llwebbrowserctrl.h"
+#include "llmediactrl.h"
 #include "lluictrlfactory.h"
 
 #include "llviewercontrol.h"
@@ -89,6 +89,9 @@
 
 #include "llpanelinventory.h"
 
+// [RLVa:KB]
+#include "rlvhandler.h"
+// [/RLVa:KB]
 
 const std::string HELLO_LSL =
 	"default\n"
@@ -294,11 +297,11 @@ void LLScriptEdCore::initMenu()
 	menuItem->setMenuCallback(onBtnHelp, this);
 	menuItem->setEnabledCallback(NULL);
 
-	menuItem = getChild<LLMenuItemCallGL>("Load from Disk");
+	menuItem = getChild<LLMenuItemCallGL>("Import Script...");
 	menuItem->setMenuCallback(onBtnLoadFromDisc, this);
 	menuItem->setEnabledCallback(NULL);
 
-	menuItem = getChild<LLMenuItemCallGL>("Save to Disk");
+	menuItem = getChild<LLMenuItemCallGL>("Export Script...");
 	menuItem->setMenuCallback(onBtnSaveToDisc, this);
 	menuItem->setEnabledCallback(NULL);
 
@@ -360,7 +363,7 @@ void LLScriptEdCore::updateDynamicHelp(BOOL immediate)
 	// update back and forward buttons
 	LLButton* fwd_button = help_floater->getChild<LLButton>("fwd_btn");
 	LLButton* back_button = help_floater->getChild<LLButton>("back_btn");
-	LLWebBrowserCtrl* browser = help_floater->getChild<LLWebBrowserCtrl>("lsl_guide_html");
+	LLMediaCtrl* browser = help_floater->getChild<LLMediaCtrl>("lsl_guide_html");
 	back_button->setEnabled(browser->canNavigateBack());
 	fwd_button->setEnabled(browser->canNavigateForward());
 
@@ -419,7 +422,7 @@ void LLScriptEdCore::setHelpPage(const std::string& help_string)
 	LLFloater* help_floater = mLiveHelpHandle.get();
 	if (!help_floater) return;
 	
-	LLWebBrowserCtrl* web_browser = help_floater->getChild<LLWebBrowserCtrl>("lsl_guide_html");
+	LLMediaCtrl* web_browser = help_floater->getChild<LLMediaCtrl>("lsl_guide_html");
 	if (!web_browser) return;
 
 	LLComboBox* history_combo = help_floater->getChild<LLComboBox>("history_combo");
@@ -592,7 +595,7 @@ void LLScriptEdCore::onBtnDynamicHelp(void* userdata)
 	live_help_floater->childSetAction("back_btn", onClickBack, userdata);
 	live_help_floater->childSetAction("fwd_btn", onClickForward, userdata);
 
-	LLWebBrowserCtrl* browser = live_help_floater->getChild<LLWebBrowserCtrl>("lsl_guide_html");
+	LLMediaCtrl* browser = live_help_floater->getChild<LLMediaCtrl>("lsl_guide_html");
 	browser->setAlwaysRefresh(TRUE);
 
 	LLComboBox* help_combo = live_help_floater->getChild<LLComboBox>("history_combo");
@@ -621,7 +624,7 @@ void LLScriptEdCore::onClickBack(void* userdata)
 	LLFloater* live_help_floater = corep->mLiveHelpHandle.get();
 	if (live_help_floater)
 	{
-		LLWebBrowserCtrl* browserp = live_help_floater->getChild<LLWebBrowserCtrl>("lsl_guide_html");
+		LLMediaCtrl* browserp = live_help_floater->getChild<LLMediaCtrl>("lsl_guide_html");
 		if (browserp)
 		{
 			browserp->navigateBack();
@@ -636,7 +639,7 @@ void LLScriptEdCore::onClickForward(void* userdata)
 	LLFloater* live_help_floater = corep->mLiveHelpHandle.get();
 	if (live_help_floater)
 	{
-		LLWebBrowserCtrl* browserp = live_help_floater->getChild<LLWebBrowserCtrl>("lsl_guide_html");
+		LLMediaCtrl* browserp = live_help_floater->getChild<LLMediaCtrl>("lsl_guide_html");
 		if (browserp)
 		{
 			browserp->navigateForward();
@@ -678,7 +681,7 @@ void LLScriptEdCore::onHelpComboCommit(LLUICtrl* ctrl, void* userdata)
 
 		corep->addHelpItemToHistory(help_string);
 
-		LLWebBrowserCtrl* web_browser = live_help_floater->getChild<LLWebBrowserCtrl>("lsl_guide_html");
+		LLMediaCtrl* web_browser = live_help_floater->getChild<LLMediaCtrl>("lsl_guide_html");
 		LLUIString url_string = gSavedSettings.getString("LSLHelpURL");
 		url_string.setArg("[APP_DIRECTORY]", gDirUtilp->getWorkingDir());
 		url_string.setArg("[LSL_STRING]", help_string);
@@ -732,36 +735,34 @@ void LLScriptEdCore::onBtnUndoChanges( void* userdata )
 
 void LLScriptEdCore::onBtnSaveToDisc( void* userdata )
 {
-
 	LLViewerStats::getInstance()->incStat( LLViewerStats::ST_LSL_SAVE_COUNT );
 
-   LLScriptEdCore* self = (LLScriptEdCore*) userdata;
+	LLScriptEdCore* self = (LLScriptEdCore*) userdata;
 
-   if( self->mSaveCallback )
-   {
-      LLFilePicker& file_picker = LLFilePicker::instance();
-	if( !file_picker.getSaveFile( LLFilePicker::FFSAVE_TEXT ) )
+	if (self->mSaveCallback)
 	{
-		return;
-	}
-	
+		LLFilePicker& file_picker = LLFilePicker::instance();
+		const LLViewerInventoryItem *item = ((LLPreviewLSL*)self->getParent())->getItem();
+		if (!file_picker.getSaveFile(LLFilePicker::FFSAVE_LSL, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null))
+		{
+			return;
+		}
+
 		std::string filename = file_picker.getFirstFile();
-      std::string scriptText=self->mEditor->getText();
-	  std::ofstream fout(filename.c_str());
-      fout<<(scriptText);
-      fout.close();
-      self->mSaveCallback( self->mUserdata, FALSE );
-         
-   }
-	
+		std::string scriptText=self->mEditor->getText();
+		std::ofstream fout(filename.c_str());
+		fout << scriptText;
+		fout.close();
+		self->mSaveCallback(self->mUserdata, FALSE);
+	}
 }
+
 void LLScriptEdCore::onBtnLoadFromDisc( void* data )
 {
-
 	LLScriptEdCore* self = (LLScriptEdCore*) data;
 	
 	LLFilePicker& file_picker = LLFilePicker::instance();
-	if( !file_picker.getOpenFile( LLFilePicker::FFLOAD_TEXT ) )
+	if (!file_picker.getOpenFile(LLFilePicker::FFLOAD_TEXT))
 	{
 		return;
 	}
@@ -771,17 +772,14 @@ void LLScriptEdCore::onBtnLoadFromDisc( void* data )
 	std::ifstream fin(filename.c_str());
 	
 	std::string line;
-	std::string linetotal;
 	self->mEditor->clear();
 	while (!fin.eof())
 	{ 
 		getline(fin,line);
-		line=line+"\n";
+		line = line + "\n";
 		self->mEditor->insertText(line);
-
 	}
 	fin.close();
-	
 }
 
 void LLScriptEdCore::onSearchMenu(void* userdata)
@@ -1102,6 +1100,9 @@ void LLPreviewLSL::callbackLSLCompileFailed(const LLSD& compile_errors)
 		line < compile_errors.endArray();
 		line++)
 	{
+		// Note: OpenSim screws up and sends the wrong values for (row, column).
+		// (As of 2010-09-06: rows start at -1 instead of 0, and columns start at
+		//  1 instead of 0) -- MC
 		LLSD row;
 		std::string error_message = line->asString();
 		LLStringUtil::stripNonprintable(error_message);
@@ -1398,7 +1399,7 @@ void LLPreviewLSL::onSaveComplete(const LLUUID& asset_uuid, void* user_data, S32
 			else
 			{
 				llwarns << "Inventory item for script " << info->mItemUUID
-					<< " is no longer in agent inventory." << llendl
+					<< " is no longer in agent inventory." << llendl;
 			}
 
 			// Find our window and close it if requested.

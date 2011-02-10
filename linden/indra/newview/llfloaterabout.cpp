@@ -42,9 +42,9 @@
 
 #include "llcurl.h"
 #include "llimagej2c.h"
-#include "audioengine.h"
+#include "llaudioengine.h"
 
-#include "hippoGridManager.h"
+#include "hippogridmanager.h"
 #include "llviewertexteditor.h"
 #include "llviewercontrol.h"
 #include "llagent.h"
@@ -57,15 +57,17 @@
 #include "lltrans.h"
 #include "llappviewer.h" 
 #include "llglheaders.h"
-#include "llmediamanager.h"
 #include "llwindow.h"
 #include "viewerversion.h"
+
+// [RLVa:KB]
+#include "rlvhandler.h"
+// [/RLVa:KB]
 
 #if LL_WINDOWS
 #include "lldxhardware.h"
 #endif
 
-extern LLCPUInfo gSysCPU;
 extern LLMemoryInfo gSysMemory;
 extern U32 gPacketsIn;
 
@@ -116,11 +118,9 @@ LLFloaterAbout::LLFloaterAbout()
 
 	// Version string
 	std::string version = llformat(
-	  "%s %d.%d.%d %s / %s %d.%d.%d (%d), %s %s\n",
+	  "%s %d.%d.%d %s (%s %s)\n",
 	  ViewerVersion::getImpViewerName().c_str(),
 	  ViewerVersion::getImpMajorVersion(), ViewerVersion::getImpMinorVersion(), ViewerVersion::getImpPatchVersion(), ViewerVersion::getImpTestVersion().c_str(),
-	  ViewerVersion::getLLViewerName().c_str(),
-	  ViewerVersion::getLLMajorVersion(), ViewerVersion::getLLMinorVersion(), ViewerVersion::getLLPatchVersion(), ViewerVersion::getLLBuildVersion(),
 	  __DATE__, __TIME__);
 
 	support_widget->appendColoredText(version, FALSE, FALSE, gColors.getColor("TextFgReadOnlyColor"));
@@ -136,15 +136,15 @@ LLFloaterAbout::LLFloaterAbout()
 #endif
 
 #if LL_GNUC
-    support.append(llformat("Built with GCC version %d\n\n", GCC_VERSION));
+	support.append(llformat("Built with GCC version %s\n\n", __VERSION__));
 #endif
 
 	// Position
 	LLViewerRegion* region = gAgent.getRegion();
-// [RLVa:KB] - Version: 1.22.11 | Checked: 2009-07-04 (RLVa-1.0.0a)
+// [RLVa:KB] - Version: 1.23.4 | Checked: 2009-07-04 (RLVa-1.0.0a)
 	if (gRlvHandler.hasBehaviour(RLV_BHVR_SHOWLOC))
 	{
-		support.append(rlv_handler_t::cstrHidden);
+		support.append(RlvStrings::getString(RLV_STRING_HIDDEN));
 		support.append("\n\n");
 	}
 	else if (region)
@@ -244,26 +244,10 @@ LLFloaterAbout::LLFloaterAbout()
 
 	support.append("\n");
 
-	LLMediaManager *mgr = LLMediaManager::getInstance();
-	if (mgr)
-	{
-		LLMediaBase *gstreamer = mgr->createSourceFromMimeType("http", "audio/mpeg");
-		if (gstreamer)
-		{
-			support.append("GStreamer Version: ");
-			support.append( gstreamer->getVersion() );
-			support.append("\n");
-		} 
+	// TODO: Implement media plugin version query
 
-		LLMediaBase *media_source = mgr->createSourceFromMimeType("http", "text/html");
-		if (media_source)
-		{
-			support.append("LLMozLib Version: ");
-			support.append(media_source->getVersion());
-			support.append("\n");
-			mgr->destroySource(media_source);
-		}
-	}
+	support.append("Qt Webkit Version: 4.6 (version number hard-coded)");
+	support.append("\n");
 
 	if (gPacketsIn > 0)
 	{

@@ -47,6 +47,7 @@ typedef void (*LLW32MsgCallback)(const MSG &msg);
 class LLWindowWin32 : public LLWindow
 {
 public:
+	/*virtual*/ void setWindowTitle(std::string &title);
 	/*virtual*/ void show();
 	/*virtual*/ void hide();
 	/*virtual*/ void close();
@@ -127,7 +128,7 @@ protected:
 	HCURSOR loadColorCursor(LPCTSTR name);
 	BOOL	isValid();
 	void	moveWindow(const LLCoordScreen& position,const LLCoordScreen& size);
-
+	LLSD	getNativeKeyData();
 
 	// Changes display resolution. Returns true if successful
 	BOOL	setDisplayResolution(S32 width, S32 height, S32 bits, S32 refresh);
@@ -206,6 +207,12 @@ protected:
 	LLRect			mLanguageTextInputAreaGL;
 
 	LLPreeditor		*mPreeditor;
+
+	
+
+	U32				mKeyCharCode;
+	U32				mKeyScanCode;
+	U32				mKeyVirtualKey;
 
 	friend class LLWindowManager;
 };

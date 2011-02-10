@@ -45,12 +45,11 @@
 #include "llappviewer.h"
 #include "lltracker.h"
 
+#include "floatergriddefault.h"
+#include "floatervoicelicense.h"
+#include "hippogridmanager.h"
+#include "llstartup.h"
 #include "llvoavatar.h"
-#include "hippoGridManager.h"
-
-// [RLVa:KB] - Version: 1.22.11
-#include "llviewerwindow.h"
-// [/RLVa:KB]
 
 // static
 std::set<std::string> LLFirstUse::sConfigVariables;
@@ -308,6 +307,29 @@ void LLFirstUse::useMedia()
 		LLNotifications::instance().add("FirstMedia");
 	}
 }
+
+// [RLVa:KB] - Version: 1.23.4 | Checked: RLVa-1.0.3a (2009-09-10) | Added: RLVa-1.0.3a
+
+bool rlvHasVisibleFirstUseNotification()
+{
+	LLNotificationChannelPtr activeNotifications = LLNotifications::instance().getChannel("Notifications");
+	for (LLNotificationChannel::Iterator itNotif = activeNotifications->begin(); itNotif != activeNotifications->end(); itNotif++)
+		if ((*itNotif)->getName().find(RLV_SETTING_FIRSTUSE_PREFIX) == 0)
+			return true;
+	return false;
+}
+
+void LLFirstUse::showRlvFirstUseNotification(const std::string& strName)
+{
+	if ( (gSavedSettings.getWarning(strName)) && (!rlvHasVisibleFirstUseNotification()) )
+	{
+		gSavedSettings.setWarning(strName, FALSE);
+		LLNotifications::instance().add(strName);
+	}
+}
+
+// [/RLVa:KB]
+
 void LLFirstUse::callbackClientTags(const LLSD& notification, const LLSD& response)
 {
 	gSavedSettings.setWarning("ClientTags", FALSE);
@@ -331,6 +353,7 @@ void LLFirstUse::callbackClientTags(const LLSD& notification, const LLSD& respon
 		gSavedSettings.setBOOL("DownloadClientTags",FALSE);
 	}
 }
+
 // static
 void LLFirstUse::ClientTags()
 {
@@ -340,3 +363,30 @@ void LLFirstUse::ClientTags()
 	}
 }
 
+// static 
+void LLFirstUse::useLoginScreen()
+{
+	if (gSavedSettings.getWarning("FirstLoginScreen"))
+	{
+		gSavedSettings.setWarning("FirstLoginScreen", FALSE);
+
+		FloaterGridDefault::getInstance()->open();
+		FloaterGridDefault::getInstance()->center();
+	}
+}
+
+// static
+void LLFirstUse::voiceLicenseAgreement()
+{
+	if (gSavedSettings.getWarning("FirstVoiceLicense"))
+	{
+		gSavedSettings.setWarning("FirstVoiceLicense", FALSE);
+
+		FloaterVoiceLicense::getInstance()->open();
+		FloaterVoiceLicense::getInstance()->center();
+	}
+	else // currently in STATE_LOGIN_VOICE_LICENSE when arriving here
+	{
+		LLStartUp::setStartupState(STATE_LOGIN_AUTH_INIT);
+	}
+}
