@@ -9215,9 +9215,6 @@ U32 info_display_from_string(std::string info_display)
 	{
 		return LLPipeline::RENDER_DEBUG_SCULPTED;
 	}
-/*
-	sub_menu->append(new LLMenuItemCallGL("Vectorize Perf Test", &run_vectorize_perf_test));
-*/	
 	else
 	{
 		return 0;
