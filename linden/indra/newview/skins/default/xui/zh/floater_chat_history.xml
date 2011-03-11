@@ -65,6 +65,9 @@
 				</combo_item>
 			</combo_box>
 			<check_box label="显示屏蔽的文字" name="show mutes"/>
+			<check_box
+				 label="翻译聊天 (由 Google 强力驱动)"
+				 name="translate chat" />
 			<button label="&lt; &lt;" label_selected="&gt; &gt;" name="toggle_active_speakers_btn" tool_tip="显示在该即时通信会话中活动的参与者。"/>
 			<panel name="chat_panel">
 				<string name="gesture_label">
