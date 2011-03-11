@@ -161,4 +161,7 @@
 
 [STATUS]
 	</string>
+	<string name="in_world">
+		动画预览将在你的化身上播放。
+	</string>
 </floater>

@@ -7,10 +7,10 @@
 		<layout_panel name="moderation_mode_panel">
 			<combo_box name="moderation_mode">
 				<combo_item name="OpenVoice">
-					声音 缺省 开
+					语音默认开放
 				</combo_item>
 				<combo_item name="ModeratedVoice">
-					声音 缺省 关
+					语音默认关闭
 				</combo_item>
 			</combo_box>
 		</layout_panel>
