@@ -2538,7 +2538,7 @@ void LLViewerWindow::handleHScrollWheel(S32 clicks)
 		llinfos << "Tilt Wheel not handled by view" << llendl;
 	}
 
-	
+
 	gAgent.handleHScrollWheel(clicks);
 
 	return;

@@ -1055,7 +1055,7 @@ LLView* LLView::childrenHandleHScrollWheel(S32 x, S32 y, S32 clicks)
 			LLView* viewp = *child_it;
 			S32 local_x = x - viewp->getRect().mLeft;
 			S32 local_y = y - viewp->getRect().mBottom;
-			if (viewp->pointInView(local_x, local_y) 
+			if (viewp->pointInView(local_x, local_y)
 				&& viewp->getVisible()
 				&& viewp->getEnabled()
 				&& viewp->handleHScrollWheel( local_x, local_y, clicks ))

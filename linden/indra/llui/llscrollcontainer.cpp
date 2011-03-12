@@ -243,7 +243,7 @@ BOOL LLScrollableContainerView::handleHScrollWheel( S32 x, S32 y, S32 clicks )
 {
 	for( S32 i = SCROLLBAR_COUNT - 1; i >= 0; i++ )
 	{
-		// Note: tries horizontal and then vertical 
+		// Note: tries horizontal and then vertical
 
 		// Pretend the mouse is over the scrollbar
 		if( mScrollbar[i]->handleScrollWheel( 0, 0, clicks ) )
