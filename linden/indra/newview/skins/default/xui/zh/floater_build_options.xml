@@ -33,19 +33,17 @@
 		 label="Z 尺寸:"
 		 name="Z size" />
  
-  <view_border
-		 name="PivotBorder" />
   <text
 		 name="text_box6">旋转中心:</text>
   <spinner
 		 label="X 位置:"
-		 name="X pos">
+		 name="X pos" />
   <spinner
 		 label="Y 位置:"
-		 name="Y pos">
+		 name="Y pos" />
   <spinner
 		 label="Z 位置:"
-		 name="Z pos">
+		 name="Z pos" />
   <check_box
 		 label="值为百分比"
 		 tool_tip="默认设置为百分比，每个轴都设置为 50"
