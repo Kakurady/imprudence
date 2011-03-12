@@ -491,9 +491,10 @@
 			<text name="Item Action Label">
 				纹身：
 			</text>
-			<texture_picker label="头部纹身" name="Head Tattoos" tool_tip="点击这里来选择图片"/>
-			<texture_picker label="上身的纹身" name="Upper Tattoos" tool_tip="点击这里来选择图片"/>
-			<texture_picker label="下身纹身" name="Lower Tattoos" tool_tip="点击这里来选择图片"/>
+			<texture_picker label="头部纹身" name="Head Tattoo" tool_tip="点击这里来选择图片"/>
+			<texture_picker label="上身的纹身" name="Upper Tattoo" tool_tip="点击这里来选择图片"/>
+			<texture_picker label="下身纹身" name="Lower Tattoo" tool_tip="点击这里来选择图片"/>
+			<color_swatch label="颜色" name="Color/Tint" tool_tip="点击这里来打开色彩选择器"/>
 			<button label="创建新的纹身" label_selected="创建新的纹身" name="Create New"/>
 			<button label="脱掉" label_selected="脱掉" name="Take Off"/>
 			<button label="存储" label_selected="存储" name="Save"/>
