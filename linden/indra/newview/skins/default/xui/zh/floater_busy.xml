@@ -11,7 +11,7 @@
 		 label="Announce 收到的即时消息"
 		 name="InstantMessageAnnounceIncoming" />
   <check_box
-		 label="Steal focus"
+		 label="偷走焦点 (Steal focus)/自动回复通告在顶端弹出"
 		 name="InstantMessageAnnounceStealFocus" />
   <check_box
 		 label="自动回复非好友"
@@ -26,7 +26,7 @@
 		 label="对方一开始打字就自动回复"
 		 name="InstantMessageShowOnTyping" />
   <check_box
-		 label="不要显示被自动回复的信息"
+		 label="如果信息被自动回复就不要显示"
 		 name="InstantMessageShowResponded" />
   <check_box
 		 label="自动回复所有信息" name="InstantMessageResponseRepeat" />
@@ -37,43 +37,31 @@
   </text>
   <text
 		 name="text_box_a">
-    Use &quot;#f&quot; for 收件人的名
+    使用‘#f’代替收件人的名
   </text>
   <text
 		 name="text_box_b">
-   Use &quot;#l&quot; for 收件人的姓
+    使用‘#l’代替收件人的姓
   </text>
   <text
 		 name="text_box_c">
-    Use &quot;#t&quot; for 当前时间
+    使用‘#t’代替当前时间
   </text>
- 
-  <text_editor
-		 name="im_response"
-		 spell_check="true" />
  
   <check_box
 		 label="回复时同时送出物体"
 		 name="InstantMessageResponseItem" />
  
-  <view_border
-		 blevel_style="in"
-		 name="im_give_drop_target_rect" />
- 
   <text
 		 name="Give inventory"
-		 tool_tip="Drop an inventory item here to have it given along with the auto-response.">
-    Drop an inventory item here
+		 tool_tip="拖动到这里的库存条目将会被在自动回复时送出。">
+    拖动库存条目到这里
   </text>
- 
-  <view_border
-		 blevel_style="in"
-		 name="im_give_disp_rect" />
  
   <text
 		 name="im_give_disp_rect_txt"
 		 tool_tip="">
-    Currently set to: ITEM
+    目前设置到: ITEM
   </text>
  
   <button

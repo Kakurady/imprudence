@@ -446,8 +446,24 @@
 				 right="-12" />
 			<check_box label="隐藏媒体 URL" name="hide_media_url" tool_tip="选中该项将会对未被授权的查看该地块信息的人隐藏媒体 URL 。注意对 HTML 类型，此项不可用。"/>
 			<text
-				 name="minutes">
-				分钟后
+				 font="SansSerifSmall"
+				 name="media_reset"
+				 right="-264"
+				 tool_tip="地块在该时间之后，将自动返回初始 URL (0 为不返回)"
+				 type="string"
+				 width="185">
+				在
+			</text>
+			<spinner
+				 name="media_reset_time"
+				 right="-195"
+				 tool_tip="地块在该时间之后，将自动返回初始 URL (0 为不返回)" />
+			<text
+
+				 name="minutes"
+				 tool_tip="地块在该时间之后，将自动返回初始 URL (0 为不返回)"
+				 right="-90">
+				分钟后回到初始 URL
 			</text>
 			<text name="Description:">
 				描述:
@@ -471,6 +487,10 @@
 			</text>
 		
 	<spinner name="media_size_width" tool_tip="渲染媒体的尺寸，设为 0 使用默认值"/>
+			<text
+				 name="pixels">
+				像素
+			</text>
 			<text
 				 name="Interaction:">
 				交互:
@@ -523,9 +543,27 @@
 			</text>
 			<check_box label="限制动作和物品的声音到此地块。" name="check_sound_local"/>
 			<button label="?" label_selected="?" name="?"/>
-			<text name="Voice settings:">
+			<text name="Voice:">
 				语音:
 			</text>
+<radio_group
+	 name="parcel_voice_channel">
+				<radio_item
+		 name="Estate"
+		 tool_tip="使用地产语音频道。">
+					地产频道
+				</radio_item>
+				<radio_item
+		 name="Parcel"
+		 tool_tip="限制语音到该地块。">
+					地块频道
+				</radio_item>
+				<radio_item
+		 name="Disabled"
+		 tool_tip="在此地块上禁用语音。">
+					禁用
+				</radio_item>
+			</radio_group>
 			<check_box label="使用语音功能" name="parcel_enable_voice_channel"/>
 			<check_box label="允许使用地产声音频道（由地产所创建）" name="parcel_enable_voice_channel_is_estate_disabled"/>
 			<check_box label="限制声音于地块私有频道" name="parcel_enable_voice_channel_parcel"/>
