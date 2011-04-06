@@ -26,14 +26,17 @@
 	<check_box
 		 label="接受后自动打开"
 		 name="show_new_inventory" />
-	<check_box label="在库存中自动显示新接收的物体" 
+	<check_box label="在库存中自动显示新接收的物品" 
 	     name="show_in_inventory" />
 	<button  width="225"
-		 label="显示所有的“下次不再显示”对话框..."
+		 label="显示所有的 “下次不再显示” 对话框..."
 		 name="reset_dialogs_btn"
 		 tool_tip="启用所有可选的弹出窗口及“首次使用”提示。" />
 	<button  width="225"
-		 label="隐藏所有的“下次不再显示”对话框..."
+		 label="隐藏所有的 “下次不再显示” 对话框..."
 		 name="skip_dialogs_btn"
 		 tool_tip="禁用所有可选的弹出窗口及“首次使用”提示。" />
+<check_box
+		 label="收到或付出 [CURRENCY] 时提示"
+		 name="notify_money_change_checkbox" />
 </panel>

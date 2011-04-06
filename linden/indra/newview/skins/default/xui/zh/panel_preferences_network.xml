@@ -4,10 +4,10 @@
 		最大带宽:
 	</text>
 	<text name="text_box2">
-		kbps (每秒kb数)
+		kbps (千位每秒)
 	</text>
 	<text name="cache_size_label_l">
-		磁盘高速缓存大小:
+		磁盘高速缓存大小 (兆字节):
 	</text>
 	<text name="text_box5">
 		兆字节

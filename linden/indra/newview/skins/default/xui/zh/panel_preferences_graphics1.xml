@@ -5,24 +5,36 @@
 	<text_editor name="FullScreenInfo">
 		若不选中，查看器在登入时将全屏显示。
 	</text_editor>
+	<check_box
+		 label="显示 WindLight 工具栏"
+		 name="toggle_windlight_control" />
 	<text name="WindowSizeLabel">
 		窗口尺寸:
 	</text>
 	<combo_box name="windowsize combo">
 		<combo_item name="640x480">
-			640x480
+			640 × 480
 		</combo_item>
 		<combo_item name="800x600">
-			800x600
+			800 × 600
 		</combo_item>
 		<combo_item name="720x480">
-			720x480 (NTSC)
+			720 × 480 (NTSC)
 		</combo_item>
 		<combo_item name="768x576">
-			768x576 (PAL)
+			768 × 576 (PAL)
 		</combo_item>
 		<combo_item name="1024x768">
-			1024x768
+			1024 × 768
+		</combo_item>
+		<combo_item name="1280x720">
+			1280 × 720 (HDV720)
+		</combo_item>
+		<combo_item name="1440x1080">
+			1440 × 1080 (HDV1080)
+		</combo_item>
+		<combo_item	name="1920x1080">
+			1920 × 1080 (HD1080)
 		</combo_item>
 	</combo_box>
 	<text name="DisplayResLabel">
@@ -40,7 +52,7 @@
 			5:4 (1280x1024 液晶显示器)
 		</combo_item>
 		<combo_item name="8:5(Widescreen)">
-			8:5 (宽屏)
+			8:5 (宽屏幕)
 		</combo_item>
 		<combo_item name="16:9(Widescreen)">
 			16:9 (宽屏幕)
@@ -107,6 +119,10 @@
 	<check_box label="化身替身" name="AvatarImpostors" width="256"/>
 	<check_box label="硬件 Skinning" name="AvatarVertexProgram" width="256"/>
 	<check_box label="化身衣物效果" name="AvatarCloth" width="256"/>
+	<text
+		name="AvatarCountText">
+		非替身最多： (名)
+	</text>
 	<text name="DrawDistanceMeterText1" width="128">
 		m
 	</text>
@@ -171,7 +187,7 @@
 	<button label="建议设置" name="Defaults"/>
 	<button label="硬件选项" label_selected="硬件选项" name="GraphicsHardwareButton"/>
 	<string hidden="true" name="resolution_format">
-		[RES_X] x [RES_Y]
+		[RES_X] × [RES_Y]
 	</string>
 	<string hidden="true" name="aspect_ratio_text">
 		[NUM]:[DEN]
