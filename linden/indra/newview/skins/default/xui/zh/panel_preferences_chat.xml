@@ -14,10 +14,99 @@
 			大号
 		</radio_item>
 	</radio_group>
+
+	<text
+		 name="text_translate_chat">
+		翻译聊天:
+	</text>
+	<check_box
+		 label="机器翻译聊天 (由 Google 强力驱动)"
+		 name="translate_chat" />
+	<text
+		 name="text_translate_chat">
+		翻译为以下语言:
+	</text>
+	<combo_box
+		 name="translate_language_combobox">
+		<combo_item
+				 name="System Default Language">
+		  系统默认值
+		</combo_item>
+		<combo_item
+				 name="English">
+		  English (英语)
+		</combo_item>
+
+		<!-- After "System Default" and "English", please keep the rest of these combo_items in alphabetical order by the first character in the string. -->
+
+		<combo_item
+				 name="Danish">
+		  Dansk (丹麦语)
+		</combo_item>
+		<combo_item
+				 name="Deutsch(German)">
+		  Deutsch (德语)
+		</combo_item>
+		<combo_item
+				 name="Spanish">
+		  Español (西班牙语)
+		</combo_item>
+		<combo_item
+				 name="French">
+		  Français (法语)
+		</combo_item>
+		<combo_item
+				 name="Italian">
+		  Italiano (意大利语)
+		</combo_item>
+		<combo_item
+				 name="Hungarian">
+		  Magyar (匈牙利语)
+		</combo_item>
+		<combo_item
+				 name="Dutch">
+		  Nederlands (荷兰语)
+		</combo_item>
+		<combo_item
+				 name="Polish">
+		  Polski (波兰语)
+		</combo_item>
+		<combo_item
+				 name="Portugese">
+		  Portugués (葡萄牙语)
+		</combo_item>
+		<combo_item
+				 name="Russian">
+		  Русский (俄语)
+		</combo_item>
+		<combo_item
+				 name="Turkish">
+		  Türkçe (土耳其语)
+		</combo_item>
+		<combo_item
+				 name="Ukrainian"
+				 value="uk">
+		  Українська (乌克兰语)
+		</combo_item>
+		<combo_item
+				 name="Chinese"
+				 value="zh">
+		  中文
+		</combo_item>
+		<combo_item
+				 name="(Japanese)"
+				 value="ja">
+		  日本語
+		</combo_item>
+		<combo_item
+				 name="(Korean)"
+				 value="ko">
+		  한국어 (韩语)
+		</combo_item>
+	</combo_box>
 	<text type="string" length="1" name="text_box2">
 		聊天颜色:
 	</text>
-	<!--Geneko Nemeth: 最多只能写三个字。/Maximum 3 Chinese characters.-->
 	<color_swatch
 		 label="您"
 		 name="user" />
@@ -25,7 +114,7 @@
 		 label="其他人"
 		 name="agent" />
 	<color_swatch
-		 label="即时"
+		 label="即时消息"
 		 name="im" />
 	<color_swatch label="系统" name="system" />
 	<color_swatch label="错误" name="script_error" />
@@ -49,7 +138,7 @@
 		 label="使用全屏宽度  (需要重启动)"
 		 name="chat_full_width_check" />
 	<text type="string" length="1" name="text_box6">
-		聊天选项:
+		其他:
 	</text>
 	<check_box label="用全屏宽度聊天 (需重启)" name="chat_full_width_check" />
 	<check_box label="按回车键关闭聊天栏" name="close_chat_on_return_check" />
@@ -63,10 +152,16 @@
 		聊天气球:
 	</text>
 	<check_box label="使用气球聊天" name="bubble_text_chat" />
+	<check_box
+		 label="同时显示本地聊天和气球"
+		 name="local_bubble_text_chat" />
 	<slider label="不透明度" name="bubble_chat_opacity" />
 	<text type="string" length="1" name="text_box8">
 		脚本错误:
 	</text>
 	<check_box label="以聊天形式显示脚本错误和警告" name="script_errors_as_chat" />
-
+	<check_box
+		 label="显示自定义聊天频道l"
+		 name="toggle_channel_control" />
+ 
 </panel>

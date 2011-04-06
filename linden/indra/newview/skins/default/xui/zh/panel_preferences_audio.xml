@@ -4,10 +4,10 @@
 		音量:
 	</text>
 	<text name="streaming_prefs_text">
-		流媒体首选项:
+		流媒体:
 	</text>
 	<text name="audio_prefs_text">
-		音频首选项:
+		音频:
 	</text>
 	<panel label="音量" name="Volume Panel"/>
 	<check_box label="当音乐可用时播放音乐流(会占用更多带宽)" name="streaming_music"/>
@@ -17,6 +17,10 @@
 	<slider label="多普勒效应" name="Doppler Effect" width="250"/>
 	<slider label="距离系数" name="Distance Factor"/>
 	<slider label="衰减系数:" name="Rolloff Factor"/>
-	<spinner label="L$ 变化阈值" name="L$ Change Threshold"/>
+	<spinner label="[CURRENCY] 变化阈值" name="L$ Change Threshold"/>
 	<spinner label="生命值变化阈值" name="Health Change Threshold"/>
+  <text name="ambient_prefs_text">
+    环境:
+  </text>
+  <check_box label="启用风声" name="mute_wind_check" />
 </panel>

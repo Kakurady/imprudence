@@ -2,8 +2,9 @@
 <floater name="Inventory" title="库存">
 	<search_editor label="在这里输入要查找的物体" name="inventory search editor"/>
 	<tab_container name="inventory filter tabs">
-		<inventory_panel label="所有物体" name="All Items"/>
-		<inventory_panel label="最近使用的物体" name="Recent Items"/>
+		<inventory_panel label="所有物品" name="All Items"/>
+		<inventory_panel label="最近使用的物品" name="Recent Items"/>
+		<inventory_panel label="穿着的物品" name="Worn Items" />
 	</tab_container>
 	<text
 		 name="group_titles_textbox">

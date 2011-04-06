@@ -12,7 +12,19 @@
 		登陆后更改
 	</text>
 	<check_box label="发送即时消息至电子邮件([EMAIL])" name="send_im_to_email" />
-	<check_box label="本地聊天中包含即时通信息" name="include_im_in_chat_console" />
+	<text
+		 name="show_ims_label">
+	    显示即时消息:
+	</text>
+	<check_box
+		 label="聊天控制台"
+		 name="include_im_in_chat_console" />
+	<check_box
+		 label="本地聊天窗口"
+		 name="include_im_in_chat_history" />
+	<check_box
+		 label="垂直即时消息标签页 (需要重启动)"
+		 name="vertical-imtabs-toggle" />
 	<check_box label="在即时消息中显示时间" name="show_timestamps_check" />
     <check_box
 		 label="显示好友上线通知"
@@ -25,6 +37,10 @@
 		 name="text_box3">
 		忙碌模式的自动回复:
 	</text>
+	<button
+		 label="即时消息自动回复选项"
+		 name="busy_adv_btn"
+		 tool_tip="即时消息自动回复选项" />
 	<text
 		 name="text_box4">
 		聊天记录选项:
@@ -47,6 +63,5 @@
 		 
 		 label="显示时间时包括日期"
 		 name="log_date_timestamp" />
-
 
 </panel>

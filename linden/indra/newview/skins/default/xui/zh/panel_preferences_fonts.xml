@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+	 name="font_panel"
+	 label="字体">
+ 
+  <text>
+    用户界面字体 (需要重启动):
+  </text>
+ 
+  <spinner
+		 name="font_mult"
+		 label="字体放大倍数:"
+		 tool_tip="所有字体尺寸将被乘以这个数。" />
+ 
+  <check_box
+		 name="font_round"
+		 label="强制整数字体大小 (也许能解决字体模糊问题)" />
+ 
+</panel>
