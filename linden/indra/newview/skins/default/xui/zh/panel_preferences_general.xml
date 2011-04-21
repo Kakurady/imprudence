@@ -84,9 +84,7 @@
 	<check_box
 		 label="空闲时进入离开状态"
 		 name="afk_timeout_checkbox" />
-	<check_box
-		 label="Go Away/AFK when idle"
-		 name="afk_timeout_checkbox" />
+
 	<text
 		 name="Mini-Map Notify:">
 	迷你地图提醒:

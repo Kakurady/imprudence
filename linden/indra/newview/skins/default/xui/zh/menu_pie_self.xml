@@ -4,7 +4,7 @@
 	<menu_item_call label="社团" name="Groups" />
 	<menu_item_call label="前往..." name="Go..." />
 	<menu_item_call label="起身" name="Stand Up" />
-	<menu_item_call label="好友..." name="Friends..." />
+	<menu_item_call label="好友" name="Friends" />
 	<menu_item_call label="动作..." name="Gestures..." />
 	<pie_menu label="脱下 &gt;" name="Take Off &gt;">
 		<pie_menu label="服饰 &gt;" name="Clothes &gt;">

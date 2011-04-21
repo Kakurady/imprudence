@@ -24,10 +24,10 @@
     复制了键为了:
   </string>
   <string name="TeleportOfferMaturity">
-    [NAME] is offering a TP to [DESTINATION]
+    [NAME] 邀请你瞬间移动到 [DESTINATION]
   </string>
   <string name="TeleportLureMaturity">
-    [NAME]'s teleport lure is to [DESTINATION]
+    [NAME] 邀请你瞬间移动到 [DESTINATION]
   </string>
 	
 	<string name="LoginInProgress">
