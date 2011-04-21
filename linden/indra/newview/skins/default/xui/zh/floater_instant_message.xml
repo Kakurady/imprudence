@@ -39,7 +39,7 @@
 		 name="add_friend_string">
     添加好友
   </string>
-	<flyout_button label="档案..." name="profile_callee_btn"/>
+	<flyout_button label="档案..." name="profile_callee_btn" >
     <flyout_button_item name="history_entry">
       查看对话历史
     </flyout_button_item>

@@ -77,6 +77,7 @@
 		<menu_item_call label="重新设置视角" name="Reset View"/>
 		<menu_item_call label="查看最后一次聊天者" name="Look at Last Chatter"/>
 		<menu_item_separator label="-----------" name="separator"/>
+		<menu_item_check label="网络浏览器" name="Web Browser" />
 		<menu_item_check label="工具栏" name="Toolbar"/>
 		<menu_item_check label="聊天记录" name="Chat History"/>
 		<menu_item_check label="即时消息" name="Instant Message"/>
@@ -114,7 +115,7 @@
 			<menu_item_call label="默认缩放" name="Zoom Default"/>
 			<menu_item_call label="放大" name="Zoom Out"/>
 		</menu>
-		<menu_item_check name="Advanced Menu" label="显示高级菜单"/>
+		<menu_item_check name="Toggle Advanced Menu" label="高级菜单"/>
 		<menu_item_call label="设置用户界面尺寸为默认值" name="Set UI Size to Default"/>
 	</menu>
 	<menu label="世界" name="World">
@@ -129,6 +130,7 @@
 		<menu_item_separator label="-----------" name="separator3"/>
 		<menu_item_call label="设成离开状态" name="Set Away"/>
 		<menu_item_call label="设成忙碌状态" name="Set Busy"/>
+		<menu_item_check label="自动回复即时消息" name="Auto-Respond to IMs" />
 		<menu_item_call label="停止化身动画" name="Stop Animating My Avatar"/>
 		<menu_item_call label="释放按键" name="Release Keys"/>
 		<menu_item_separator label="-----------" name="separator4"/>
@@ -174,7 +176,7 @@
 		<menu_item_check label="对齐到网格" name="Snap to Grid"/>
 		<menu_item_call label="在 XY 面上对齐网格" name="Snap Object XY to Grid"/>
 		<menu_item_call label="以选项作为网格" name="Use Selection for Grid"/>
-		<menu_item_call label="高级建造选项..." name="Advanced Build Options"/>
+		<menu_item_call label="高级建造选项..." name="Advanced Build Options..."/>
 		<menu_item_separator label="-----------" name="separator3"/>
 		<menu_item_check label="编辑链接部件" name="Edit Linked Parts" />
 		<menu_item_check label="选择链接部件" name="Select Linked Parts" />
@@ -197,6 +199,9 @@
 		<menu_item_call label="重置所选项中脚本" name="Reset Scripts in Selection"/>
 		<menu_item_call label="设置所选项中脚本运行" name="Set Scripts to Running in Selection"/>
 		<menu_item_call label="设置所选项中脚本不运行" name="Set Scripts to Not Running in Selection"/>
+		<menu_item_call
+			 name="Set permissions on selected task inventory"
+			 label="批量设置权限"/>
 	</menu>
 	<menu label="帮助" name="Help">
 		<menu_item_call label="第二人生帮助" name="Second Life Help"/>
