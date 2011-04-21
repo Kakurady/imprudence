@@ -268,33 +268,33 @@
 其他居民在观看你的档案的时候可以访问你所指定的URL。
 	</notification>
 	<notification name="JoinGroupCanAfford">
-		加入该社团需花费L$[COST]。
+		加入该社团需花费[CURRENCY][COST]。
 你愿意继续吗？
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="加入"/>
 	</notification>
 	<notification name="JoinGroupCannotAfford">
-		加入该社团需花费 L$[COST]。
-您拥有的 L$ 不够。
+		加入该社团需花费 [CURRENCY][COST]。
+您拥有的 [CURRENCY] 不够。
 	</notification>
 	<notification name="LandBuyPass">
-		花费 L$[COST] 你就可以进入这块土地(‘[PARCEL_NAME]’)
+		花费 [CURRENCY][COST] 你就可以进入这块土地(‘[PARCEL_NAME]’)
 [TIME]小时。是否购买通行证？
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="购买"/>
 	</notification>
 	<notification name="SalePriceRestriction">
-		如果出售给任何人，出售价格必须 &gt; L$0。
-如果售价为L$0，请选定一个用户来售出。
+		如果出售给任何人，出售价格必须 &gt; [CURRENCY]0。
+如果售价为[CURRENCY]0，请选定一个用户来售出。
 	</notification>
 	<notification name="ConfirmLandSaleChange">
 		所选的 [LAND_SIZE]平方米土地正被设置为代售。
-你的售价将是为 L$[SALE_PRICE]并将被授权售给[NAME]。
+你的售价将是为 [CURRENCY][SALE_PRICE]并将被授权售给[NAME]。
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="确定"/>
 	</notification>
 	<notification name="ConfirmLandSaleToAnyoneChange">
 		请注意： 点击 ‘售出给任何人’ 将使你的土地对整个 [GRID_NAME] 社区开放，包括当前不在这个地区中的人。
 
 所选的 [LAND_SIZE]平方米土地正被设置为代售。
-你的售价将是为 L$[SALE_PRICE]并将被授权售给[NAME]。
+你的售价将是为 [CURRENCY][SALE_PRICE]并将被授权售给[NAME]。
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="确定"/>
 	</notification>
 	<notification name="ReturnObjectsDeededToGroup">
@@ -684,19 +684,24 @@ MINSPECS
 [FILE]
 	</notification>
 	<notification name="UnknownVorbisEncodeFailure">
-		对文件进行 Vorbis 编码时发生错误： [FILE]
+		对文件进行 Vorbis 编码时发生错误： 
+[FILE]
 	</notification>
 	<notification name="CannotEncodeFile">
-		无法编码文件[FILE]
+		无法编码文件
+[FILE]
 	</notification>
 	<notification name="CorruptResourceFile">
-		崩坏的的资源文件： [FILE]
+		崩坏的的资源文件： 
+[FILE]
 	</notification>
 	<notification name="UnknownResourceFileVersion">
-		未知的林登资源文件版本发现于文件： [FILE]
+		未知的林登资源文件版本发现于文件： 
+[FILE]
 	</notification>
 	<notification name="UnableToCreateOutputFile">
-		无法创建输出文件： [FILE]
+		无法创建输出文件： 
+[FILE]
 	</notification>
 	<notification name="DoNotSupportBulkAnimationUpload">
 		我们现在不支持大宗上传动画文件。
@@ -838,6 +843,11 @@ www.secondlife.com/support
 		无法购买土地：
 无法找到该土地所在区域。
 	</notification>
+	<notification name="CannotBuyLandMaturity">
+		无法购买土地：
+
+你所能访问的/选择的限制级别不允许你购买该土地。你可能首先需要在参数设定中更改你的限制级别。
+</notification>
 	<notification name="CannotCloseFloaterBuyLand">
 		在 [GRID_NAME] 完成对这次交易的估价前，
 你不能关闭“购买土地”窗口。
@@ -914,8 +924,9 @@ www.secondlife.com/support
 	</notification>
 	<notification name="ReleaseLandWarning">
 		你将放弃面积为 [AREA] 平方米的土地。
-放弃该土地会将他从你拥有的土地中
-移走, 不会兑换成任何 L$。
+
+放弃该土地会将它从你持有的土地中
+去除, 但不会退还任何 [CURRENCY]。
 
 是否放弃土地？
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="确定"/>
@@ -1007,6 +1018,7 @@ www.secondlife.com/support
 	</notification>
 	<notification name="CannotSaveToAssetStore">
 		无法储存 [NAME] 至中央资料服务器。
+		
 这通常只是临时的问题。请自定义后再次保存。
 
 如果问题依然存在，请点击
@@ -1014,7 +1026,7 @@ www.secondlife.com/support
 您的网络设置的具体信息。
 	</notification>
 	<notification name="YouHaveBeenLoggedOut">
-		你已经退出[GRID_NAME]：
+		你已经被退出[GRID_NAME]：
 
 [MESSAGE]
 
@@ -1075,7 +1087,7 @@ www.secondlife.com/support
 		你必须给分类广告设定一个名字。
 	</notification>
 	<notification name="MinClassifiedPrice">
-		广告刊登出价必须大于 L$[MIN_PRICE]。
+		广告刊登出价必须大于 [CURRENCY][MIN_PRICE]。
 
 请输入一个更高的价格。
 	</notification>
@@ -1198,8 +1210,7 @@ www.secondlife.com/support
 	</notification>
 	<notification name="ClothingLoading">
 		你的装束仍在下载中。
-你现在可以按正常的使用这个世界，
-其他用户也可以看见你。
+你现在可以按正常地使用 [GRID_NAME]，其他用户也可以看见你。
 		<form name="form">
 			<ignore name="ignore" text="装束下载时间太长"/>
 		</form>
@@ -1233,7 +1244,7 @@ www.secondlife.com/support
 		<usetemplate name="okcancelbuttons" notext="女性" yestext="男性"/>
 	</notification>
 	<notification name="NotEnoughCurrency">
-		[NAME] L$ [PRICE] 您没有足够的 L$ 来这样做。
+		[NAME] [CURRENCY] [PRICE] 您没有足够的 [CURRENCY] 来这样做。
 	</notification>
 	<notification name="GrantedModifyRights">
 		你已经被授予特权，你可以任意修改[FIRST_NAME] [LAST_NAME]的物体。
@@ -1336,7 +1347,7 @@ www.secondlife.com/support
 		<usetemplate name="okcancelbuttons" notext="继续" yestext="下载"/>
 	</notification>
 	<notification name="DownloadWindowsReleaseForDownload">
-		[VIEWER_NAME] 有新版本可用。
+		[VIEWER_NAME] 有新版本可用。	
 [MESSAGE]
 
 这个更新不是必须的，但我们建议下载并安装此更新，以改善性能和稳定性。
@@ -1370,7 +1381,7 @@ www.secondlife.com/support
 	</notification>
 	<notification name="DeedObjectToGroup">
 		转让此物体会导致社团：
-* 收到付给该物体的L$。
+* 收到付给该物体的 [CURRENCY]。
 		<usetemplate ignoretext="转让物体到社团" name="okcancelignore" notext="取消" yestext="转让"/>
 	</notification>
 	<notification name="WebLaunchExternalTarget">
@@ -1468,7 +1479,9 @@ www.secondlife.com/support
 一个旧社团, 或者拒绝新社团邀请。
 离开社团请选择‘编辑’菜单下的
 ‘我的社团...’选项。
+
 [NAME]邀请你成为该社团成员。
+
 [INVITE]
 		<usetemplate name="okcancelbuttons" notext="谢绝" yestext="加入"/>
 	</notification>
@@ -1738,7 +1751,7 @@ www.secondlife.com/support
 	<notification name="PublishClassified">
 		请遵记： 分类广告费用不会退还。
 
-是否以L$[AMOUNT]发布广告？
+是否以 [CURRENCY][AMOUNT] 发布广告？
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="发布"/>
 	</notification>
 	<notification name="SetClassifiedMature">
@@ -1775,6 +1788,14 @@ www.secondlife.com/support
 
 默认： 关
 	</notification>
+	<notification
+	label="最小年龄"
+ name="HelpRegionMinimumAge"
+ type="alertmodal">
+进入该地区的用户其账户必须至少已建立这么多天才能进入。
+
+默认: 0 (禁用)
+</notification>
 	<notification label="锁定飞翔" name="HelpRegionBlockFly">
 		如果选择此项,无论每个地块设置如何，
 人们都不能在此区域内飞行。
@@ -1812,7 +1833,7 @@ www.secondlife.com/support
 	<notification label="限制推动" name="HelpRegionRestrictPushObject">
 		设定所有区域为限制推动区。居民只能推动自己，或者由土地主人的脚本代码推动。
 
-(推动功能和llPushObject() LSL函数有关。)
+(推动指的是llPushObject() LSL函数。)
 
 默认： 关
 	</notification>
@@ -1829,11 +1850,11 @@ www.secondlife.com/support
 
 默认： 选择
 	</notification>
-	<notification label="Do Not Show In Search" name="HelpRegionSearch">
+	<notification label="不在搜索中显示" name="HelpRegionSearch">
 		打开该选项将阻止地块拥有者在搜索中列出他们的地块。
 默认：关
 	</notification>
-	<notification label="更改区域的成人指数设定" name="RegionMaturityChange">
+	<notification label="更改区域的设定" name="RegionMaturityChange">
 		此区域内的成人内容等级已经更新。
 
 但是，世界地图更新时间需要大约5分钟，
@@ -1976,8 +1997,8 @@ www.secondlife.com/support
 		地产经理是你委派的负责区域控制
 和地产调节的居民。 地产经理
 有权改变控制板内任何调节项, 除了上传,
-下载, 和压缩地形。特别的, 他们有权允许
-或禁止居民进入你的地产。
+下载, 和压缩地形。值得指出的一点是
+他们有权允许或禁止居民进入你的地产。
 
 地产经理只能被地产主人雇佣或辞退
 , 不能互相之间委派。请选择你信任的
@@ -2057,48 +2078,50 @@ www.secondlife.com/support
 请仅选择一件物体，再试一次。
 	</notification>
 	<notification name="BuyOriginal">
-		是否以 L$[PRICE] 购买原物体？
+		是否以 [CURRENCY][PRICE] 购买原物体？
 你将成为物体的主人。
 你将可以：
- 修改： [MODIFYPERM]
- 复制： [COPYPERM]
- 转卖或赠送： [RESELLPERM]
+• 修改： [MODIFYPERM]
+• 复制： [COPYPERM]
+• 转卖或赠送： [RESELLPERM]
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="购买"/>
 	</notification>
 	<notification name="BuyOriginalNoOwner">
-		是否以 L$[PRICE] 购买原物体？
+		是否以 [CURRENCY][PRICE] 购买原物体？
 你将成为物体的主人。
 你将可以：
- 修改： [MODIFYPERM]
- 复制： [COPYPERM]
- 转卖或赠送： [RESELLPERM]
+• 修改： [MODIFYPERM]
+• 复制： [COPYPERM]
+• 转卖或赠送： [RESELLPERM]
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="购买"/>
 	</notification>
 	<notification name="BuyCopy">
-		是否以 L$[PRICE] 从 [OWNER] 购买物体的副本？
+		是否以 [CURRENCY][PRICE] 从 [OWNER] 购买物体的副本？
 这件物体将被复制到你的库存。
 你将可以：
- 修改： [MODIFYPERM]
- 复制： [COPYPERM]
- 转卖或赠送： [RESELLPERM]
+• 修改： [MODIFYPERM]
+• 复制： [COPYPERM]
+• 转卖或赠送： [RESELLPERM]
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="购买"/>
 	</notification>
 	<notification name="BuyCopyNoOwner">
-		是否以 L$[PRICE] 购买物体的副本？
+		是否以 [CURRENCY][PRICE] 购买物体的副本？
 这件物体将被复制到你的库存。
 你将可以：
- 修改： [MODIFYPERM]
- 复制： [COPYPERM]
- 转卖或赠送： [RESELLPERM]
+• 修改： [MODIFYPERM]
+• 复制： [COPYPERM]
+• 转卖或赠送： [RESELLPERM]
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="购买"/>
 	</notification>
 	<notification name="BuyContents">
-		是否以 L$[PRICE] 从 [OWNER] 购买内容？
+		是否以 [CURRENCY][PRICE] 从 [OWNER] 购买内容？
+
 它们将被复制到你的库存。
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="购买"/>
 	</notification>
 	<notification name="BuyContentsNoOwner">
-		是否以 L$[PRICE] 购买内容？
+		是否以 [CURRENCY][PRICE] 购买内容？
+
 它们将被复制到你的库存。
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="购买"/>
 	</notification>
@@ -2111,6 +2134,7 @@ www.secondlife.com/support
 	</notification>
 	<notification name="ConfirmPurchasePassword" type="password">
 		此项交易将：
+
  [ACTION]
 
 你确定要继续购买吗？
@@ -2162,6 +2186,9 @@ www.secondlife.com/support
 	<notification name="ClickOpenF1Help">
 		访问 [SECOND_LIFE] 帮助网站吗？
 		<usetemplate ignoretext="访问 [SECOND_LIFE] 帮助网站时" name="okcancelignore" notext="取消" yestext="打开页面"/>
+	</notification>
+	<notification name="NoSupportUrl">
+		[GRID_NAME] 没有支持网页的链接。
 	</notification>
 	<notification name="ConfirmQuit">
 		确定退出？
@@ -2216,17 +2243,14 @@ http://secondlife.com/community/support.php
 	</notification>
 	<notification name="HelpReportAbuseAbuserLocationEmpty">
 		请输入不良行为发生的地址。
-
 输入正确的描述可以帮助我们归档和处理不良行为报告。
 	</notification>
 	<notification name="HelpReportAbuseSummaryEmpty">
 		请输入不良行为的概况。
-
 输入对事件的正确描述可以帮助我们归档和处理不良行为报告。
 	</notification>
 	<notification name="HelpReportBugSummaryEmpty">
 		请输入错误概况。
-
 输入对事件的正确描述可以帮助我们归档和处理错误报告。
 	</notification>
 	<notification name="HelpReportAbuseDetailsEmpty">
@@ -2257,10 +2281,12 @@ http://secondlife.com/community/support.php
 	</notification>
 	<notification name="FailedRequirementsCheck">
 		以下必须的部件丢失于 [FLOATER]：
+		
 [COMPONENTS]
 	</notification>
 	<notification label="替换已经存在的附件" name="ReplaceAttachment">
 		已经有一个物体附在身体的这个部位上了。
+		
 你是否要用所选物体替代它？
 		<form name="form">
 			<ignore name="ignore" save_option="true" text="替换已有的附件时"/>
@@ -2544,8 +2570,8 @@ http://secondlife.com/community/support.php
 	<notification name="Cannot_Purchase_an_Attachment">
 		物品作为附件时无法购买。
 	</notification>
-	<notification label="About Requests for the Debit Permission" name="DebitPermissionDetails">
-		授予该请求将给予脚本持续的从您的帐户中提取林登币 (L$) 的许可。要取消这项许可，物体的拥有者必须删除物体或重置物体中的脚本。
+	<notification label="关于提款权限请求" name="DebitPermissionDetails">
+		授予该请求将给予脚本持续的从您的帐户中提取 [CURRENCY] 的许可。要取消这项许可，物体的拥有者必须删除物体或重置物体中的脚本。
 		<usetemplate name="okbutton" yestext="确定"/>
 	</notification>
 	<notification name="AutoWearNewClothing">
@@ -2560,11 +2586,11 @@ http://secondlife.com/community/support.php
 		<url name="url" option="0">
 			https://secondlife.com/account/verification.php
 		</url>
-		<usetemplate ignoretext="警告没有验证年龄时" name="okcancelignore" notext="否" yestext="是"/>
+		<usetemplate ignoretext="没有验证年龄时警告" name="okcancelignore" notext="否" yestext="是"/>
 	</notification>
 	<notification name="Cannot enter parcel: no payment info on file">
 		在您访问该土地前，您的帐户需要付款信息。
-您要到[SECOND_LIFE]网站来设置么？
+您要到 [SECOND_LIFE] 网站来设置么？
 
 [_URL]
 		<url name="url" option="0">
@@ -2578,6 +2604,68 @@ http://secondlife.com/community/support.php
 	<notification name="SystemMessageTip">
 		[MESSAGE]
 	</notification>
+	<notification name="SetDisplayNameSuccess">
+	你好 [DISPLAY_NAME]!
+
+	和真实生活中一样，大家认识新名字要有一段时间。所以若新的显示名称没有立即在物体、脚本、搜索等等中更新的话，请稍待几天。
+	</notification>
+
+	<notification name="SetDisplayNameBlocked">
+	抱歉，你不能更改你的显示名称。若你觉得这不应该发生，请联系支持人员。
+	</notification>
+
+	<notification name="SetDisplayNameFailedLength">
+	抱歉，那个名字太长了。显示名称最长可以有 [LENGTH] 个字符。
+
+	请尝试短一点的名字。
+	</notification>
+
+	<notification name="SetDisplayNameFailedGeneric">
+	抱歉，我们不能设置你的显示名称。请稍候再试。
+	</notification>
+
+	<notification
+		 icon="alertmodal.tga"
+		 name="SetDisplayNameMismatch">
+	你键入的显示名称不一致。请重新输入。
+	</notification>
+
+	<!-- *NOTE: This should never happen -->
+	<notification name="AgentDisplayNameUpdateThresholdExceeded">
+	抱歉，你要多等一段时间才能更改你的显示名称。
+
+	参见 http://wiki.secondlife.com/wiki/Setting_your_display_name
+
+	请稍候再试。
+	</notification>
+
+	<notification
+		 icon="alertmodal.tga"
+		 name="AgentDisplayNameSetBlocked">
+	抱歉，我们不能设置你所希望的显示名称，因为其中含有禁止用词。
+
+	请尝试别的名字。
+	</notification>
+
+	<notification
+		 icon="alertmodal.tga"
+		 name="AgentDisplayNameSetInvalidUnicode">
+	你所希望设置的显示名称包含无效字符。
+	</notification>
+
+	<notification
+		 icon="alertmodal.tga"
+		 name="AgentDisplayNameSetOnlyPunctuation">
+	你的显示名称必须含有不是标点符号的字。
+	</notification>
+
+
+	<notification
+		 icon="notifytip.tga"
+		 name="DisplayNameUpdate">
+	[OLD_NAME] ([SLID]) 已改名为 [NEW_NAME].
+	</notification>
+
 	<notification name="Cancelled">
 		已取消
 	</notification>
@@ -2607,7 +2695,7 @@ http://secondlife.com/community/support.php
 (大概要 5 分钟)
 	</notification>
 	<notification name="UploadPayment">
-		您为了上传付出了 L$[AMOUNT]。
+		您为了上传付出了 [CURRENCY][AMOUNT]。
 	</notification>
 	<notification name="UploadWebSnapshotDone">
 		快照已经被上传至网页。
@@ -2632,6 +2720,7 @@ http://secondlife.com/community/support.php
 	</notification>
 	<notification name="CapsKeyOn">
 		大写锁定处于开启状态。
+
 因为这会影响您键入的密码，
 也许您会想把它关掉。
 	</notification>
@@ -2759,11 +2848,25 @@ http://secondlife.com/community/support.php
 	</notification>
 	<notification name="DeactivatedGesturesTrigger">
 		取消激活了触发器相同的动作：
+
 [NAMES]
 	</notification>
 	<notification name="NoQuickTime">
 		Apple 公司的 QuickTime 没有安装在你的操作系统中。如果你希望观看在支持的地块中播放的媒体流，则需要从
 QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
+	</notification>
+	<notification name="NoPlugin">
+	没有找到能处理 “[MIME_TYPE]” MIME 类型的插件。此类媒体将不可用。
+	</notification>
+	<notification name="MediaPluginFailed">
+	以下的媒体插件已崩溃：
+	[PLUGIN]
+
+	请重新安装或如果持续遇到问题，清联系供应商。
+		<form name="form">
+		  <ignore name="ignore"
+		   text="媒体插件崩溃时"/>
+		</form>
 	</notification>
 	<notification name="OwnedObjectsReturned">
 		在所选地块上你所拥有的物体已经被归还至你的库存中。
@@ -2778,7 +2881,9 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 	</notification>
 	<notification name="GroupObjectsReturned">
 		在所选地块上，与社团 [GROUPNAME] 分享的物体已经被归还至它们的主人的库存里。
+		
 可转让的转让到社团的物体已经被归还至它们先前主人处。
+
 不可转让的转让到社团的物体已经删除。
 	</notification>
 	<notification name="UnOwnedObjectsReturned">
@@ -2786,14 +2891,17 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 	</notification>
 	<notification name="NotSafe">
 		这块土地打开了伤害选项 (‘不安全’)。
+
 您在这里可能会受伤。如果您死了，您将会被瞬间移动至您的家位置。
 	</notification>
 	<notification name="NoFly">
 		这块土地关闭了飞行 (‘不能飞行’)。
+
 您不能在这里飞行。
 	</notification>
 	<notification name="PushRestricted">
 		这块土地 ‘不允许推动’。
+
 您不能推动这里的任何物体，除非您拥有这块土地。
 	</notification>
 	<notification name="NoVoice">
@@ -2801,6 +2909,7 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 	</notification>
 	<notification name="NoBuild">
 		这块土地上关闭了建造 (‘不能建造’)。
+
 您不能在此创建物体。
 	</notification>
 	<notification name="ScriptsStopped">
@@ -2811,6 +2920,7 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 	</notification>
 	<notification name="NoOutsideScripts">
 		这块土地关闭了外部脚本 (‘没有外部脚本’)。
+
 除了属于土地主人的脚本，任何脚本在这里都不会运行。
 	</notification>
 	<notification name="ClaimPublicLand">
@@ -2828,8 +2938,8 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 		您的账号不能连接到该“少年专属区”。
 	</notification>
 	<notification name="NoHelpIslandTP">
-		您不能瞬间转移回“援助岛”。
-去“公共援助岛”重复您的教程。
+		您不能瞬间移动回 “Help Island”。
+去 “Help Island Public” 重复您的教程。
 	</notification>
 	<notification name="ImproperPaymentStatus">
 		您没有适当的付款信息，不能进入此区。
@@ -2877,7 +2987,7 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 		没有有效的回路
 	</notification>
 	<notification name="NoValidTimestamp">
-		没有有效的时间标记
+		没有有效的时间戳
 	</notification>
 	<notification name="NoPendingConnection">
 		无法建立连接。
@@ -2923,6 +3033,7 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 	</notification>
 	<notification name="GodMessage">
 		[NAME]
+
 [MESSAGE]
 	</notification>
 	<notification name="JoinGroup">
@@ -2944,6 +3055,7 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 	</notification>
 	<notification name="GotoURL">
 		[MESSAGE]
+
 [URL]
 		<form name="form">
 			<button name="Later" text="稍后"/>
@@ -2959,6 +3071,8 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 		<form name="form">
 			<button name="Accept" text="接受"/>
 			<button name="Decline" text="谢绝"/>
+			<button name="Profile" text="档案"/>
+			<button	name="Ignore" text="忽略"/>
 		</form>
 	</notification>
 	<notification name="OfferFriendshipNoMessage">
@@ -2967,6 +3081,8 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 		<form name="form">
 			<button name="Accept" text="接受"/>
 			<button name="Decline" text="谢绝"/>
+			<button name="Profile" text="档案"/>
+			<button	name="Ignore" text="忽略"/>
 		</form>
 	</notification>
 	<notification name="FriendshipAccepted">
@@ -2976,19 +3092,24 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 		[NAME] 谢绝了您的好友邀请。
 	</notification>
 	<notification name="OfferCallingCard">
-		[FIRST] [LAST] 要给你他的通话卡。这将在你的库存中添加一个书签，这样你就可以快速的通过即时消息联系这位居民。
+		[FIRST] [LAST] 要给你他的通话卡。
+		
+这将在你的库存中添加一个书签，这样你就可以快速的通过即时消息联系这位居民。
 		<form name="form">
 			<button name="Accept" text="接受"/>
 			<button name="Decline" text="谢绝"/>
+			<button	name="Ignore" text="忽略"/>
 		</form>
 	</notification>
 	<notification name="RegionRestartMinutes">
-		地区将在 [MINUTES]分钟后重新启动。
-如果仍留在此地区内，您将会被登出。
+		区域将在 [MINUTES]分钟后重新启动。
+
+如果仍留在此区域内，您将会被登出。
 	</notification>
 	<notification name="RegionRestartSeconds">
 		区域将在 [MINUTES]秒后重新启动。
-如果仍留在此地区内，您将会被登出。
+
+如果仍留在此区域内，您将会被登出。
 	</notification>
 	<notification name="LoadWebPage">
 		是否载入网页[URL]？
@@ -3014,6 +3135,7 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 		‘[OBJECTNAME]’, 一件 ‘[NAME]’ 拥有的物体, 想要：
 
 [QUESTIONS]
+
 这样可以吗？
 		<form name="form">
 			<button name="Yes" text="允许"/>
@@ -3025,6 +3147,7 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 		‘[OBJECTNAME]’, 一件 ‘[NAME]’ 拥有的物体, 想要：
 
 [QUESTIONS]
+
 如果您不信任该物体和它的创建者，您应该拒绝这请求。点击细节按钮察看详细资料。
 
 是否授予许可？
@@ -3049,23 +3172,34 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 		</form>
 	</notification>
 	<notification name="FirstBalanceIncrease">
-		您刚收到了 L$[AMOUNT]。
-物体和其他用户可以向您支付L$。
+		您刚收到了 [CURRENCY][AMOUNT]。
+
+物体和其他用户可以向您支付 [CURRENCY]。
+
 您的帐户余额显示在屏幕的右上角。
 	</notification>
 	<notification name="FirstBalanceDecrease">
-		您刚支付了 L$[AMOUNT]。
+		您刚支付了 [CURRENCY][AMOUNT]。
+
 您的帐户余额显示在屏幕的右上角。
 	</notification>
 	<notification name="FirstSit">
 		您正在坐着。
+
 使用方向键 (或者AWSD) 来改变视角。
+
 点击 ‘站起来’ 按钮起身。
 	</notification>
 	<notification name="FirstMap">
 		点击并拖动地图以查看全景。
 双击以瞬间移动。
 使用右边的控件查找信息，并显示不同的背景。
+	</notification>
+	<notification
+	 icon="notify.tga"
+	 name="FirstMiniMap"
+	 type="notify">
+		右键单击迷你地图查看更多选项。
 	</notification>
 	<notification name="FirstBuild">
 		您可以在 [GRID_NAME] 的某些区域中创建新物体。
@@ -3093,9 +3227,9 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 	</notification>
 	<notification name="FirstInventory">
 		这是您的库存，是存放物体、记事卡、衣服和您拥有的其他东西的地方。
-* 要穿上物体或装备文件夹，将它拖动到您自己身上。
-* 要将物体带入世界中，将它拖动到地上。
-* 要阅读记事卡，双击它。
+• 要穿上物体或装备文件夹，将它拖动到您自己身上。
+• 要将物体带入世界中，将它拖动到地上。
+• 要阅读记事卡，双击它。
 	</notification>
 	<notification name="FirstSandbox">
 		这是一块沙盒区域。
@@ -3113,13 +3247,37 @@ QuickTime网站 (http://www.apple.com/quicktime) 安装 QuickTime Player。
 要切换该菜单，在 Windows 中按 Ctrl-Alt-D。 在 Mac 中按 Cmd-Opt-Shift-D。
 	</notification>
 	<notification name="FirstSculptedPrim">
-		您正在编辑 sculpted 元件。
-Sculpted 元件需要特殊的材质来指定其形状。
-您可以在库存库中找到示范 sculpted 材质。
+		您正在编辑雕塑元件。
+雕塑元件需要特殊的材质来指定其形状。
+您可以在库存中找到示范雕塑材质。
 	</notification>
 	<notification name="FirstMedia">
 		您已经开始播放媒体。媒体可以在参数设置的音频和视频一栏中设置为自动播放。请注意这对于您不信任的媒体站点可能会有安全隐患。
 	</notification>
+<notification name="FirstRLVDetach">
+您的一个或多个附件已被 Restrained Life 设置为不可卸下。
+请注意这同时会禁用所有附件的‘穿上’选项，除非它们被正确地命名。
+
+详细资料请在 SL Wiki 上搜索‘Restrained Life’。
+</notification>
+
+<notification name="FirstRLVFartouch">
+您已被距离触摸限制: 您将不能触摸离您的化身1.5米以外的物体，直到限制解除。
+
+提示: 距离外的物体在鼠标划过时将不会改变指针，并且如果您尝试右键点击的话将会听到错误提示音。
+</notification>
+
+<notification name="FirstRLVGiveToRLV">
+接受物品时，名称以 &apos;#RLV/~&apos; 开始的文件夹可以被自动放置在您的 #RLV 共享文件夹下。 
+
+请注意，一旦启用，接受的物品将会立即可供脚本使用，并可以调用 RLV API 的所有功能，这可能导致意想不到的或令人不快的情况发生。
+
+您是否希望启用这个功能?
+  <usetemplate
+   name="okcancelbuttonscanceldefault"
+   notext="否"
+   yestext="是"/>
+</notification>
 	<notification name="MaxListSelectMessage">
 		您从该列表中最多只能选择[MAX_SELECT] 个项目。
 	</notification>
@@ -3213,6 +3371,364 @@ Sculpted 元件需要特殊的材质来指定其形状。
 	<notification name="UnableToOpenCommandURL">
 		您点击的URL不能从该浏览器中打开。
 	</notification>
+	<notification name="QueryClientTags">
+	您是否希望从 kokuaviewer.org 自动更新客户端标识数据库？
+
+这将确保您关于其它客户端的资料是最新的。
+		<form name="form">
+		  <button
+			 name="Yes"
+			 text="是"/>
+		  <button
+			 name="No"
+			 text="否"/>
+		</form>
+	</notification>
+<!--Begin Imprudence notifications-->
+
+<notification name="ClickBuildConstants">
+本标签页中可以使用以下常数: 
+
+PX  —  X 轴位置
+PY  —  Y 轴位置
+PZ  —  Z 轴位置
+SX  —  X 轴尺寸
+SY  —  Y 轴尺寸
+SZ  —  Z 轴尺寸
+RX  —  X 轴角度
+RY  —  Y 轴角度
+RZ  —  Z 轴角度
+CB  —  路径截断开始
+CE  —  路径截断结束
+HLW  —  窟窿大小
+SKW  —  倾斜
+PB  —  切片/凹陷/剖面截断开始
+PE  —  切片/凹陷/剖面截断结束
+TB  —  扭曲开始
+TE  —  扭曲结束
+SHX  —  X 轴顶面倾斜
+SHY  —  Y 轴顶面倾斜
+HLX  —  X 轴洞的尺寸
+HLY  —  Y 轴洞的尺寸
+TPX  —  X 轴锥形
+TPY  —  Y 轴锥形
+ROF  —  半径变化
+REV  —  旋转次数
+
+PI  —  π
+TWO_PI  —  2π
+PI_BY_TWO  —  π/2
+SQRT2  —  2的平方根
+DEG_TO_RAD  —  角度到弧度转换 (π/180)
+RAD_TO_DEG  —  弧度到角度转换 (180/π)
+GRAVITY  —  -9.8
+
+*  —  乘
+\  —  除
++  —  加
+-  —  减
+
+更多信息请点击 “更多信息”。
+  <usetemplate
+   name="okhelpbuttons"
+   yestext="确定"
+   helptext="更多信息"/>
+</notification>
+
+<notification name="ClickTextureConstants" type="alert">
+本标签页中可以使用以下常数: 
+
+TSU  —  每面重复次数 (水平)
+TSV  —  每面重复次数 (垂直)
+TOU  —  位移 (水平)
+TOV  —  位移 (垂直)
+TRNS —  透明度
+TROT —  材质旋转角度
+GLOW —  发光
+
+*  —  乘
+\  —  除
++  —  加
+-  —  减
+
+更多信息请点击 “更多信息”。
+  <usetemplate
+   name="okhelpbuttons"
+   yestext="确定"
+   helptext="更多信息"/>
+</notification>
+
+<notification name="ConfirmAutoPilot">
+你确定要前往这里吗?
+  <usetemplate
+   ignoretext="使用自动寻路时"
+   name="okcancelignore"
+   notext="取消"
+   yestext="前往"/>
+</notification>
+
+<!--looks like a singular they - not much I can do about it - Kaku -->
+<notification name="ConfirmDerender">
+您确定要隐藏 [NAME]?
+
+[NAME] 将不再被渲染，直到您离开区域或他们更换装束。
+  <usetemplate
+    ignoretext="隐藏物体或化身时"
+    name="okcancelignore"
+    notext="取消"
+    yestext="隐藏"/>
+</notification>
+
+<notification name="ConfirmDoubleClickTP">
+您确定要瞬间移动到这里吗？
+  <usetemplate
+   ignoretext="双击瞬间移动时"
+   name="okcancelignore"
+   notext="取消"
+   yestext="瞬间移动"/>
+</notification>
+
+<notification name="ConfirmMuteAgent">
+您确定要屏蔽 [NAME] (居民)吗?
+  <usetemplate
+    ignoretext="屏蔽居民时"
+    name="okcancelignore"
+    notext="取消"
+    yestext="屏蔽"/>
+</notification>
+
+<notification name="ConfirmMuteObject">
+您确定要屏蔽 [NAME] (物体)吗?
+   <usetemplate
+    ignoretext="屏蔽物体时"
+    name="okcancelignore"
+    notext="取消"
+    yestext="屏蔽"/>
+</notification>
+
+<notification name="ConfirmToggleFullscreen">
+您确定要切换全屏模式吗?
+  <usetemplate
+   name="okcancelbuttons"
+   notext="取消"
+   yestext="切换"/>
+</notification>
+
+<notification name="ConfirmRemoveAllClothes">
+您确定要脱下所有衣物吗?
+  <usetemplate
+   ignoretext="脱下所有衣物时"
+   name="okcancelignore"
+   notext="取消"
+   yestext="脱下"/>
+</notification>
+
+<notification name="ConfirmResetAllPreferences">
+您确定要重置所有设置吗?
+
+设置将在 [VIEWER_NAME] 重新启动时清除。
+  <usetemplate
+   ignoretext="重置设置时"
+   name="okcancelignore"
+   notext="取消"
+   yestext="重置"/>
+</notification>
+
+<notification name="ConfirmRestoreToWorld">
+您确定要恢复该物体到其最后的位置吗?
+
+警告: 如果你不确定物体会恢复到哪里, 不要执行恢复!
+
+更多信息请点击 “更多信息”。
+  <usetemplate
+   name="okcancelhelpignore"
+   yestext="恢复"
+   helptext="更多信息"
+   notext="取消"
+   ignoretext="恢复物体到其最后位置时" />
+</notification>
+
+<notification name="ConfirmTeleportHome">
+您确定要瞬间移动回家吗?
+  <usetemplate
+   ignoretext="瞬间移动回家时"
+   name="okcancelignore"
+   notext="取消"
+   yestext="瞬间移动"/>
+</notification>
+
+<notification name="ConnectingToRegionError">
+无法连接到当前区域。请尝试登入到其他区域。
+
+默认登录区域可以在参数设置的一般选项卡中设置。
+</notification>
+
+<notification name="DisconnectedFromRegion">
+您与所在的区域的链接已被断开。无法继续。
+</notification>
+
+<notification name="GridsNoNick">
+不能保存新的网格信息。
+
+您必须指定一个唯一的网格昵称。
+</notification>
+
+<notification name="GridsNoLoginUri">
+不能保存新网格 ‘[NAME]’.
+
+您必须指定登入 URI 。
+</notification>
+
+<notification name="GridExists">
+不能保存新网格 ‘[NAME]’.
+
+昵称相同的网格已经存在。
+</notification>
+
+<notification name="GridInfoNoLoginUri">
+获取网格的信息需要网格登入 URI。
+</notification>
+
+<notification name="GridInfoError">
+无法从服务器获取网格信息。
+</notification>
+  
+<notification name="IMLogNotFound">
+找不到与 [NAME] 的即时聊天记录。
+  <usetemplate
+   name="okbutton"
+   yestext="确定"/>
+</notification>
+
+<notification name="ShowLookAtInfo">
+显示视线目标是一个调试功能，可以显示化身的头部在看什么东西。请注意: 这项功能并*不会*显示化身的摄像机视角实际朝向哪个方向。请不要依赖该功能保护任何隐私!
+  <usetemplate
+   ignoretext="设置显示视线目标时"
+   name="okignore"
+   yestext="OK"/>
+</notification>
+  
+<notification name="WebLaunchImprudenceBlog">
+前往 Imprudence 官方日志阅读最新的新闻和信息。
+  <usetemplate
+   ignoretext="打开网络浏览器阅读网络日志时"
+   name="okcancelignore"
+   notext="取消"
+   yestext="打开网页"/>
+</notification>
+
+<notification name="WebLaunchImprudenceForums">
+前往 Imprudence 官方论坛讨论 Imprudence 工程。
+  <usetemplate
+   ignoretext="打开网络浏览器阅读论坛时"
+   name="okcancelignore"
+   notext="取消"
+   yestext="打开网页"/>
+</notification>
+
+<notification
+ icon="alert.tga"
+ name="WebLaunchAutoscript"
+ type="alert">
+打开 Autoscript 生成器 (由 3greeneggs.com 制作)?
+  <usetemplate
+   ignoretext="打开 Autoscript 生成器"
+   name="okcancelignore"
+   notext="取消"
+   yestext="确定"/>
+</notification>
+
+<notification
+ icon="notify.tga"
+ name="FirstAO"
+ type="notify">
+使用方法可以在新建记事卡模板中找到。使用工具栏打开或关闭动画覆盖。
+</notification>
+
+<notification
+ icon="notifytip.tga"
+ name="NoShadows"
+ type="notifytip">
+不能启用阴影，因为您的图形设置过低。请确定您的图像设置为 “极高” 并已启用了基本和大气着色器。
+</notification>
+
+<notification name="NoTextureExportSL">
+为了遵守 Second Life 服务协议, Imprudence 没有下载导出物体的任何材质。
+</notification>
+
+<notification
+ icon="alert.tga"
+ name="Help_CmdLine"
+ type="alert">
+各种命令行功能的选项。
+
+要使用某一条命令, 在聊天栏 (本地聊天) 中键入命令并按回车键。
+</notification>
+  
+<notification label="拼写检查帮助" name="EmeraldHelp_SpellCheck">
+要拼写检查某个单词, 右键点击它, 然后选择正确的词替换。
+您可以选择一个基本辞典, 该辞典储存语式和基本词汇。
+您也可以选择安装其他词汇列表, 只要从列表中选中然后 “安装”。
+</notification>
+
+<notification
+ name="ConfirmLightShare"
+ type="notify"
+ icon="notify.tga">
+该区域正在广播自定义天空和水面设置。
+应用该区域的设定？ (&quot;忽略&quot; 将会忽略所有区域设置，直到你离开这个区域。)
+  <form name="form">
+    <button name="apply"  text="应用"/>
+    <button name="temp"   text="现在不要"/>
+    <button name="region" text="忽略"/>
+  </form>
+</notification>
+
+<notification
+ name="ChangeFont"
+ icon="notify.tga"
+ type="notify">
+新字体将在您重新启动 [VIEWER_NAME] 后使用。
+</notification>
+
+<notification name="FirstPrivacy">
+注意: Second Life 服务条款要求所有客户端，包括 Imprudence 查看器, 连接到 Second Life 时每 5 分钟向林登实验室发送一个 “统计数据封包”。
+
+该封包包括关于您的计算机以及您使用 Second Life 的情况的一些非个人识别性的信息, 例如您的计算机硬件和操作系统，平均帧率，访问的区域数，附近化身数量，以及其他信息。请Please check the Second Life Privacy Policy for information about how Linden Lab uses this and other data.
+
+该封包仅发送给林登实验室; Imprudence 开发者并不接收或采集任何此类信息。
+
+The Second Life Terms of Service do not allow you to opt out. By logging in to Second Life, you are consenting to this data collection.
+  <usetemplate
+   name="okcancelbuttons"
+   yestext="登入"   notext="取消"/>
+</notification>
+
+<!--End Imprudence notifications-->
+ <!-- [KITTY VIEWER] -->
+  <notification
+   icon="alertmodal.tga"
+   name="KittyInvalidWaterlightNotecard"
+   type="alert">
+[NAME] 不是有效的水面设定资产。
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="KittyInvalidWindlightNotecard"
+   type="alert">
+[NAME] 不是有效的 WindLight 设定资产。
+  </notification>
+
+  <notification
+   name="KittyWLSaveNotecardAlert">
+您是否要覆盖已经保存的预设?
+    <usetemplate
+     name="okcancelbuttons"
+     notext="否"
+     yestext="是"/>
+  </notification>
+ <!-- [/KITTY VIEWER] -->
 	<global name="UnsupportedCPU">
 		- 您的 CPU(中央处理器)速度没有达到最低需求。
 	</global>
