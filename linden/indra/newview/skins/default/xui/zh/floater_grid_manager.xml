@@ -30,13 +30,41 @@
   <!-- Grid Details -->
   <text
 		 name="gridnick_text">
+    网格昵称 (唯一):
+  </text>
+  <line_editor
+	name="gridnick"
+	label="必须填写" />
+  <text
+		 name="gridname_text">
     网格名称:
   </text>
- 
+  <line_editor
+		 name="gridname"
+		 label="必须填写" />
+  <text
+		 name="first_name_text">
+    名:
+  </text>
+  <text
+		 name="username_text">
+    用户名:
+  </text>
+  <text
+		 name="last_name_text">
+    姓:
+  </text>
+  <text
+		 name="avatar_password_text">
+    密码:
+  </text>
   <text
 		 name="loginuri_text">
     登入 URI:
   </text>
+  <line_editor
+		 name="loginuri"
+		 label="必须填写" />
   <button
 		 label="获取网格信息"
 		 name="btn_gridinfo" />
@@ -72,7 +100,7 @@
     密码:
   </text>
   <text
-		 name="websearch_text">
+		 name="search_text">
     搜索网页:
   </text>
   <button

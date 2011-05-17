@@ -483,4 +483,7 @@
 
 		</panel>
 	</tab_container>
+	<check_box
+	 name="save_results_check"
+	 label="保存搜索结果">
 </floater>
