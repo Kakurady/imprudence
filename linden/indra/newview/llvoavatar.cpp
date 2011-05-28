@@ -67,8 +67,9 @@
 #include "lltexlayer.h"
 #include "lltoolgrab.h"	// for needsRenderBeam
 #include "lltoolmgr.h" // for needsRenderBeam
-#include "lltoolmorph.h"
+#include "lltoolmorph.h" // for auto de-ruth
 #include "llviewercamera.h"
+#include "llviewergenericmessage.h"
 #include "llviewerimagelist.h"
 #include "llviewermedia.h"
 #include "llviewermenu.h"
@@ -870,6 +871,8 @@ LLVOAvatar::LLVOAvatar(const LLUUID& id,
 	mOohMorph      = NULL;
 	mAahMorph      = NULL;
 
+	mRuthTimer.reset();
+
 	//-------------------------------------------------------------------------
 	// initialize joint, mesh and shape members
 	//-------------------------------------------------------------------------
@@ -1525,7 +1528,7 @@ void LLVOAvatar::loadCloud(const std::string& filename,  LLPartSysData& particle
 	if(particles.mPartImageID.isNull() || default_id == particles.mPartImageID)
 	{
 		LLViewerImage* cloud_image =
-		 	gImageList.getImageFromFile("cloud-particle.j2c", MIPMAP_YES, IMMEDIATE_YES, 0, 0, default_id);
+		 	gImageList.getImage(default_id);
 		particles.mPartImageID = cloud_image->getID();
 	}
 }
@@ -7458,6 +7461,8 @@ BOOL LLVOAvatar::updateIsFullyLoaded()
 		loading = TRUE;
 	}
 
+	updateRuthTimer(loading);
+
 	// special case to keep nudity off orientation island -
 	// this is fragilely dependent on the compositing system,
 	// which gets available textures in the following order:
@@ -7510,6 +7515,35 @@ BOOL LLVOAvatar::updateIsFullyLoaded()
 	return changed;
 }
 
+void LLVOAvatar::updateRuthTimer(bool loading)
+{
+	if (isSelf() || !loading) 
+	{
+		return;
+	}
+
+	if (mPreviousFullyLoaded)
+	{
+		mRuthTimer.reset();
+	}
+
+	const F32 LOADING_TIMEOUT__SECONDS = 90.f;
+	if (mRuthTimer.getElapsedTimeF32() > LOADING_TIMEOUT__SECONDS)
+	{
+		llinfos << "Ruth Timer timeout: Missing texture data for '" << getFullname() << "' "
+			<< "( Params loaded : " << !visualParamWeightsAreDefault() << " ) "
+			<< "( Lower : " << isTextureDefined(TEX_LOWER_BAKED) << " ) "
+			<< "( Upper : " << isTextureDefined(TEX_UPPER_BAKED) << " ) "
+			<< "( Head : " << isTextureDefined(TEX_HEAD_BAKED) << " )."
+			<< llendl;
+
+		//LLAvatarPropertiesProcessor::getInstance()->sendAvatarTexturesRequest(getID());
+		std::vector<std::string> strings;
+		strings.push_back(getID().asString());
+		send_generic_message("avatartexturesrequest", strings);
+		mRuthTimer.reset();
+	}
+}
 
 BOOL LLVOAvatar::isFullyLoaded()
 {
@@ -7600,7 +7634,8 @@ LLGLuint LLVOAvatar::getScratchTexName( LLGLenum format, U32* texture_bytes )
 	{
 	case GL_LUMINANCE:			components = 1; internal_format = GL_LUMINANCE8;		break;
 	case GL_ALPHA:				components = 1; internal_format = GL_ALPHA8;			break;
-	case GL_COLOR_INDEX:		components = 1; internal_format = GL_COLOR_INDEX8_EXT;	break;
+// Deprecated.  See http://svn.secondlife.com/trac/linden/changeset/2757
+//	case GL_COLOR_INDEX:		components = 1; internal_format = GL_COLOR_INDEX8_EXT;	break;
 	case GL_LUMINANCE_ALPHA:	components = 2; internal_format = GL_LUMINANCE8_ALPHA8;	break;
 	case GL_RGB:				components = 3; internal_format = GL_RGB8;				break;
 	case GL_RGBA:				components = 4; internal_format = GL_RGBA8;				break;
@@ -8753,7 +8788,6 @@ void LLVOAvatar::processAvatarAppearance( LLMessageSystem* mesgsys )
 
 				if( !param )
 				{
-					llwarns << "Number of params in AvatarAppearance msg does not match number of params in avatar xml file." << llendl;
 					break;
 				}
 
@@ -8795,10 +8829,9 @@ void LLVOAvatar::processAvatarAppearance( LLMessageSystem* mesgsys )
 			}
 		}
 
-		S32 expected_tweakable_count = getVisualParamCountInGroup(VISUAL_PARAM_GROUP_TWEAKABLE); // don't worry about VISUAL_PARAM_GROUP_TWEAKABLE_NO_TRANSMIT
-		if (num_blocks != expected_tweakable_count)
+		while( param && (param->getGroup() != VISUAL_PARAM_GROUP_TWEAKABLE) )
 		{
-			llinfos << "Number of params in AvatarAppearance msg (" << num_blocks << ") does not match number of tweakable params in avatar xml file (" << expected_tweakable_count << "). Processing what we can. Object: " << getID() << llendl;
+			param = getNextVisualParam();
 		}
 
 		if (params_changed)
@@ -8819,6 +8852,23 @@ void LLVOAvatar::processAvatarAppearance( LLMessageSystem* mesgsys )
 	else
 	{
 		llwarns << "AvatarAppearance msg received without any parameters, object: " << getID() << llendl;
+		const F32 LOADING_TIMEOUT_SECONDS = 60.f;
+		// this isn't really a problem if we already have a non-default shape
+		if (visualParamWeightsAreDefault() && mRuthTimer.getElapsedTimeF32() > LOADING_TIMEOUT_SECONDS)
+		{
+			// re-request appearance, hoping that it comes back with a shape next time
+			llinfos << "Re-requesting AvatarAppearance for object: "  << getID() << llendl;
+			//LLAvatarPropertiesProcessor::getInstance()->sendAvatarTexturesRequest(getID());
+			std::vector<std::string> strings;
+			strings.push_back(getID().asString());
+			send_generic_message("avatartexturesrequest", strings);
+			mRuthTimer.reset();
+		}
+		else
+		{
+			llinfos << "That's okay, we already have a non-default shape for object: "  << getID() << llendl;
+			// we don't really care.
+		}
 	}
 
 	setCompositeUpdatesEnabled( TRUE );

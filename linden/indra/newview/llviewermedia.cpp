@@ -40,7 +40,7 @@
 #include "llviewerimage.h"
 #include "llviewerwindow.h"
 #include "llviewerimagelist.h"
-//#include "viewerversion.h"
+//#include "viewerinfo.h"
 
 #include "llpluginclassmedia.h"
 
@@ -261,7 +261,7 @@ std::string LLViewerMedia::getCurrentUserAgent()
 	std::ostringstream codec;
 	codec << "SecondLife/";
 	codec << "C64 Basic V2";
-	//codec << ViewerVersion::getImpMajorVersion() << "." << ViewerVersion::getImpMinorVersion() << "." << ViewerVersion::getImpPatchVersion() << " " << ViewerVersion::getImpTestVersion();
+	//codec << " " << ViewerInfo::versionNumbers3();
  	//codec << " (" << channel << "; " << skin_name << " skin)";
 // 	llinfos << codec.str() << llendl;
 	
@@ -547,6 +547,13 @@ LLPluginClassMedia* LLViewerMediaImpl::newSourceFromMediaType(std::string media_
 
 			if (media_source->init(launcher_name, plugin_name, gSavedSettings.getBOOL("PluginAttachDebuggerToPlugins")))
 			{
+				#if LL_WINDOWS
+				if (gSavedSettings.getBOOL("ShowConsoleWindow"))
+				{
+					media_source->showConsole();
+				}
+				#endif
+
 				return media_source;
 			}
 			else

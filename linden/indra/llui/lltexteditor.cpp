@@ -636,7 +636,7 @@ void LLTextEditor::defineMenuCallbacks(LLMenuGL* menu) {
 			      "Select All Text",
 			      this,
 			      (void*)context_enable_selectall);
-	menu->setCtrlResponse(1+LLCallbackInformation::LL_MENU_ITEM_CALL_GL_ON_CLICK,
+	menu->setCtrlResponse(LLCallbackInformation::LL_MENU_ITEM_CALL_GL_ON_CLICK,
 			      "Select All Text",
 			      this,
 			      (void*)context_selectall);
@@ -3869,6 +3869,12 @@ void LLTextEditor::onTabInto()
 // virtual
 void LLTextEditor::clear()
 {
+	// Also clear any styling we might have added -- MC
+	mParseHTML = FALSE;
+	mParseHighlights = FALSE;
+
+	mSegments.clear();
+
 	setText(LLStringUtil::null);
 	std::for_each(mSegments.begin(), mSegments.end(), DeletePointer());
 	mSegments.clear();

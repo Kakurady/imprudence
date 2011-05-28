@@ -153,8 +153,8 @@ void LLPrefsVoice::apply()
 	if (enable_voice && !gSavedSettings.getBOOL("VivoxLicenseAccepted"))
 	{
 		// This window enables voice chat if license is accepted
- 		FloaterVoiceLicense::getInstance()->open();
- 		FloaterVoiceLicense::getInstance()->center();
+		FloaterVoiceLicense::getInstance()->open();
+		FloaterVoiceLicense::getInstance()->center();
 	}
 	else
 	{
@@ -189,6 +189,8 @@ void LLPrefsVoice::onCommitEnableVoiceChat(LLUICtrl* ctrl, void* user_data)
 	self->childSetEnabled("push_to_talk_label", enable);
 	self->childSetEnabled("voice_call_friends_only_check", enable);
 	self->childSetEnabled("auto_disengage_mic_check", enable);
+	self->childSetEnabled("privacy_heading", enable);
+	self->childSetEnabled("push_to_talk_heading", enable);
 	self->childSetEnabled("push_to_talk_toggle_check", enable);
 	self->childSetEnabled("ear_location", enable);
 	self->childSetEnabled("set_voice_hotkey_button", enable);
