@@ -24,6 +24,9 @@
 	<text name="last_name_text">
 		姓:
 	</text>
+	<text name="username_text">
+		登入名称:
+	</text>
 	<text name="password_text">
 		密码:
 	</text>

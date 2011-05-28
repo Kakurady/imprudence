@@ -2,6 +2,9 @@
 <panel name="Panel Avatar">
 	<tab_container name="tab">
 		<panel label="档案" name="2nd Life">
+			<button label="复制键值" label_selected="复制键值" name="btn_copy_uuid" />
+           
+        
 			<string name="CaptionTextAcctInfo">
 [ACCTTYPE]
 [PAYMENTINFO]

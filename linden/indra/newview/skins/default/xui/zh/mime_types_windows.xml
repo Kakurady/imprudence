@@ -46,7 +46,6 @@
 		<label name="audio_label">
 			音频
 		</label>
-			audio/*
 		<tooltip name="audio_tooltip">
 			这里可以播放音频
 		</tooltip>
@@ -113,17 +112,11 @@
 		<label name="application/rtf_label">
 			带格式化的文本 (RTF)
 		</label>
-		<widgettype>
-			image
-		</widgettype>
 	</mimetype>
 	<mimetype name="application/smil">
 		<label name="application/smil_label">
 		    同步多媒体集成语言 (SMIL)
 		</label>
-		<widgettype>
-			movie
-		</widgettype>
 	</mimetype>
 	<mimetype name="application/xhtml+xml">
 		<label name="application/xhtml+xml_label">
@@ -213,6 +206,11 @@
 	<mimetype name="video/mp4">
 		<label name="video/mp4_label">
 			影片 (MP4)
+		</label>
+	</mimetype>
+	<mimetype name="video/x-m4v">
+		<label name="video/m4v_label">
+			影片 (M4V)
 		</label>
 	</mimetype>
 	<mimetype name="video/quicktime">

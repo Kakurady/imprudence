@@ -29,6 +29,7 @@
       <check_box
 				 label="对他人显示你的客户端名称"
 				 name="client_name_tag_broadcast_check" />
+      <check_box label="用颜色区别客户端" name="client_name_color_check" />
       <check_box
 				 label="启用阴影 (警告: 不稳定并需要图像设置为最高)"
 				 name="shadows_check" />
@@ -72,6 +73,7 @@
 				 tool_tip="切换编辑外观时是否起立转身。"
 				 label="编辑外观时播放化身动画"
 				 name="appearance_anim_check" />
+      <check_box label="头部跟随鼠标" tooltip="如果您的化身头部跟随您的鼠标动作" name="head_follows_mouse_checkbox" />
       <check_box
 				 label="使用旧式菜单"
 				 name="legacy_pie_menu_checkbox" />
@@ -164,6 +166,18 @@
 				 label="自动更正设定..."
 				 tool_tip="更改自动更正词汇表和设置" />
     </panel>
- 
+  <panel
+		   label="化身粒子设置"
+		   name="AvatarCloud">
+  <text
+			   name="must_be_logged_in_textbox">
+	  必须登入后才能更改
+  </text>
+  <check_box
+			   label="预览化身为云"
+			   name="preview_cloud"
+			   tool_tip="预览化身为云，即使已经 rezzed" />
+  </panel>
   </tab_container>
+
 </panel>

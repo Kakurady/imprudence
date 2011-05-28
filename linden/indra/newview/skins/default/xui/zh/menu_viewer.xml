@@ -66,6 +66,7 @@
 		<menu_item_separator label="-----------" name="separator7" />
 		<menu_item_check label="好友..." name="Friends"/>
 		<menu_item_call label="社团..." name="Groups"/>
+		<menu_item_check label="媒体过滤" name="Media Filter" />
 		<menu_item_separator label="-----------" name="separator8"/>
 		<menu_item_call label="参数设置..." name="Preferences..."/>
 	</menu>
@@ -207,7 +208,7 @@
 		<menu_item_call label="第二人生帮助" name="Second Life Help"/>
 		<menu_item_call label="教程" name="Tutorial"/>
 		<menu_item_separator label="-----------" name="separator"/>
-		<menu_item_call label="Imprudence 日志" name="Imprudence Blog" />
+		<menu_item_call label="Imprudence 网络日志" name="Imprudence Blog" />
 		<menu_item_call label="Imprudence 论坛" name="Imprudence Forums" />
 		<menu_item_call	label="脚本参考首页" name="Scripting Portal">
 			<!--
@@ -272,6 +273,7 @@
 		<menu_item_call name="Teleport to Ground" label="瞬间移动到地面" />
 		<menu_item_check label="幻影化身" name="Phantom" />
 		<menu_item_check label="动画列表" name="Animation List" />
+		<menu_item_check label="全功能雷达" name="Full Radar" />
 		<menu_item_check label="区域物体搜索" name="Area Object Search" />
 		<menu_item_check label="资产浏览器" name="asset browser" />
 		<!-- RENDERING -->

@@ -161,7 +161,7 @@
 	</text>
 	<check_box label="以聊天形式显示脚本错误和警告" name="script_errors_as_chat" />
 	<check_box
-		 label="显示自定义聊天频道l"
+		 label="显示自定义聊天频道"
 		 name="toggle_channel_control" />
  
 </panel>

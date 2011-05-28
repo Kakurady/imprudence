@@ -18,6 +18,92 @@
 	</text>
 	<button label="设置" label_selected="设置" name="set_cache"/>
 	<button label="重置" label_selected="设置" name="reset_cache"/>
-	<check_box label="自定义连接端口" name="connection_port_enabled"/>
+	<check_box label="自定义传出连接端口" name="connection_port_enabled"
+		tool_tip="对传出连接使用自定义端口"/>
 	<spinner label="端口号:" name="connection_port"/>
+ 
+	<check_box
+		 label="启用 XMLRPC 代理服务器 (登入、土地、以及购买货币)"
+		 name="xmlrpc_proxy_enabled" />
+	<text
+		 name="xmlrpc_proxy_text_label">
+		地址:
+	</text>
+	<line_editor
+		 name="xmlrpc_proxy_editor"
+		 tool_tip="希望使用的代理服务器名称或 IP 地址" />
+	<spinner
+		 label="端口号:"
+		 name="xmlrpc_proxy_port" />
+ 
+	<!-- SOCKS 5 PROXY -->
+ 
+	<check_box
+		 label="启用 SOCKS 5 代理服务器"
+		 name="socks5_proxy_enabled" />
+	<text
+		 name="socks5_host_label">
+		SOCKS 5 主机:
+	</text>
+	<line_editor
+		 name="socks5_proxy_host"
+		 tool_tip="希望使用的 SOCKS 5 代理服务器名称或 IP 地址e" />
+	<spinner
+		 label="端口号:"
+		 name="socks5_proxy_port" />
+	<text
+		 name="socks5_auth_label">
+		SOCKS 5 身份验证:
+	</text>
+	<radio_group
+		 name="socks5_auth">
+		<radio_item
+			 name="None"
+			 tool_tip="不使用身份验证">
+			无
+		</radio_item>
+		<radio_item
+			 name="UserPass"
+			 tool_tip="用户名 / 密码身份验证">
+			用户名 / 密码
+		</radio_item>
+	</radio_group>
+	<text
+		 name="socks5_username_label">
+		用户名:
+	</text>
+	<line_editor
+		 name="socks5_proxy_username"
+		 tool_tip="Socks 5代理服务器的用户名" />
+ 
+	<text
+		 name="socks5_password_label">
+		密码:
+	</text>
+	<line_editor
+		 name="socks5_proxy_password"
+		 tool_tip="Socks 5代理服务器的密码" />
+ 
+	<text
+		 name="http_proxy_label">
+		HTTP 代理服务器:
+	</text>
+	<radio_group
+		 name="socks5_http_proxy_type">
+		<radio_item
+			 name="None"
+			 tool_tip="不使用代理服务器">
+			不使用
+		</radio_item>
+		<radio_item
+			 name="Socks"
+			 tool_tip="HTTP 连接使用 Socks 5 代理服务器">
+			SOCKS 5
+		</radio_item>
+		<radio_item
+			 name="Web"
+			 tool_tip="HTTP 连接使用 Web 代理服务器">
+			Web
+		</radio_item>
+	</radio_group>
 </panel>
