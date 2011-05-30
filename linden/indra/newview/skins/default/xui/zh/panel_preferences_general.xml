@@ -20,7 +20,7 @@
 		  &lt;输入地域名&gt;
 		</combo_item>
 	</combo_box>
-	<check_box label="在登陆界面上显示起始位置" name="show_location_checkbox"/>
+	<check_box label="在登陆界面上显示" name="show_location_checkbox"/>
 	<button
 		 name="grid_btn"
 		 label="网格管理器" />
@@ -29,16 +29,16 @@
 			从不显示
 		</combo_item>
 		<combo_item name="Show Temporarily">
-			暂时显示
+			短暂地显示
 		</combo_item>
 		<combo_item name="Always">
 			总是显示
 		</combo_item>
 	</combo_box>
-	<check_box label="化身名字使用小号字体" name="small_avatar_names_checkbox"/>
+	<check_box label="放大姓名标签" name="large_avatar_names_checkbox"/>
 	<check_box label="在我的屏幕上隐藏我的名字" name="show_my_name_checkbox"/>
 	<check_box
-		 label="突出显示好友的姓名标签"
+		 label="粗体显示好友的姓名标签"
 		 name="highlight_friends_checkbox" />
 	<text
 		 name="Display_Names_textbox">
@@ -80,6 +80,10 @@
 		 label="重置"
 		 label_selected="重置"
 		 name="reset_ui_size" />
+ <text
+		 name="afk_textbox">
+    空闲时离开:
+  </text>
 	<spinner label="离开休息计时:" name="afk_timeout_spinner"/>
 	<check_box
 		 label="空闲时进入离开状态"
@@ -89,13 +93,6 @@
 		 name="Mini-Map Notify:">
 	迷你地图提醒:
 	</text>
-	<check_box
-		 label="进入聊天范围"
-		 name="mini_map_notify_chat" />
-	<check_box
-		 label="进入区域"
-		 name="mini_map_notify_sim" />
-	<check_box label="在付出或收到林登币 (L$) 时提醒我" name="notify_money_change_checkbox"/>
 	<text name="maturity_desired_label">
 		分级：
 	</text>
@@ -146,8 +143,8 @@
 	<text length="1" name="effects_color_textbox" type="string">
 		我的效果颜色:
 	</text>
-	<text length="1" name="seconds_textbox" type="string">
-		秒
+	<text length="1" name="minutes_textbox" type="string">
+		分钟
 	</text>
 	<text length="1" name="crash_report_textbox" type="string">
 		崩溃报告:

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<panel label="输入和摄像头" name="Input panel">
+<panel label="输入和摄像机" name="Input panel">
 	<text length="1" name=" Mouselook Options:" type="string">
 		第一人称视角选项设置:
 	</text>
@@ -11,7 +11,7 @@
 		自动飞翔选项:
 	</text>
 	<check_box label="起飞/着陆通过键盘上/下键控制" name="automatic_fly"/>
-	<text length="1" name=" Camera Options:" type="string">
+	<text length="1" name="Camera Options:" type="string">
 		摄像机选项:
 	</text>
 	<text name="camera_fov_label">

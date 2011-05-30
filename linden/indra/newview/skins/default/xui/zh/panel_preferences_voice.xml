@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<panel border="true" bottom="-409" enabled="true" follows="left|top|right|bottom" height="408" hidden="false" label="语音聊天" left="102" mouse_opaque="true" name="chat" width="517">
+<panel label="语音聊天" name="voice_chat">
 	<text_editor name="voice_unavailable">
 		语音聊天不可用。
 	</text_editor>

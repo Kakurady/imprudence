@@ -6,6 +6,19 @@
 		 name="text_box2">
     聊天颜色:
   </text>
+  <text
+		 name="effects_color_textbox">
+    我的选择光束颜色:
+  </text>
+  <color_swatch
+		 name="effect_color_swatch"
+		 tool_tip="点击这里来打开色彩选择器" />
+
+  <text
+		 name="client_tag_color_textbox">
+    客户端标签颜色:
+  </text>
+  <check_box label="用颜色区别客户端" name="client_name_color_check" />
   <color_swatch
 		 label="你的聊天"
 		 name="user" />
@@ -59,19 +72,10 @@
 		 label="你的名字"
 		 name="OwnNameChatColor" />
  
-  <text
-		 name="nick01_text">
-    高亮昵称 1:
-  </text>
- 
-  <text
-		 name="nick02_text">
-    高亮昵称 2:
-  </text>
- 
-  <text
-		 name="nick03_text">
-    高亮昵称 3:
-  </text>
- 
+  <line_editor label="高亮昵称 1:"
+		 name="nick01" />
+  <line_editor label="高亮昵称 2:"
+		 name="nick02" />
+  <line_editor label="高亮昵称 3:"
+		 name="nick03">
 </panel>
