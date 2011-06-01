@@ -306,7 +306,7 @@
 				<menu_item_check name="Flexible Objects" label="活动物体" />
 			</menu>
 			<!-- INFO DISPLAYS -->
-			<menu name="Info Displays">
+			<menu name="Info Displays" label="信息显示">
 				<menu_item_check name="Verify" label="验证" />
 				<menu_item_check name="BBoxes" label="包围盒" />
 				<menu_item_check name="Points" label="点" />
@@ -404,7 +404,7 @@
 			<menu_item_call name="Restrictions..." label="限制..." />
 		</menu>
 		<!-- UI -->
-		<menu name="UI">
+		<menu name="UI" label="界面">
 			<menu_item_check name="Use default system color picker" label="使用系统默认颜色选择器" />
 			<menu_item_check name="Show search panel in overlay bar" label="覆盖栏中显示搜索面板" />
 			<menu_item_call name="Reload Balance" label="重新载入 [CURRENCY] 余额" />
@@ -504,7 +504,7 @@
 			<menu_item_call label="Reload Avatar Cloud Particle" name="重新加载化身云粒子" />
 		</menu>
 		<!-- CRASH -->
-		<menu name="Crash">
+		<menu name="Crash" label="崩溃">
 			<menu_item_call name="Force Bad Memory Access" label="强制无效内存访问" />
 			<menu_item_call name="Force LLError And Crash" label="强制 LLError 并崩溃" />
 			<menu_item_call name="Force Infinite Loop" label="强制无限循环" />
@@ -513,7 +513,7 @@
 			<menu_item_check name="Output Debug Minidump" label="输出调试小转储" />
 		</menu>
 		<!-- NETWORK -->
-		<menu name="Network">
+		<menu name="Network" label="网络">
 			<menu_item_call name="Enable Message Log" label="启用消息日志" />
 			<menu_item_call name="Disable Message Log" label="禁用消息日志" />
 			<menu_item_check name="Velocity Interpolate Objects" label="物体速度插值" />
@@ -521,7 +521,7 @@
 			<menu_item_call name="Drop a Packet" label="丢弃一个封包" />
 		</menu>
 		<!-- RECORDER -->
-		<menu name="Recorder">
+		<menu name="Recorder" label="记录器">
 			<menu_item_check name="Full Session Logging" label="录制整个会话" />
 			<menu_item_call name="Start Logging" label="开始记录" />
 			<menu_item_call name="Stop Logging" label="停止记录" />
@@ -535,7 +535,7 @@
 			<menu_item_call name="Stop Record" label="停止录制" />
 		</menu>
 		<!-- ADMIN OPTIONS -->
-		<menu name="Admin Options">
+		<menu name="Admin Options" label="管理员选项">
 			<menu_item_check name="View Admin Options" label="显示管理员选项" />
 			<menu_item_call name="Request Admin Status" label="请求管理员状态" />
 			<menu_item_call name="Leave Admin Status" label="离开管理员状态" />

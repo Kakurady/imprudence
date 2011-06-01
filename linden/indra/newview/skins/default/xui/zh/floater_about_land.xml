@@ -434,10 +434,10 @@
 				媒体 URL:
 			</text>
 			<button label="设置..." label_selected="设置..." name="set_media_url"/>
-			<!--<text
-				 name="at URL:">
-				Current URL:
-			</text> -->
+			<text
+				 name="Current URL:">
+				当前 URL:
+			</text>
 
 			<button
 				 label="重置..."

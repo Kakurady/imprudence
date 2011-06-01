@@ -108,7 +108,7 @@
  
 			<check_box
 				 label="化身进入 / 离开喊叫距离"
-				 name="alerts_chat"
+				 name="alerts_shout"
 				 tool_tip="报告进入或离开喊叫距离的化身" />
  
 			<check_box
