@@ -10,13 +10,10 @@
 		<layout_panel
 			 name="nav_controls">
 			<button
-				 label="后退"
 				 name="back" />
 			<button
-				 label="前进"
 				 name="forward" />
 			<button
-				 label="刷新"
 				 name="reload" />
 			<button
 				 label="转到"
